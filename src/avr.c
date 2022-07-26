@@ -1041,9 +1041,15 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		return enc;
 	}
 	else if (!strcmp(op, "lpm")) {
-		if (rd == 0 || rs == 0) {
+		if (rd != 0 && rs == 0) {
 			printf("error: too few arguements\n");
 			enc.n = 0;
+			return enc;
+		}
+		else if (rd == 0) {
+			enc.x[0] = 200;
+			enc.x[1] = 149;
+			enc.n = 2;
 			return enc;
 		}
 		enc.x[0] = 4;
@@ -1066,9 +1072,15 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		return enc;
 	}
 	else if (!strcmp(op, "elpm")) {
-		if (rd == 0 || rs == 0) {
+		if (rd != 0 && rs == 0) {
 			printf("error: too few arguements\n");
 			enc.n = 0;
+			return enc;
+		}
+		else if (rd == 0) {
+			enc.x[0] = 216;
+			enc.x[1] = 149;
+			enc.n = 2;
 			return enc;
 		}
 		enc.x[0] = 6;
@@ -1089,6 +1101,25 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			enc.n = 0;
 		}
 		return enc;
+	}
+	else if (!strcmp(op, "spm")) {
+		if (rd != 0 && rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		else if (rd == 0) {
+			enc.x[0] = 232;
+			enc.x[1] = 149;
+			enc.n = 2;
+			return enc;
+		}
+		else if (!strcmp(rd, "z+")) {
+			enc.x[0] = 248;
+			enc.x[1] = 149;
+			enc.n = 2;
+			return enc;
+		}
 	}
 	else if (!strcmp(op, "xch")) {
 		if (rd == 0 || rs == 0) {
@@ -1218,6 +1249,190 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] = 15;
 		enc.x[1] = 146;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "com")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 0;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "neg")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 1;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "swap")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 2;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "inc")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 3;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "dec")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 10;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "asr")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 5;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "lsr")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 6;
+		enc.x[1] = 148;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
+		if (r == 255) {
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] |= r << 4;
+		enc.x[1] |= r >> 4;
+		return enc;
+	}
+	else if (!strcmp(op, "ror")) {
+		if (rd == 0) {
+			printf("error: too few arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		if (rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 7;
+		enc.x[1] = 148;
 		enc.n = 2;
 		uint8_t r = avr_reg5(rd);
 		if (r == 255) {
