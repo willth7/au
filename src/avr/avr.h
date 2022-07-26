@@ -17,18 +17,4 @@ typedef struct enc_s {
 	uint8_t n;
 } enc_t;
 
-uint8_t avr_reg3(uint8_t*);
-
-uint8_t avr_reg4(uint8_t*);
-
-uint8_t avr_reg5(uint8_t*);
-
-uint8_t avr_reg4p(int8_t*);
-
-uint8_t avr_imm4(int8_t*);
-
-uint8_t avr_imm6(int8_t*);
-
-uint8_t avr_imm8(int8_t*);
-
 enc_t avr_enc(int8_t*, int8_t*, int8_t*);
