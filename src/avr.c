@@ -356,7 +356,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "muls")) {
 		if (rd == 0 || rs == 0) {
@@ -379,7 +378,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "mulsu")) {
 		if (rd == 0 || rs == 0) {
@@ -402,7 +400,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "fmul")) {
 		if (rd == 0 || rs == 0) {
@@ -425,7 +422,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "fmuls")) {
 		if (rd == 0 || rs == 0) {
@@ -448,7 +444,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "fmulsu")) {
 		if (rd == 0 || rs == 0) {
@@ -471,7 +466,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "cp")) {
 		if (rd == 0 || rs == 0) {
@@ -496,7 +490,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "cpc")) {
 		if (rd == 0 || rs == 0) {
@@ -521,7 +514,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "sub")) {
 		if (rd == 0 || rs == 0) {
@@ -546,7 +538,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "sbc")) {
 		if (rd == 0 || rs == 0) {
@@ -571,7 +562,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "add")) {
 		if (rd == 0 || rs == 0) {
@@ -596,7 +586,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "adc")) {
 		if (rd == 0 || rs == 0) {
@@ -621,7 +610,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "lsl")) {
 		if (rd == 0) {
@@ -646,7 +634,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.x[1] |= (r >> 3) & 2;
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "rol")) {
 		if (rd == 0) {
@@ -671,7 +658,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.x[1] |= (r >> 3) & 2;
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "cpse")) {
 		if (rd == 0 || rs == 0) {
@@ -696,7 +682,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "and")) {
 		if (rd == 0 || rs == 0) {
@@ -721,7 +706,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "eor")) {
 		if (rd == 0 || rs == 0) {
@@ -746,7 +730,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "or")) {
 		if (rd == 0 || rs == 0) {
@@ -771,7 +754,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "mov")) {
 		if (rd == 0 || rs == 0) {
@@ -796,7 +778,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "cpi")) {
 		if (rd == 0 || rs == 0) {
@@ -816,7 +797,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "subi")) {
 		if (rd == 0 || rs == 0) {
@@ -836,7 +816,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "sbci")) {
 		if (rd == 0 || rs == 0) {
@@ -856,7 +835,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "ori") || !strcmp(op, "sbr")) {
 		if (rd == 0 || rs == 0) {
@@ -876,7 +854,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "andi") || !strcmp(op, "cbr")) {
 		if (rd == 0 || rs == 0) {
@@ -896,7 +873,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r << 4;
-		return enc;
 	}
 	else if (!strcmp(op, "ldd")) {
 		if (rd == 0 || rs == 0) {
@@ -922,7 +898,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "std")) {
 		if (rd == 0 || rs == 0) {
@@ -948,7 +923,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "lds")) {
 		if (rd == 0 || rs == 0) {
@@ -969,7 +943,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		uint16_t i = avr_imm16(rs);
 		enc.x[2] = i;
 		enc.x[3] = i >> 8;
-		return enc;
 	}
 	else if (!strcmp(op, "sts")) {
 		if (rd == 0 || rs == 0) {
@@ -990,7 +963,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		uint16_t i = avr_imm16(rd);
 		enc.x[2] = i;
 		enc.x[3] = i >> 8;
-		return enc;
 	}
 	else if (!strcmp(op, "ld")) {
 		if (rd == 0 || rs == 0) {
@@ -1014,7 +986,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r;
-		return enc;
 	}
 	else if (!strcmp(op, "st")) {
 		if (rd == 0 || rs == 0) {
@@ -1038,7 +1009,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			return enc;
 		}
 		enc.x[0] |= r;
-		return enc;
 	}
 	else if (!strcmp(op, "lpm")) {
 		if (rd != 0 && rs == 0) {
@@ -1069,7 +1039,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			printf("error: invalid register %s\n", rs);
 			enc.n = 0;
 		}
-		return enc;
 	}
 	else if (!strcmp(op, "elpm")) {
 		if (rd != 0 && rs == 0) {
@@ -1100,7 +1069,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 			printf("error: invalid register %s\n", rs);
 			enc.n = 0;
 		}
-		return enc;
 	}
 	else if (!strcmp(op, "spm")) {
 		if (rd != 0 && rs != 0) {
@@ -1142,7 +1110,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "las")) {
 		if (rd == 0 || rs == 0) {
@@ -1165,7 +1132,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "lac")) {
 		if (rd == 0 || rs == 0) {
@@ -1188,7 +1154,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "xch")) {
 		if (rd == 0 || rs == 0) {
@@ -1211,7 +1176,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "pop")) {
 		if (rd == 0) {
@@ -1234,7 +1198,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "push")) {
 		if (rd == 0) {
@@ -1257,7 +1220,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "com")) {
 		if (rd == 0) {
@@ -1280,7 +1242,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "neg")) {
 		if (rd == 0) {
@@ -1303,7 +1264,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "swap")) {
 		if (rd == 0) {
@@ -1326,7 +1286,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "inc")) {
 		if (rd == 0) {
@@ -1349,7 +1308,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "dec")) {
 		if (rd == 0) {
@@ -1372,7 +1330,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "asr")) {
 		if (rd == 0) {
@@ -1395,7 +1352,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "lsr")) {
 		if (rd == 0) {
@@ -1418,7 +1374,6 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
 	}
 	else if (!strcmp(op, "ror")) {
 		if (rd == 0) {
@@ -1441,11 +1396,170 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		}
 		enc.x[0] |= r << 4;
 		enc.x[1] |= r >> 4;
-		return enc;
+	}
+	else if (!strcmp(op, "clc")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 8;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "sec")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 136;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "clz")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 24;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "sez")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 152;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "cln")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 40;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "sen")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 168;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "clv")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 56;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "sev")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 184;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "cls")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 72;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "ses")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 200;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "clh")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 88;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "seh")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 216;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "clt")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 104;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "set")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 232;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "cli")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 120;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (!strcmp(op, "sei")) {
+		if (rd != 0 || rs != 0) {
+			printf("error: too many arguements\n");
+			enc.n = 0;
+			return enc;
+		}
+		enc.x[0] = 248;
+		enc.x[1] = 148;
+		enc.n = 2;
 	}
 	else {
 		printf("error: invalid operation\n");
 		enc.n = 0;
-			return enc;
 	}
+	return enc;
 }
