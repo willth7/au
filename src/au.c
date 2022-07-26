@@ -24,17 +24,17 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	uint16_t b;
+	enc_t enc;
 	if (argc == 2) {
-		b = avr_enc(argv[1], 0, 0);
+		enc = avr_enc(argv[1], 0, 0);
 	}
 	else if (argc == 3) {
-		b = avr_enc(argv[1], argv[2], 0);
+		enc = avr_enc(argv[1], argv[2], 0);
 	}
 	else if (argc == 4) {
-		b = avr_enc(argv[1], argv[2], argv[3]);
+		enc = avr_enc(argv[1], argv[2], argv[3]);
 	}
-	printf("0x%04x\n", b);
+	printf("0x%02x%02x\n", enc.x[0], enc.x[1]);
 	
 	return 0;
 }

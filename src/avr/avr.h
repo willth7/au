@@ -12,6 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+typedef struct enc_s {
+	uint8_t x[4];
+	uint8_t n;
+} enc_t;
+
 uint8_t avr_reg3(uint8_t*);
 
 uint8_t avr_reg4(uint8_t*);
@@ -26,4 +31,4 @@ uint8_t avr_imm6(int8_t*);
 
 uint8_t avr_imm8(int8_t*);
 
-uint16_t avr_enc(int8_t*, int8_t*, int8_t*);
+enc_t avr_enc(int8_t*, int8_t*, int8_t*);

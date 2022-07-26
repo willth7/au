@@ -17,6 +17,11 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef struct enc_s {
+	uint8_t x[4];
+	uint8_t n;
+} enc_t;
+
 uint8_t avr_reg3(uint8_t* r) {
 	if (!strcmp(r, "r16")) {
 		return 0;
@@ -273,495 +278,656 @@ uint8_t avr_imm8(int8_t* i) {
 	return atoi(i);
 }
 
-uint16_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
+enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
+	enc_t enc;
 	if (!strcmp(op, "nop")) {
 		if (rd != 0 || rs != 0) {
 			printf("error: too many arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return 0;
+		enc.x[0] = 0;
+		enc.x[1] = 0;
+		enc.n = 2;
 	}
 	else if (!strcmp(op, "movw")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 256;
+		enc.x[0] = 0;
+		enc.x[1] = 0;
+		enc.n = 2;
 		uint8_t r = avr_reg4p(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
+		enc.x[0] |= r;
 		r = avr_reg4p(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "muls")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 512;
+		enc.x[0] = 0;
+		enc.x[1] = 2;
+		enc.n = 2;
 		uint8_t r = avr_reg4(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		r = avr_reg4(rd);
-		b |= r << 4;
+		enc.x[0] |= r;
+		enc.x[0] = avr_reg4(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "mulsu")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 768;
+		enc.x[0] = 0;
+		enc.x[1] = 3;
+		enc.n = 2;
 		uint8_t r = avr_reg3(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
+		enc.x[0] |= r;
 		r = avr_reg3(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "fmul")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 776;
+		enc.x[0] = 8;
+		enc.x[1] = 3;
+		enc.n = 2;
 		uint8_t r = avr_reg3(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
+		enc.x[0] |= r;
 		r = avr_reg3(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "fmuls")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 896;
+		enc.x[0] = 128;
+		enc.x[1] = 3;
+		enc.n = 2;
 		uint8_t r = avr_reg3(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
+		enc.x[0] |= r;
 		r = avr_reg3(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "fmulsu")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 904;
+		enc.x[0] = 136;
+		enc.x[1] = 3;
+		enc.n = 2;
 		uint8_t r = avr_reg3(rs);
-		b |= r;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
+		enc.x[0] |= r;
 		r = avr_reg3(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "cp")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 1024;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 4;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "cpc")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 5120;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 20;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "sub")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 2048;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 8;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "sbc")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 6144;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 24;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "add")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 3072;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 12;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "adc")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 7168;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 28;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "lsl")) {
 		if (rd == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
 		if (rs != 0) {
 			printf("error: too many arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 3072;
-		uint16_t r = avr_reg5(rd);
+		enc.x[0] = 0;
+		enc.x[1] = 12;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "rol")) {
 		if (rd == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
 		if (rs != 0) {
 			printf("error: too many arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 7168;
-		uint16_t r = avr_reg5(rd);
+		enc.x[0] = 0;
+		enc.x[1] = 28;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "cpse")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 4096;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 16;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "and")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 8192;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 32;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "eor")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 9216;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 36;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "or")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 10240;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 40;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "mov")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 11264;
-		uint16_t r = avr_reg5(rs);
+		enc.x[0] = 0;
+		enc.x[1] = 44;
+		enc.n = 2;
+		uint8_t r = avr_reg5(rs);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 5) & 512;
-		b |= rl;
-		b |= rh;
+		uint8_t rl = r & 15;
+		uint8_t rh = (r >> 3) & 2;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg5(rd);
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		b |= r << 4;
-		return b;
+		rl = r << 4;
+		rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
+		return enc;
 	}
 	else if (!strcmp(op, "cpi")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 12288;
-		uint16_t r = avr_imm8(rs);
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 4) & 3840;
-		b |= rl;
-		b |= rh;
+		enc.x[0] = 0;
+		enc.x[1] = 48;
+		enc.n = 2;
+		uint8_t r = avr_imm8(rs);
+		uint8_t rl = r & 15;
+		uint8_t rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg4(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "subi")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 16384;
-		uint16_t r = avr_imm8(rs);
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 4) & 3840;
-		b |= rl;
-		b |= rh;
+		enc.x[0] = 0;
+		enc.x[1] = 64;
+		enc.n = 2;
+		uint8_t r = avr_imm8(rs);
+		uint8_t rl = r & 15;
+		uint8_t rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg4(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "sbci")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 20480;
-		uint16_t r = avr_imm8(rs);
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 4) & 3840;
-		b |= rl;
-		b |= rh;
+		enc.x[0] = 0;
+		enc.x[1] = 80;
+		enc.n = 2;
+		uint8_t r = avr_imm8(rs);
+		uint8_t rl = r & 15;
+		uint8_t rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg4(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "ori") || !strcmp(op, "sbr")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 24576;
-		uint16_t r = avr_imm8(rs);
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 4) & 3840;
-		b |= rl;
-		b |= rh;
+		enc.x[0] = 0;
+		enc.x[1] = 96;
+		enc.n = 2;
+		uint8_t r = avr_imm8(rs);
+		uint8_t rl = r & 15;
+		uint8_t rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg4(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else if (!strcmp(op, "andi") || !strcmp(op, "cbr")) {
 		if (rd == 0 || rs == 0) {
 			printf("error: too few arguements\n");
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		uint16_t b = 28672;
-		uint16_t r = avr_imm8(rs);
-		uint16_t rl = r & 15;
-		uint16_t rh = (r << 4) & 3840;
-		b |= rl;
-		b |= rh;
+		enc.x[0] = 0;
+		enc.x[1] = 112;
+		enc.n = 2;
+		uint8_t r = avr_imm8(rs);
+		uint8_t rl = r & 15;
+		uint8_t rh = r >> 4;
+		enc.x[0] |= rl;
+		enc.x[1] |= rh;
 		r = avr_reg4(rd);
-		b |= r << 4;
 		if (r == 255) {
-			return 65535;
+			enc.n = 0;
+			return enc;
 		}
-		return b;
+		enc.x[0] |= r << 4;
+		return enc;
 	}
 	else {
 		printf("error: invalid operation\n");
-		return 65535;
+		enc.n = 0;
+			return enc;
 	}
 }
