@@ -49,6 +49,33 @@ uint8_t avr_reg2(int8_t* r) {
 	}
 }
 
+uint8_t avr_reg3(int8_t* r) {
+	if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
+		return 0;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '7' && r[3] == 0) {
+		return 1;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '8' && r[3] == 0) {
+		return 2;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '9' && r[3] == 0) {
+		return 3;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '0' && r[3] == 0) {
+		return 4;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '1' && r[3] == 0) {
+		return 5;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '2' && r[3] == 0) {
+		return 6;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '3' && r[3] == 0) {
+		return 7;
+	}
+}
+
 uint8_t avr_reg4(int8_t* r) {
 	if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
 		return 0;
@@ -679,6 +706,82 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
 		enc.x[1] |= (avr_reg5(rs) >> 3) & 2;
 		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 'c' && op[3] == 0) { //dec
+		enc.x[0] = 10;
+		enc.x[1] = 148;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 's' && op[3] == 0) { //des
+		enc.x[0] = 11;
+		enc.x[1] = 148;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm6(rd) << 4) & 240;
+	}
+	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'c' && op[3] == 'a' && op[4] == 'l' && op[5] == 'l' && op[6] == 0) { //eicall
+		enc.x[0] = 25;
+		enc.x[1] = 149;
+		enc.n = 2;
+	}
+	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'j' && op[3] == 'm' && op[4] == 'p' && op[5] == 0) { //eijmp
+		enc.x[0] = 25;
+		enc.x[1] = 148;
+		enc.n = 2;
+	}
+	else if (op[0] == 'e' && op[1] == 'l' && op[2] == 'p' && op[3] == 'm' && op[4] == 0) { //elpm
+		enc.x[0] = 0;
+		enc.x[1] = 0;
+		enc.n = 2;
+		
+		//todo
+	}
+	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) { //eor
+		enc.x[0] = 0;
+		enc.x[1] = 36;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rs)) & 15;
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rs) >> 3) & 2;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 0) { //fmul
+		enc.x[0] = 8;
+		enc.x[1] = 3;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg3(rs)) & 7;
+		enc.x[0] |= (avr_reg3(rd) << 4) & 112;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 0) { //fmuls
+		enc.x[0] = 128;
+		enc.x[1] = 3;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg3(rs)) & 7;
+		enc.x[0] |= (avr_reg3(rd) << 4) & 112;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 'u' && op[6] == 0) { //fmulsu
+		enc.x[0] = 136;
+		enc.x[1] = 3;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg3(rs)) & 7;
+		enc.x[0] |= (avr_reg3(rd) << 4) & 112;
+	}
+	else if (op[0] == 'i' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) { //icall
+		enc.x[0] = 9;
+		enc.x[1] = 149;
+		enc.n = 2;
+	}
+	else if (op[0] == 'i' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) { //ijmp
+		enc.x[0] = 9;
+		enc.x[1] = 148;
+		enc.n = 2;
 	}
 	else {
 		enc.x[0] = 0;
