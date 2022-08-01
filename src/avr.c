@@ -351,8 +351,8 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.x[1] |= (avr_imm8(rs) >> 4) & 15;
 	}
 	else if (op[0] == 'a' && op[1] == 's' && op[2] == 'r' && op[3] == 0) {
-		enc[0] = 5;
-		enc[1] = 148;
+		enc.x[0] = 5;
+		enc.x[1] = 148;
 		enc.n = 2;
 		
 		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
@@ -379,7 +379,167 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.x[1] = 244;
 		enc.n = 2;
 		
-		//todo
+		enc.x[0] |= (avr_bit3(rd)) & 7;
+		enc.x[0] |= (avr_imm8(rs) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rs) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) {
+		enc.x[0] = 0;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_bit3(rd)) & 7;
+		enc.x[0] |= (avr_imm8(rs) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rs) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) {
+		enc.x[0] = 0;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 's' && op[4] == 0) {
+		enc.x[0] = 0;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'a' && op[4] == 'k' && op[5] == 0) {
+		enc.x[0] = 152;
+		enc.x[1] = 149;
+		enc.n = 2;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) {
+		enc.x[0] = 1;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) {
+		enc.x[0] = 4;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) {
+		enc.x[0] = 5;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) {
+		enc.x[0] = 5;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) {
+		enc.x[0] = 7;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) {
+		enc.x[0] = 7;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) {
+		enc.x[0] = 0;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) {
+		enc.x[0] = 4;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) {
+		enc.x[0] = 2;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) {
+		enc.x[0] = 1;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) {
+		enc.x[0] = 2;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
+		enc.x[0] = 0;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) {
+		enc.x[0] = 6;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) {
+		enc.x[0] = 6;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) {
+		enc.x[0] = 3;
+		enc.x[1] = 244;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) {
+		enc.x[0] = 3;
+		enc.x[1] = 240;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rd) << 3) & 248;
+		enc.x[1] |= (avr_imm8(rd) >> 5) & 3;
 	}
 	else {
 		enc.x[0] = 0;
