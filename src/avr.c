@@ -304,6 +304,57 @@ uint8_t avr_reg7d(int8_t* r) {
 	return k;
 }
 
+uint8_t avr_reg4w(int8_t* r) {
+	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
+		return 0;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == 0) {
+		return 1;
+	}
+	else if (r[0] == 'r' && r[1] == '4' && r[2] == 0) {
+		return 2;
+	}
+	else if (r[0] == 'r' && r[1] == '6' && r[2] == 0) {
+		return 3;
+	}
+	else if (r[0] == 'r' && r[1] == '8' && r[2] == 0) {
+		return 4;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '0' && r[3] == 0) {
+		return 5;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '2' && r[3] == 0) {
+		return 6;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '4' && r[3] == 0) {
+		return 7;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
+		return 8;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '8' && r[3] == 0) {
+		return 9;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '0' && r[3] == 0) {
+		return 10;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '2' && r[3] == 0) {
+		return 11;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) {
+		return 12;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '6' && r[3] == 0) {
+		return 13;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == '8' && r[3] == 0) {
+		return 14;
+	}
+	else if (r[0] == 'r' && r[1] == '3' && r[2] == '0' && r[3] == 0) {
+		return 15;
+	}
+}
+
 uint8_t avr_bit3(int8_t* b) {
 	if (b[0] == '0' && b[1] == 0) {
 		return 0;
@@ -973,6 +1024,92 @@ enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs) {
 		enc.n = 2;
 		
 		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) { //mov
+		enc.x[0] = 0;
+		enc.x[1] = 44;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rs)) & 15;
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rs) >> 3) & 2;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w' && op[4] == 0) { //movw
+		enc.x[0] = 0;
+		enc.x[1] = 1;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg4w(rs)) & 15;
+		enc.x[0] |= (avr_reg4w(rd) << 4) & 240;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) { //mul
+		enc.x[0] = 0;
+		enc.x[1] = 156;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rs)) & 15;
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rs) >> 3) & 2;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) { //muls
+		enc.x[0] = 0;
+		enc.x[1] = 2;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg4(rs)) & 15;
+		enc.x[0] |= (avr_reg4(rd) << 4) & 240;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 'u' && op[5] == 0) { //mulsu
+		enc.x[0] = 0;
+		enc.x[1] = 3;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg3(rs)) & 7;
+		enc.x[0] |= (avr_reg3(rd) << 4) & 112;
+	}
+	else if (op[0] == 'n' && op[1] == 'e' && op[2] == 'g' && op[3] == 0) { //neg
+		enc.x[0] = 1;
+		enc.x[1] = 148;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) { //nop
+		enc.x[0] = 0;
+		enc.x[1] = 0;
+		enc.n = 2;
+	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) { //or
+		enc.x[0] = 0;
+		enc.x[1] = 40;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_reg5(rs)) & 15;
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_reg5(rs) >> 3) & 2;
+		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
+	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) { //ori
+		enc.x[0] = 0;
+		enc.x[1] = 96;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm8(rs)) & 15;
+		enc.x[0] |= (avr_reg4(rd) << 4) & 240;
+		enc.x[1] |= (avr_imm8(rs) >> 4) & 15;
+	}
+	else if (op[0] == 'o' && op[1] == 'u' && op[2] == 't' && op[3] == 0) { //out
+		enc.x[0] = 0;
+		enc.x[1] = 184;
+		enc.n = 2;
+		
+		enc.x[0] |= (avr_imm6(rs)) & 15;
+		enc.x[0] |= (avr_reg5(rd) << 4) & 240;
+		enc.x[1] |= (avr_imm6(rs) >> 3) & 6;
 		enc.x[1] |= (avr_reg5(rd) >> 4) & 1;
 	}
 	else {
