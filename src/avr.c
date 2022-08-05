@@ -31,14 +31,6 @@ avr_op_t avr_op[119];
 avr_reg_t avr_rd[119];
 avr_reg_t avr_rs[119];
 
-uint64_t strlen(int8_t* s) {
-	for (uint64_t i = 0;;i++) {
-		if (s[i] == 0) {
-			return i;
-		}
-	}
-}
-
 int64_t au_strint(int8_t* s, uint8_t i, err_t* err) {
 	int64_t v = 0;
 	if (s[i] == 39 && s[i + 2] == 39) {
@@ -683,6 +675,20 @@ enc_t avr_and(uint8_t rd, uint8_t rs) {
 	return enc;
 }
 
+enc_t avr_tst(uint8_t rd) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 32;
+	enc.n = 2;
+	
+	enc.x[0] |= (rd) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (rd >> 3) & 2;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
 enc_t avr_eor(uint8_t rd, uint8_t rs) {
 	enc_t enc;
 	enc.x[0] = 0;
@@ -692,6 +698,20 @@ enc_t avr_eor(uint8_t rd, uint8_t rs) {
 	enc.x[0] |= (rs) & 15;
 	enc.x[0] |= (rd << 4) & 240;
 	enc.x[1] |= (rs >> 3) & 2;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_clr(uint8_t rd) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 36;
+	enc.n = 2;
+	
+	enc.x[0] |= (rd) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (rd >> 3) & 2;
 	enc.x[1] |= (rd >> 4) & 1;
 	
 	return enc;
@@ -1082,74 +1102,13 @@ enc_t avr_ror(uint8_t rd) {
 	return enc;
 }
 
-enc_t avr_clc() {
+enc_t avr_bset(uint8_t b) {
 	enc_t enc;
-	enc.x[0] = 136;
+	enc.x[0] = 8;
 	enc.x[1] = 148;
 	enc.n = 2;
 	
-	return enc;
-}
-
-enc_t avr_clz() {
-	enc_t enc;
-	enc.x[0] = 152;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_cln() {
-	enc_t enc;
-	enc.x[0] = 168;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_clv() {
-	enc_t enc;
-	enc.x[0] = 184;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_cls() {
-	enc_t enc;
-	enc.x[0] = 200;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_clh() {
-	enc_t enc;
-	enc.x[0] = 216;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_clt() {
-	enc_t enc;
-	enc.x[0] = 232;
-	enc.x[1] = 148;
-	enc.n = 2;
-	
-	return enc;
-}
-
-enc_t avr_cli() {
-	enc_t enc;
-	enc.x[0] = 248;
-	enc.x[1] = 148;
-	enc.n = 2;
+	enc.x[0] |= (b << 4) & 112;
 	
 	return enc;
 }
@@ -1222,6 +1181,672 @@ enc_t avr_sei() {
 	enc.x[0] = 120;
 	enc.x[1] = 148;
 	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_bclr(uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 136;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	enc.x[0] |= (b << 4) & 112;
+	
+	return enc;
+}
+
+enc_t avr_clc() {
+	enc_t enc;
+	enc.x[0] = 136;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_clz() {
+	enc_t enc;
+	enc.x[0] = 152;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_cln() {
+	enc_t enc;
+	enc.x[0] = 168;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_clv() {
+	enc_t enc;
+	enc.x[0] = 184;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_cls() {
+	enc_t enc;
+	enc.x[0] = 200;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_clh() {
+	enc_t enc;
+	enc.x[0] = 216;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_clt() {
+	enc_t enc;
+	enc.x[0] = 232;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_cli() {
+	enc_t enc;
+	enc.x[0] = 248;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+
+enc_t avr_ret() {
+	enc_t enc;
+	enc.x[0] = 8;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_reti() {
+	enc_t enc;
+	enc.x[0] = 24;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_sleep() {
+	enc_t enc;
+	enc.x[0] = 136;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_break() {
+	enc_t enc;
+	enc.x[0] = 152;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_wdr() {
+	enc_t enc;
+	enc.x[0] = 168;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_spm() {
+	enc_t enc;
+	enc.x[0] = 232;
+	enc.x[1] = 149;
+	enc.n = 2;
+	//todo
+	
+	return enc;
+}
+
+enc_t avr_ijmp() {
+	enc_t enc;
+	enc.x[0] = 9;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_eijmp() {
+	enc_t enc;
+	enc.x[0] = 25;
+	enc.x[1] = 148;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_icall() {
+	enc_t enc;
+	enc.x[0] = 9;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_eicall() {
+	enc_t enc;
+	enc.x[0] = 25;
+	enc.x[1] = 149;
+	enc.n = 2;
+	
+	return enc;
+}
+
+enc_t avr_des(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 11;
+	enc.x[1] = 148;
+	enc.n = 2;
+		
+	enc.x[0] |= (k << 4) & 240;
+	
+	return enc;
+}
+
+enc_t avr_jmp(uint16_t k) {
+	enc_t enc;
+	enc.x[0] = 12;
+	enc.x[1] = 148;
+	enc.x[2] = k;
+	enc.x[3] = k >> 8;
+	enc.n = 4;
+	
+	return enc;
+}
+
+enc_t avr_call(uint16_t k) {
+	enc_t enc;
+	enc.x[0] = 14;
+	enc.x[1] = 148;
+	enc.x[2] = k;
+	enc.x[3] = k >> 8;
+	enc.n = 4;
+	
+	return enc;
+}
+
+enc_t avr_adiw(uint8_t rd, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 150;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 15;
+	enc.x[0] |= (k << 2) & 192;
+	enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
+	
+	return enc;
+}
+
+enc_t avr_sbiw(uint8_t rd, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 151;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 15;
+	enc.x[0] |= (k << 2) & 192;
+	enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
+	
+	return enc;
+}
+
+enc_t avr_cbi(uint8_t p, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 152;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (p << 3) & 248; //todo p
+	
+	return enc;
+}
+
+enc_t avr_sbi(uint8_t p, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 154;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (p << 3) & 248; //todo p
+	
+	return enc;
+}
+
+enc_t avr_sbic(uint8_t p, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 153;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (p << 3) & 248; //todo p
+	
+	return enc;
+}
+
+enc_t avr_sbis(uint8_t p, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 155;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (p << 3) & 248; //todo p
+	
+	return enc;
+}
+
+enc_t avr_mul(uint8_t rd, uint8_t rs) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 156;
+	enc.n = 2;
+	
+	enc.x[0] |= (rs) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (rs >> 3) & 2;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_in(uint8_t rd, uint8_t p) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 176;
+	enc.n = 2;
+	
+	enc.x[0] |= (p) & 15; //todo p
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (p >> 3) & 6;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_out(uint8_t rd, uint8_t p) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 184;
+	enc.n = 2;
+	
+	enc.x[0] |= (p) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (p >> 3) & 6; //todo p
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_rjmp(uint16_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 192;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 255;
+	enc.x[1] |= (k >> 8) & 15;
+	
+	return enc;
+}
+
+enc_t avr_rcall(uint16_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 208;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 255;
+	enc.x[1] |= (k >> 8) & 15;
+	
+	return enc;
+}
+
+enc_t avr_ldi(uint8_t rd, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 224;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (k >> 4) & 15;
+	
+	return enc;
+}
+
+enc_t avr_ser(uint8_t rd) {
+	enc_t enc;
+	enc.x[0] = 15;
+	enc.x[1] = 239;
+	enc.n = 2;
+	
+	enc.x[0] |= (rd << 4) && 240;
+	
+	return enc;
+}
+
+enc_t avr_brcs(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brlo(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brcc(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brsh(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_breq(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 1;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brne(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 1;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brmi(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 2;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brpl(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 2;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brvs(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 3;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brvc(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 3;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brlt(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 4;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brge(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 4;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brhs(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 5;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brhc(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 5;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brts(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 6;
+	enc.x[1] = 240;
+	enc.n = 2;
+		
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brtc(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 6;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brie(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 7;
+	enc.x[1] = 240;
+	enc.n = 2;
+		
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brid(uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 7;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brbs(uint8_t b, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 240;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_brbc(uint8_t b, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 244;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (k << 3) & 248;
+	enc.x[1] |= (k >> 5) & 3;
+	
+	return enc;
+}
+
+enc_t avr_bld(uint8_t rd, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 248;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_bst(uint8_t rd, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 250;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_sbrc(uint8_t rd, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 252;
+	enc.n = 2;
+		
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[0] |= (rd >> 4) & 1;
+	
+	return enc;
+}
+
+enc_t avr_sbrs(uint8_t rd, uint8_t b) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 254;
+	enc.n = 2;
+	
+	enc.x[0] |= (b) & 7;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[0] |= (rd >> 4) & 1;
 	
 	return enc;
 }
@@ -1416,901 +2041,3 @@ void avr_init() {
 	avr_rs[47] = 0;
 }
 
-enc_t avr_enc(int8_t* op, int8_t* rd, int8_t* rs, uint8_t rn, err_t* err) {
-	enc_t enc;
-	
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) { //adiw
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 150;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 15;
-		enc.x[0] |= (k << 2) & 192;
-		enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
-	}
-	
-	else if (op[0] == 'b' && op[1] == 'c' && op[2] == 'l' && op[3] == 'r' && op[4] == 0) { //bclr
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 136;
-		enc.x[1] = 148;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rd, err) << 4) & 112;
-	}
-	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'd' && op[3] == 0) { //bld
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 248;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 'c' && op[4] == 0) { //brbc
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rd, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) { //brbs
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rd, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) { //brcc
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 's' && op[4] == 0) { //brcs
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'a' && op[4] == 'k' && op[5] == 0) { //break
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 152;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) { //breq
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 1;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) { //brge
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 4;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) { //brhc
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 5;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) { //brhs
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 5;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) { //brid
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 7;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) { //brie
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 7;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) { //brlo
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) { //brlt
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 4;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) { //brmi
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 2;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) { //brne
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 1;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) { //brpl
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 2;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) { //brsh
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) { //brtc
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 6;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) { //brts
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 6;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) { //brvc
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 3;
-		enc.x[1] = 244;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) { //brvs
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 3;
-		enc.x[1] = 240;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 3) & 248;
-		enc.x[1] |= (k >> 5) & 3;
-	}
-	else if (op[0] == 'b' && op[1] == 's' && op[2] == 'e' && op[3] == 't' && op[4] == 0) { //bset
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 8;
-		enc.x[1] = 148;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rd, err) << 4) & 112;
-	}
-	else if (op[0] == 'b' && op[1] == 's' && op[2] == 't' && op[3] == 0) { //bst
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 250;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) { //call
-		
-		
-		enc.x[0] = 14;
-		enc.x[1] = 148;
-		enc.x[2] = 0;
-		enc.x[3] = 0;
-		enc.n = 4;
-		
-		//todo
-	}
-	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) { //cbi
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 152;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-	}
-	
-	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'r' && op[3] == 0) { //clr
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 36;
-		enc.n = 2;
-		
-		enc.x[0] |= (rd) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (rd >> 3) & 2;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	
-	
-	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 's' && op[3] == 0) { //des
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 11;
-		enc.x[1] = 148;
-		enc.n = 2;
-		
-		enc.x[0] |= (k << 4) & 240;
-	}
-	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'c' && op[3] == 'a' && op[4] == 'l' && op[5] == 'l' && op[6] == 0) { //eicall
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 25;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'j' && op[3] == 'm' && op[4] == 'p' && op[5] == 0) { //eijmp
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 25;
-		enc.x[1] = 148;
-		enc.n = 2;
-	}
-	
-
-	else if (op[0] == 'i' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) { //icall
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 9;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 'i' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) { //ijmp
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 9;
-		enc.x[1] = 148;
-		enc.n = 2;
-	}
-	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 0) { //in
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 176;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (k >> 3) & 6;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 'c' && op[3] == 0) { //inc
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		
-	}
-	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) { //jmp
-		
-		
-		enc.x[0] = 12;
-		enc.x[1] = 148;
-		enc.n = 4;
-		
-		//todo
-	}
-	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) { //ldi
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 224;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (k >> 4) & 15;
-	}
-
-
-	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) { //mul
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 156;
-		enc.n = 2;
-		
-		enc.x[0] |= (rs) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (rs >> 3) & 2;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) { //muls
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 2;
-		enc.n = 2;
-		
-		enc.x[0] |= (rs) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-	}
-	else if (op[0] == 'o' && op[1] == 'u' && op[2] == 't' && op[3] == 0) { //out
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 184;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (k >> 3) & 6;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'r' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) { //rcall
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 208;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 255;
-		enc.x[1] |= (k >> 8) & 15;
-	}
-	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 0) { //ret
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 8;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 'i' && op[4] == 0) { //reti
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 24;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 'r' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) { //rjmp
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 192;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 255;
-		enc.x[1] |= (k >> 8) & 15;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) { //sbi
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 154;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'c' && op[4] == 0) { //sbic
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 153;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 's' && op[4] == 0) { //sbis
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 155;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (k << 3) & 248;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) { //sbiw
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 151;
-		enc.n = 2;
-		
-		enc.x[0] |= (k) & 15;
-		enc.x[0] |= (k << 2) & 192;
-		enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 'c' && op[4] == 0) { //sbrc
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 252;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[0] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 's' && op[4] == 0) { //sbrs
-		if (rn != 2) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 254;
-		enc.n = 2;
-		
-		enc.x[0] |= (avr_bit3(rs, err)) & 7;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[0] |= (rd >> 4) & 1;
-	}
-	
-	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'r' && op[3] == 0) { //ser
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 15;
-		enc.x[1] = 239;
-		enc.n = 2;
-		
-		enc.x[0] |= (rd << 4) && 240;
-	}
-	
-	else if (op[0] == 's' && op[1] == 'l' && op[2] == 'e' && op[3] == 'e' && op[4] == 'p' && op[5] == 0) { //sleep
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 136;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else if (op[0] == 's' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) { //spm
-		
-		enc.x[0] = 232;
-		enc.x[1] = 149;
-		enc.n = 2;
-		
-		//todo
-	}
-
-	else if (op[0] == 't' && op[1] == 's' && op[2] == 't' && op[3] == 0) { //tst
-		if (rn == 0) {
-			////err->e = "too few operands";
-			//err->b = 1;
-			return enc;
-		}
-		else if (rn == 2) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 0;
-		enc.x[1] = 32;
-		enc.n = 2;
-		
-		enc.x[0] |= (rd) & 15;
-		enc.x[0] |= (rd << 4) & 240;
-		enc.x[1] |= (rd >> 3) & 2;
-		enc.x[1] |= (rd >> 4) & 1;
-	}
-	else if (op[0] == 'w' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) { //wdr
-		if (rn != 0) {
-			////err->e = "too many operands";
-			//err->b = 1;
-			return enc;
-		}
-		
-		enc.x[0] = 168;
-		enc.x[1] = 149;
-		enc.n = 2;
-	}
-	else {
-		////err->e = "illegal operation";
-		//err->b = 1;
-	}
-	return enc;
-}
