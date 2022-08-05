@@ -40,6 +40,11 @@ int64_t au_strint(int8_t* s, uint8_t i, err_t* err) {
 		v = s[i + 1];
 	}
 	else {
+		int8_t n = 0;
+		if (s[i] == '-') {
+			n = 1;
+			i++;
+		}
 		for (; i < 20; i++) {
 			if (s[i] == 0) {
 				return v;
@@ -81,116 +86,7 @@ int64_t au_strint(int8_t* s, uint8_t i, err_t* err) {
 	}
 }
 
-uint8_t avr_reg2(int8_t* r, err_t* err) {
-	if (r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) {
-		return 0;
-	}
-	else if ((r[0] == 'r' && r[1] == '2' && r[2] == '6' && r[3] == 0) || (r[0] == 'x' && r[1] == 0)) {
-		return 1;
-	}
-	else if ((r[0] == 'r' && r[1] == '2' && r[2] == '8' && r[3] == 0) || (r[0] == 'y' && r[1] == 0)) {
-		return 2;
-	}
-	else if ((r[0] == 'r' && r[1] == '3' && r[2] == '0' && r[3] == 0) || (r[0] == 'z' && r[1] == 0)) {
-		return 3;
-	}
-	else {
-		////err->e = "illegal register";
-		//err->b = 1;
-	}
-}
-
-uint8_t avr_reg3(int8_t* r, err_t* err) {
-	if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
-		return 0;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '7' && r[3] == 0) {
-		return 1;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '8' && r[3] == 0) {
-		return 2;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '9' && r[3] == 0) {
-		return 3;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '0' && r[3] == 0) {
-		return 4;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '1' && r[3] == 0) {
-		return 5;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '2' && r[3] == 0) {
-		return 6;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '3' && r[3] == 0) {
-		return 7;
-	}
-	else {
-		////err->e = "illegal register";
-		//err->b = 1;
-	}
-}
-
-uint8_t avr_reg4(int8_t* r, err_t* err) {
-	if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
-		return 0;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '7' && r[3] == 0) {
-		return 1;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '8' && r[3] == 0) {
-		return 2;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '9' && r[3] == 0) {
-		return 3;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '0' && r[3] == 0) {
-		return 4;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '1' && r[3] == 0) {
-		return 5;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '2' && r[3] == 0) {
-		return 6;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '3' && r[3] == 0) {
-		return 7;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) {
-		return 8;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '5' && r[3] == 0) {
-		return 9;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '6' && r[3] == 0) {
-		return 10;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '7' && r[3] == 0) {
-		return 11;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '8' && r[3] == 0) {
-		return 12;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '9' && r[3] == 0) {
-		return 13;
-	}
-	else if (r[0] == 'r' && r[1] == '3' && r[2] == '0' && r[3] == 0) {
-		return 14;
-	}
-	else if (r[0] == 'r' && r[1] == '3' && r[2] == '1' && r[3] == 0) {
-		return 15;
-	}
-	else {
-		////err->e = "illegal register";
-		//err->e[strlen(//err->e)] = ' ';
-		//err->e[strlen(//err->e)] = 39;
-		//err->e[strlen(//err->e)] = 'a';
-		//err->e[strlen(//err->e)] = 39;
-		//err->b = 1;
-	}
-}
-
-uint8_t avr_reg5(int8_t* r, err_t* err) {
+uint8_t avr_reg(int8_t* r) {
 	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
 		return 0;
 	}
@@ -288,17 +184,30 @@ uint8_t avr_reg5(int8_t* r, err_t* err) {
 		return 31;
 	}
 	else {
+		return 255;
+	}
+}
+
+uint8_t avr_r2(int8_t* r, err_t* err) {
+	if (r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) {
+		return 0;
+	}
+	else if ((r[0] == 'r' && r[1] == '2' && r[2] == '6' && r[3] == 0) || (r[0] == 'x' && r[1] == 0)) {
+		return 1;
+	}
+	else if ((r[0] == 'r' && r[1] == '2' && r[2] == '8' && r[3] == 0) || (r[0] == 'y' && r[1] == 0)) {
+		return 2;
+	}
+	else if ((r[0] == 'r' && r[1] == '3' && r[2] == '0' && r[3] == 0) || (r[0] == 'z' && r[1] == 0)) {
+		return 3;
+	}
+	else {
 		////err->e = "illegal register";
-		//err->e[16] = ' ';
-		//err->e[17] = 39;
-		//err->e[18] = 'a';
-		//err->e[19] = 39;
-		//err->e[20] = 0;
 		//err->b = 1;
 	}
 }
 
-uint8_t avr_reg5x(int8_t* r, err_t* err) {
+uint8_t avr_rex(int8_t* r, err_t* err) {
 	if (r[0] == 'x' && r[1] == 0) {
 		return 28;
 	}
@@ -328,41 +237,57 @@ uint8_t avr_reg5x(int8_t* r, err_t* err) {
 	}
 }
 
-uint8_t avr_reg7d(int8_t* r, err_t* err) {
-	uint8_t k = 0;
-	for (uint8_t i = 1; i < 4; i++) {
-		if (r[i] == 0) {
-			break;
-		}
-		k *= 10;
-		if (r[i] == '1') {
-			k += 1;
-		}
-		else if (r[i] == '2') {
-			k += 2;
-		}
-		else if (r[i] == '3') {
-			k += 3;
-		}
-		else if (r[i] == '4') {
-			k += 4;
-		}
-		else if (r[i] == '5') {
-			k += 5;
-		}
-		else if (r[i] == '6') {
-			k += 6;
-		}
-		else if (r[i] == '7') {
-			k += 7;
-		}
-		else if (r[i] == '8') {
-			k += 8;
-		}
-		else if (r[i] == '9') {
-			k += 9;
-		}
+uint8_t avr_r3(int8_t* r, err_t* err) {
+	uint8_t a = avr_reg(r);
+	if ((a < 16 || a > 23) && a < 32) {
+		//error
 	}
+	else if (a == 255) {
+		//error
+	}
+	
+	return a & 7;
+}
+
+uint8_t avr_r4(int8_t* r, err_t* err) {
+	uint8_t a = avr_reg(r);
+	if ((a < 16 || a > 32)) {
+		//error
+	}
+	else if (a == 255) {
+		//error
+	}
+	
+	return a & 15;
+}
+
+uint8_t avr_r5(int8_t* r, err_t* err) {
+	uint8_t a = avr_reg(r);
+	if (a == 255) {
+		//error
+	}
+	
+	return a & 31;
+}
+
+uint8_t avr_rw(int8_t* r, err_t* err) {
+	uint8_t a = avr_reg(r);
+	if (a % 2 == 1) {
+		//error
+	}
+	else if (a == 255) {
+		//error
+	}
+	
+	return (a / 2) & 15;
+}
+
+uint8_t avr_d6(int8_t* r, err_t* err) {
+	uint8_t k = au_strint(r, 1, err);
+	if (k > 63) {
+		//error
+	}
+	
 	if (r[0] == 'y') {
 		uint8_t y = (k << 1) & 112;
 		k &= 7;
@@ -373,85 +298,35 @@ uint8_t avr_reg7d(int8_t* r, err_t* err) {
 		k &= 7;
 		k |= z;
 	}
+	
 	return k;
 }
 
-uint8_t avr_reg4w(int8_t* r, err_t* err) {
-	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
-		return 0;
+uint8_t avr_b3(int8_t* b, err_t* err) {
+	uint8_t a = au_strint(b, 0, err);
+	if (a > 7) {
+		//error
 	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == 0) {
-		return 1;
-	}
-	else if (r[0] == 'r' && r[1] == '4' && r[2] == 0) {
-		return 2;
-	}
-	else if (r[0] == 'r' && r[1] == '6' && r[2] == 0) {
-		return 3;
-	}
-	else if (r[0] == 'r' && r[1] == '8' && r[2] == 0) {
-		return 4;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '0' && r[3] == 0) {
-		return 5;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '2' && r[3] == 0) {
-		return 6;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '4' && r[3] == 0) {
-		return 7;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '6' && r[3] == 0) {
-		return 8;
-	}
-	else if (r[0] == 'r' && r[1] == '1' && r[2] == '8' && r[3] == 0) {
-		return 9;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '0' && r[3] == 0) {
-		return 10;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '2' && r[3] == 0) {
-		return 11;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) {
-		return 12;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '6' && r[3] == 0) {
-		return 13;
-	}
-	else if (r[0] == 'r' && r[1] == '2' && r[2] == '8' && r[3] == 0) {
-		return 14;
-	}
-	else if (r[0] == 'r' && r[1] == '3' && r[2] == '0' && r[3] == 0) {
-		return 15;
-	}
+	
+	return a;
 }
 
-uint8_t avr_bit3(int8_t* b, err_t* err) {
-	if (b[0] == '0' && b[1] == 0) {
-		return 0;
+uint8_t avr_p5(uint8_t* p, err_t* err) {
+	uint8_t a = au_strint(p, 0, err);
+	if (a > 31) {
+		//error
 	}
-	else if (b[0] == '1' && b[1] == 0) {
-		return 1;
+	
+	return a;
+}
+
+uint8_t avr_p6(uint8_t* p, err_t* err) {
+	uint8_t a = au_strint(p, 0, err);
+	if (a > 63) {
+		//error
 	}
-	else if (b[0] == '2' && b[1] == 0) {
-		return 2;
-	}
-	else if (b[0] == '3' && b[1] == 0) {
-		return 3;
-	}
-	else if (b[0] == '4' && b[1] == 0) {
-		return 4;
-	}
-	else if (b[0] == '5' && b[1] == 0) {
-		return 5;
-	}
-	else if (b[0] == '6' && b[1] == 0) {
-		return 6;
-	}
-	else if (b[0] == '7' && b[1] == 0) {
-		return 7;
-	}
+	
+	return a;
 }
 
 enc_t avr_nop() {
@@ -832,6 +707,19 @@ enc_t avr_cbr(uint8_t rd, uint8_t k) {
 	enc.x[0] |= (~k) & 15;
 	enc.x[0] |= (rd << 4) & 240;
 	enc.x[1] |= (~k >> 4) & 15;
+	
+	return enc;
+}
+
+enc_t avr_ldi(uint8_t rd, uint8_t k) {
+	enc_t enc;
+	enc.x[0] = 0;
+	enc.x[1] = 224;
+	enc.n = 2;
+	
+	enc.x[0] |= (k) & 15;
+	enc.x[0] |= (rd << 4) & 240;
+	enc.x[1] |= (k >> 4) & 15;
 	
 	return enc;
 }
@@ -1401,7 +1289,7 @@ enc_t avr_adiw(uint8_t rd, uint8_t k) {
 	
 	enc.x[0] |= (k) & 15;
 	enc.x[0] |= (k << 2) & 192;
-	enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
+	enc.x[0] |= (avr_r2(rd, err) << 4) & 48;
 	
 	return enc;
 }
@@ -1414,7 +1302,7 @@ enc_t avr_sbiw(uint8_t rd, uint8_t k) {
 	
 	enc.x[0] |= (k) & 15;
 	enc.x[0] |= (k << 2) & 192;
-	enc.x[0] |= (avr_reg2(rd, err) << 4) & 48;
+	enc.x[0] |= (avr_r2(rd, err) << 4) & 48;
 	
 	return enc;
 }
@@ -1529,19 +1417,6 @@ enc_t avr_rcall(uint16_t k) {
 	
 	enc.x[0] |= (k) & 255;
 	enc.x[1] |= (k >> 8) & 15;
-	
-	return enc;
-}
-
-enc_t avr_ldi(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 224;
-	enc.n = 2;
-	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
 	
 	return enc;
 }
@@ -1857,187 +1732,187 @@ void avr_init() {
 	avr_rs[0] = 0;
 	
 	avr_op[1] = (avr_op_t) avr_movw;
-	avr_rd[1] = (avr_reg_t) avr_reg4w;
-	avr_rs[1] = (avr_reg_t) avr_reg4w;
+	avr_rd[1] = (avr_reg_t) avr_rw;
+	avr_rs[1] = (avr_reg_t) avr_rw;
 	
 	avr_op[2] = (avr_op_t) avr_muls;
-	avr_rd[2] = (avr_reg_t) avr_reg4w;
-	avr_rs[2] = (avr_reg_t) avr_reg4w;
+	avr_rd[2] = (avr_reg_t) avr_rw;
+	avr_rs[2] = (avr_reg_t) avr_rw;
 	
 	avr_op[3] = (avr_op_t) avr_mulsu;
-	avr_rd[3] = (avr_reg_t) avr_reg3;
-	avr_rs[3] = (avr_reg_t) avr_reg3;
+	avr_rd[3] = (avr_reg_t) avr_r3;
+	avr_rs[3] = (avr_reg_t) avr_r3;
 	
 	avr_op[4] = (avr_op_t) avr_fmul;
-	avr_rd[4] = (avr_reg_t) avr_reg3;
-	avr_rs[4] = (avr_reg_t) avr_reg3;
+	avr_rd[4] = (avr_reg_t) avr_r3;
+	avr_rs[4] = (avr_reg_t) avr_r3;
 	
 	avr_op[5] = (avr_op_t) avr_fmuls;
-	avr_rd[5] = (avr_reg_t) avr_reg3;
-	avr_rs[5] = (avr_reg_t) avr_reg3;
+	avr_rd[5] = (avr_reg_t) avr_r3;
+	avr_rs[5] = (avr_reg_t) avr_r3;
 	
 	avr_op[6] = (avr_op_t) avr_fmulsu;
-	avr_rd[6] = (avr_reg_t) avr_reg3;
-	avr_rs[6] = (avr_reg_t) avr_reg3;
+	avr_rd[6] = (avr_reg_t) avr_r3;
+	avr_rs[6] = (avr_reg_t) avr_r3;
 	
 	avr_op[7] = (avr_op_t) avr_cp;
-	avr_rd[7] = (avr_reg_t) avr_reg5;
-	avr_rs[7] = (avr_reg_t) avr_reg5;
+	avr_rd[7] = (avr_reg_t) avr_r5;
+	avr_rs[7] = (avr_reg_t) avr_r5;
 	
 	avr_op[8] = (avr_op_t) avr_cpc;
-	avr_rd[8] = (avr_reg_t) avr_reg5;
-	avr_rs[8] = (avr_reg_t) avr_reg5;
+	avr_rd[8] = (avr_reg_t) avr_r5;
+	avr_rs[8] = (avr_reg_t) avr_r5;
 	
 	avr_op[9] = (avr_op_t) avr_sub;
-	avr_rd[9] = (avr_reg_t) avr_reg5;
-	avr_rs[9] = (avr_reg_t) avr_reg5;
+	avr_rd[9] = (avr_reg_t) avr_r5;
+	avr_rs[9] = (avr_reg_t) avr_r5;
 	
 	avr_op[9] = (avr_op_t) avr_sbc;
-	avr_rd[9] = (avr_reg_t) avr_reg5;
-	avr_rs[9] = (avr_reg_t) avr_reg5;
+	avr_rd[9] = (avr_reg_t) avr_r5;
+	avr_rs[9] = (avr_reg_t) avr_r5;
 	
 	avr_op[10] = (avr_op_t) avr_add;
-	avr_rd[10] = (avr_reg_t) avr_reg5;
-	avr_rs[10] = (avr_reg_t) avr_reg5;
+	avr_rd[10] = (avr_reg_t) avr_r5;
+	avr_rs[10] = (avr_reg_t) avr_r5;
 	
 	avr_op[11] = (avr_op_t) avr_adc;
-	avr_rd[11] = (avr_reg_t) avr_reg5;
-	avr_rs[11] = (avr_reg_t) avr_reg5;
+	avr_rd[11] = (avr_reg_t) avr_r5;
+	avr_rs[11] = (avr_reg_t) avr_r5;
 	
 	avr_op[12] = (avr_op_t) avr_lsl;
-	avr_rd[12] = (avr_reg_t) avr_reg5;
+	avr_rd[12] = (avr_reg_t) avr_r5;
 	avr_rs[12] = 0;
 	
 	avr_op[13] = (avr_op_t) avr_rol;
-	avr_rd[13] = (avr_reg_t) avr_reg5;
+	avr_rd[13] = (avr_reg_t) avr_r5;
 	avr_rs[13] = 0;
 	
 	avr_op[14] = (avr_op_t) avr_cpse;
-	avr_rd[14] = (avr_reg_t) avr_reg5;
-	avr_rs[14] = (avr_reg_t) avr_reg5;
+	avr_rd[14] = (avr_reg_t) avr_r5;
+	avr_rs[14] = (avr_reg_t) avr_r5;
 	
 	avr_op[15] = (avr_op_t) avr_and;
-	avr_rd[15] = (avr_reg_t) avr_reg5;
-	avr_rs[15] = (avr_reg_t) avr_reg5;
+	avr_rd[15] = (avr_reg_t) avr_r5;
+	avr_rs[15] = (avr_reg_t) avr_r5;
 	
 	avr_op[16] = (avr_op_t) avr_eor;
-	avr_rd[16] = (avr_reg_t) avr_reg5;
-	avr_rs[16] = (avr_reg_t) avr_reg5;
+	avr_rd[16] = (avr_reg_t) avr_r5;
+	avr_rs[16] = (avr_reg_t) avr_r5;
 	
 	avr_op[17] = (avr_op_t) avr_or;
-	avr_rd[17] = (avr_reg_t) avr_reg5;
-	avr_rs[17] = (avr_reg_t) avr_reg5;
+	avr_rd[17] = (avr_reg_t) avr_r5;
+	avr_rs[17] = (avr_reg_t) avr_r5;
 	
 	avr_op[18] = (avr_op_t) avr_mov;
-	avr_rd[18] = (avr_reg_t) avr_reg5;
-	avr_rs[18] = (avr_reg_t) avr_reg5;
+	avr_rd[18] = (avr_reg_t) avr_r5;
+	avr_rs[18] = (avr_reg_t) avr_r5;
 	
 	avr_op[19] = (avr_op_t) avr_cpi;
-	avr_rd[19] = (avr_reg_t) avr_reg4;
+	avr_rd[19] = (avr_reg_t) avr_r4;
 	avr_rs[19] = (avr_reg_t) au_strint;
 	
 	avr_op[20] = (avr_op_t) avr_subi;
-	avr_rd[20] = (avr_reg_t) avr_reg4;
+	avr_rd[20] = (avr_reg_t) avr_r4;
 	avr_rs[20] = (avr_reg_t) au_strint;
 	
 	avr_op[21] = (avr_op_t) avr_sbci;
-	avr_rd[21] = (avr_reg_t) avr_reg4;
+	avr_rd[21] = (avr_reg_t) avr_r4;
 	avr_rs[21] = (avr_reg_t) au_strint;
 	
 	avr_op[22] = (avr_op_t) avr_ori;
-	avr_rd[22] = (avr_reg_t) avr_reg4;
+	avr_rd[22] = (avr_reg_t) avr_r4;
 	avr_rs[22] = (avr_reg_t) au_strint;
 	
 	avr_op[23] = (avr_op_t) avr_sbr;
-	avr_rd[23] = (avr_reg_t) avr_reg4;
+	avr_rd[23] = (avr_reg_t) avr_r4;
 	avr_rs[23] = (avr_reg_t) au_strint;
 	
 	avr_op[24] = (avr_op_t) avr_andi;
-	avr_rd[24] = (avr_reg_t) avr_reg4;
+	avr_rd[24] = (avr_reg_t) avr_r4;
 	avr_rs[24] = (avr_reg_t) au_strint;
 	
 	avr_op[25] = (avr_op_t) avr_cbr;
-	avr_rd[25] = (avr_reg_t) avr_reg4;
+	avr_rd[25] = (avr_reg_t) avr_r4;
 	avr_rs[25] = (avr_reg_t) au_strint;
 	
 	avr_op[26] = (avr_op_t) avr_ldd;
-	avr_rd[26] = (avr_reg_t) avr_reg5;
-	avr_rs[26] = (avr_reg_t) avr_reg7d;
+	avr_rd[26] = (avr_reg_t) avr_r5;
+	avr_rs[26] = (avr_reg_t) avr_d6;
 	
 	avr_op[27] = (avr_op_t) avr_std;
-	avr_rd[27] = (avr_reg_t) avr_reg7d;
-	avr_rs[27] = (avr_reg_t) avr_reg5;
+	avr_rd[27] = (avr_reg_t) avr_d6;
+	avr_rs[27] = (avr_reg_t) avr_r5;
 	
 	avr_op[28] = (avr_op_t) avr_lds;
 	
 	avr_op[29] = (avr_op_t) avr_sts;
 	
 	avr_op[30] = (avr_op_t) avr_ld;
-	avr_rd[30] = (avr_reg_t) avr_reg5;
-	avr_rs[30] = (avr_reg_t) avr_reg5x;
+	avr_rd[30] = (avr_reg_t) avr_r5;
+	avr_rs[30] = (avr_reg_t) avr_rex;
 	
 	avr_op[31] = (avr_op_t) avr_ld;
-	avr_rd[31] = (avr_reg_t) avr_reg5x;
-	avr_rs[31] = (avr_reg_t) avr_reg5;
+	avr_rd[31] = (avr_reg_t) avr_rex;
+	avr_rs[31] = (avr_reg_t) avr_r5;
 	
 	avr_op[32] = (avr_op_t) avr_lpm;
 	
 	avr_op[33] = (avr_op_t) avr_elpm;
 	
 	avr_op[34] = (avr_op_t) avr_xch;
-	avr_rd[34] = (avr_reg_t) avr_reg5;
-	avr_rs[34] = (avr_reg_t) avr_reg5;
+	avr_rd[34] = (avr_reg_t) avr_r5;
+	avr_rs[34] = (avr_reg_t) avr_r5;
 	
 	avr_op[35] = (avr_op_t) avr_las;
-	avr_rd[35] = (avr_reg_t) avr_reg5;
-	avr_rs[35] = (avr_reg_t) avr_reg5;
+	avr_rd[35] = (avr_reg_t) avr_r5;
+	avr_rs[35] = (avr_reg_t) avr_r5;
 	
 	avr_op[36] = (avr_op_t) avr_lac;
-	avr_rd[36] = (avr_reg_t) avr_reg5;
-	avr_rs[36] = (avr_reg_t) avr_reg5;
+	avr_rd[36] = (avr_reg_t) avr_r5;
+	avr_rs[36] = (avr_reg_t) avr_r5;
 	
 	avr_op[37] = (avr_op_t) avr_lat;
-	avr_rd[37] = (avr_reg_t) avr_reg5;
-	avr_rs[37] = (avr_reg_t) avr_reg5;
+	avr_rd[37] = (avr_reg_t) avr_r5;
+	avr_rs[37] = (avr_reg_t) avr_r5;
 	
 	avr_op[38] = (avr_op_t) avr_pop;
-	avr_rd[38] = (avr_reg_t) avr_reg5;
+	avr_rd[38] = (avr_reg_t) avr_r5;
 	avr_rs[38] = 0;
 	
 	avr_op[39] = (avr_op_t) avr_push;
-	avr_rd[39] = (avr_reg_t) avr_reg5;
+	avr_rd[39] = (avr_reg_t) avr_r5;
 	avr_rs[39] = 0;
 	
 	avr_op[40] = (avr_op_t) avr_com;
-	avr_rd[40] = (avr_reg_t) avr_reg5;
+	avr_rd[40] = (avr_reg_t) avr_r5;
 	avr_rs[40] = 0;
 	
 	avr_op[41] = (avr_op_t) avr_neg;
-	avr_rd[41] = (avr_reg_t) avr_reg5;
+	avr_rd[41] = (avr_reg_t) avr_r5;
 	avr_rs[41] = 0;
 	
 	avr_op[42] = (avr_op_t) avr_swap;
-	avr_rd[42] = (avr_reg_t) avr_reg5;
+	avr_rd[42] = (avr_reg_t) avr_r5;
 	avr_rs[42] = 0;
 	
 	avr_op[43] = (avr_op_t) avr_inc;
-	avr_rd[43] = (avr_reg_t) avr_reg5;
+	avr_rd[43] = (avr_reg_t) avr_r5;
 	avr_rs[43] = 0;
 	
 	avr_op[44] = (avr_op_t) avr_dec;
-	avr_rd[44] = (avr_reg_t) avr_reg5;
+	avr_rd[44] = (avr_reg_t) avr_r5;
 	avr_rs[44] = 0;
 	
 	avr_op[45] = (avr_op_t) avr_asr;
-	avr_rd[45] = (avr_reg_t) avr_reg5;
+	avr_rd[45] = (avr_reg_t) avr_r5;
 	avr_rs[45] = 0;
 	
 	avr_op[46] = (avr_op_t) avr_lsr;
-	avr_rd[46] = (avr_reg_t) avr_reg5;
+	avr_rd[46] = (avr_reg_t) avr_r5;
 	avr_rs[46] = 0;
 	
 	avr_op[47] = (avr_op_t) avr_ror;
-	avr_rd[47] = (avr_reg_t) avr_reg5;
+	avr_rd[47] = (avr_reg_t) avr_r5;
 	avr_rs[47] = 0;
 }
 
