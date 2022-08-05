@@ -28,17 +28,22 @@ typedef struct line_s {
 
 int8_t main(int32_t argc, int8_t** argv) {
 	line_t l[65536];
-	uint16_t ln = 3;
-	l[0].op = "adiw";
-	l[0].rd = "r30";
-	l[0].rs = "3";
+	uint16_t ln = 4;
+	l[0].op = "mov";
+	l[0].rd = "r3";
+	l[0].rs = "r17";
 	l[0].rn = 2;
-	l[1].op = "adc";
-	l[1].rd = "r17";
-	l[1].rs = "r19";
+	l[1].op = "cp";
+	l[1].rd = "r16";
+	l[1].rs = "r18";
 	l[1].rn = 2;
-	l[2].op = "nop";
-	l[2].rn = 0;
+	l[2].op = "breq";
+	l[2].rd = "0";
+	l[2].rn = 1;
+	l[3].op = "add";
+	l[3].rd = "r19";
+	l[3].rs = "r20";
+	l[3].rn = 2;
 	
 	uint8_t byte[65536];
 	uint16_t bi = 0;
