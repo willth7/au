@@ -27,9 +27,9 @@ typedef struct err_s {
 typedef enc_t (*avr_op_t) (uint16_t, uint16_t);
 typedef uint16_t (*avr_reg_t) (int8_t*);
 
-avr_op_t avr_op[119];
-avr_reg_t avr_rd[119];
-avr_reg_t avr_rs[119];
+avr_op_t avr_op;
+avr_reg_t avr_rd;
+avr_reg_t avr_rs;
 
 uint64_t avr_strint(int8_t* s, uint8_t i, err_t* err) {
 	uint64_t v = 0;
@@ -1827,482 +1827,603 @@ enc_t avr_sbrs(uint8_t rd, uint8_t b) {
 	return enc;
 }
 
-void avr_init() {
-	avr_op[0] = (avr_op_t) avr_nop;
-	avr_rd[0] = 0;
-	avr_rs[0] = 0;
-	
-	avr_op[1] = (avr_op_t) avr_movw;
-	avr_rd[1] = (avr_reg_t) avr_rw;
-	avr_rs[1] = (avr_reg_t) avr_rw;
-	
-	avr_op[2] = (avr_op_t) avr_muls;
-	avr_rd[2] = (avr_reg_t) avr_rw;
-	avr_rs[2] = (avr_reg_t) avr_rw;
-	
-	avr_op[3] = (avr_op_t) avr_mulsu;
-	avr_rd[3] = (avr_reg_t) avr_r3;
-	avr_rs[3] = (avr_reg_t) avr_r3;
-	
-	avr_op[4] = (avr_op_t) avr_fmul;
-	avr_rd[4] = (avr_reg_t) avr_r3;
-	avr_rs[4] = (avr_reg_t) avr_r3;
-	
-	avr_op[5] = (avr_op_t) avr_fmuls;
-	avr_rd[5] = (avr_reg_t) avr_r3;
-	avr_rs[5] = (avr_reg_t) avr_r3;
-	
-	avr_op[6] = (avr_op_t) avr_fmulsu;
-	avr_rd[6] = (avr_reg_t) avr_r3;
-	avr_rs[6] = (avr_reg_t) avr_r3;
-	
-	avr_op[7] = (avr_op_t) avr_cp;
-	avr_rd[7] = (avr_reg_t) avr_r5;
-	avr_rs[7] = (avr_reg_t) avr_r5;
-	
-	avr_op[8] = (avr_op_t) avr_cpc;
-	avr_rd[8] = (avr_reg_t) avr_r5;
-	avr_rs[8] = (avr_reg_t) avr_r5;
-	
-	avr_op[9] = (avr_op_t) avr_sub;
-	avr_rd[9] = (avr_reg_t) avr_r5;
-	avr_rs[9] = (avr_reg_t) avr_r5;
-	
-	avr_op[10] = (avr_op_t) avr_sbc;
-	avr_rd[10] = (avr_reg_t) avr_r5;
-	avr_rs[10] = (avr_reg_t) avr_r5;
-	
-	avr_op[11] = (avr_op_t) avr_add;
-	avr_rd[11] = (avr_reg_t) avr_r5;
-	avr_rs[11] = (avr_reg_t) avr_r5;
-	
-	avr_op[12] = (avr_op_t) avr_adc;
-	avr_rd[12] = (avr_reg_t) avr_r5;
-	avr_rs[12] = (avr_reg_t) avr_r5;
-	
-	avr_op[13] = (avr_op_t) avr_lsl;
-	avr_rd[13] = (avr_reg_t) avr_r5;
-	avr_rs[13] = 0;
-	
-	avr_op[14] = (avr_op_t) avr_rol;
-	avr_rd[14] = (avr_reg_t) avr_r5;
-	avr_rs[14] = 0;
-	
-	avr_op[15] = (avr_op_t) avr_cpse;
-	avr_rd[15] = (avr_reg_t) avr_r5;
-	avr_rs[15] = (avr_reg_t) avr_r5;
-	
-	avr_op[16] = (avr_op_t) avr_and;
-	avr_rd[16] = (avr_reg_t) avr_r5;
-	avr_rs[16] = (avr_reg_t) avr_r5;
-	
-	avr_op[17] = (avr_op_t) avr_tst;
-	avr_rd[17] = (avr_reg_t) avr_r5;
-	avr_rs[17] = 0;
-	
-	avr_op[18] = (avr_op_t) avr_eor;
-	avr_rd[18] = (avr_reg_t) avr_r5;
-	avr_rs[18] = (avr_reg_t) avr_r5;
-	
-	avr_op[19] = (avr_op_t) avr_clr;
-	avr_rd[19] = (avr_reg_t) avr_r5;
-	avr_rs[19] = 0;
-	
-	avr_op[20] = (avr_op_t) avr_or;
-	avr_rd[20] = (avr_reg_t) avr_r5;
-	avr_rs[20] = (avr_reg_t) avr_r5;
-	
-	avr_op[21] = (avr_op_t) avr_mov;
-	avr_rd[21] = (avr_reg_t) avr_r5;
-	avr_rs[21] = (avr_reg_t) avr_r5;
-	
-	avr_op[22] = (avr_op_t) avr_cpi;
-	avr_rd[22] = (avr_reg_t) avr_r4;
-	avr_rs[22] = (avr_reg_t) avr_i8;
-	
-	avr_op[23] = (avr_op_t) avr_subi;
-	avr_rd[23] = (avr_reg_t) avr_r4;
-	avr_rs[23] = (avr_reg_t) avr_i8;
-	
-	avr_op[24] = (avr_op_t) avr_sbci;
-	avr_rd[24] = (avr_reg_t) avr_r4;
-	avr_rs[24] = (avr_reg_t) avr_i8;
-	
-	avr_op[25] = (avr_op_t) avr_ori;
-	avr_rd[25] = (avr_reg_t) avr_r4;
-	avr_rs[25] = (avr_reg_t) avr_i8;
-	
-	avr_op[26] = (avr_op_t) avr_sbr;
-	avr_rd[26] = (avr_reg_t) avr_r4;
-	avr_rs[26] = (avr_reg_t) avr_i8;
-	
-	avr_op[27] = (avr_op_t) avr_andi;
-	avr_rd[27] = (avr_reg_t) avr_r4;
-	avr_rs[27] = (avr_reg_t) avr_i8;
-	
-	avr_op[28] = (avr_op_t) avr_cbr;
-	avr_rd[28] = (avr_reg_t) avr_r4;
-	avr_rs[28] = (avr_reg_t) avr_i8;
-	
-	avr_op[29] = (avr_op_t) avr_ldi;
-	avr_rd[29] = (avr_reg_t) avr_r4;
-	avr_rs[29] = (avr_reg_t) avr_i8;
-	
-	avr_op[30] = (avr_op_t) avr_ldd;
-	avr_rd[30] = (avr_reg_t) avr_r5;
-	avr_rs[30] = (avr_reg_t) avr_d6;
-	
-	avr_op[31] = (avr_op_t) avr_std;
-	avr_rd[31] = (avr_reg_t) avr_d6;
-	avr_rs[31] = (avr_reg_t) avr_r5;
-	
-	avr_op[32] = (avr_op_t) avr_lds;
-	avr_rd[32] = (avr_reg_t) avr_r5;
-	avr_rs[32] = (avr_reg_t) avr_i16;
-	
-	avr_op[33] = (avr_op_t) avr_sts;
-	avr_rd[33] = (avr_reg_t) avr_i16;
-	avr_rs[33] = (avr_reg_t) avr_r5;
-	
-	avr_op[34] = (avr_op_t) avr_ld;
-	avr_rd[34] = (avr_reg_t) avr_r5;
-	avr_rs[34] = (avr_reg_t) avr_rex;
-	
-	avr_op[35] = (avr_op_t) avr_st;
-	avr_rd[35] = (avr_reg_t) avr_rex;
-	avr_rs[35] = (avr_reg_t) avr_r5;
-	
-	avr_op[36] = (avr_op_t) avr_lpm;
-	avr_rd[36] = (avr_reg_t) avr_r5;
-	avr_rs[36] = (avr_reg_t) avr_z1;
-	
-	avr_op[37] = (avr_op_t) avr_elpm;
-	avr_rd[37] = (avr_reg_t) avr_r5;
-	avr_rs[37] = (avr_reg_t) avr_z1;
-	
-	avr_op[38] = (avr_op_t) avr_xch;
-	avr_rd[38] = (avr_reg_t) avr_z0;
-	avr_rs[38] = (avr_reg_t) avr_r5;
-	
-	avr_op[39] = (avr_op_t) avr_las;
-	avr_rd[39] = (avr_reg_t) avr_z0;
-	avr_rs[39] = (avr_reg_t) avr_r5;
-	
-	avr_op[40] = (avr_op_t) avr_lac;
-	avr_rd[40] = (avr_reg_t) avr_z0;
-	avr_rs[40] = (avr_reg_t) avr_r5;
-	
-	avr_op[41] = (avr_op_t) avr_lat;
-	avr_rd[41] = (avr_reg_t) avr_z0;
-	avr_rs[41] = (avr_reg_t) avr_r5;
-	
-	avr_op[42] = (avr_op_t) avr_pop;
-	avr_rd[42] = (avr_reg_t) avr_r5;
-	avr_rs[42] = 0;
-	
-	avr_op[43] = (avr_op_t) avr_push;
-	avr_rd[43] = (avr_reg_t) avr_r5;
-	avr_rs[43] = 0;
-	
-	avr_op[44] = (avr_op_t) avr_com;
-	avr_rd[44] = (avr_reg_t) avr_r5;
-	avr_rs[44] = 0;
-	
-	avr_op[45] = (avr_op_t) avr_neg;
-	avr_rd[45] = (avr_reg_t) avr_r5;
-	avr_rs[45] = 0;
-	
-	avr_op[46] = (avr_op_t) avr_swap;
-	avr_rd[46] = (avr_reg_t) avr_r5;
-	avr_rs[46] = 0;
-	
-	avr_op[47] = (avr_op_t) avr_inc;
-	avr_rd[47] = (avr_reg_t) avr_r5;
-	avr_rs[47] = 0;
-	
-	avr_op[48] = (avr_op_t) avr_dec;
-	avr_rd[48] = (avr_reg_t) avr_r5;
-	avr_rs[48] = 0;
-	
-	avr_op[49] = (avr_op_t) avr_asr;
-	avr_rd[49] = (avr_reg_t) avr_r5;
-	avr_rs[49] = 0;
-	
-	avr_op[50] = (avr_op_t) avr_lsr;
-	avr_rd[50] = (avr_reg_t) avr_r5;
-	avr_rs[50] = 0;
-	
-	avr_op[51] = (avr_op_t) avr_ror;
-	avr_rd[51] = (avr_reg_t) avr_r5;
-	avr_rs[51] = 0;
-	
-	avr_op[52] = (avr_op_t) avr_bset;
-	avr_rd[52] = (avr_reg_t) avr_b3;
-	avr_rs[52] = 0;
-	
-	avr_op[53] = (avr_op_t) avr_sec;
-	avr_rd[53] = 0;
-	avr_rs[53] = 0;
-	
-	avr_op[54] = (avr_op_t) avr_sez;
-	avr_rd[54] = 0;
-	avr_rs[54] = 0;
-	
-	avr_op[55] = (avr_op_t) avr_sen;
-	avr_rd[55] = 0;
-	avr_rs[55] = 0;
-	
-	avr_op[56] = (avr_op_t) avr_sev;
-	avr_rd[56] = 0;
-	avr_rs[56] = 0;
-	
-	avr_op[57] = (avr_op_t) avr_ses;
-	avr_rd[57] = 0;
-	avr_rs[57] = 0;
-	
-	avr_op[58] = (avr_op_t) avr_seh;
-	avr_rd[58] = 0;
-	avr_rs[58] = 0;
-	
-	avr_op[59] = (avr_op_t) avr_set;
-	avr_rd[59] = 0;
-	avr_rs[59] = 0;
-	
-	avr_op[60] = (avr_op_t) avr_sei;
-	avr_rd[60] = 0;
-	avr_rs[60] = 0;
-	
-	avr_op[61] = (avr_op_t) avr_bclr;
-	avr_rd[61] = (avr_reg_t) avr_b3;
-	avr_rs[61] = 0;
-	
-	avr_op[62] = (avr_op_t) avr_clc;
-	avr_rd[62] = 0;
-	avr_rs[62] = 0;
-	
-	avr_op[63] = (avr_op_t) avr_clz;
-	avr_rd[63] = 0;
-	avr_rs[63] = 0;
-	
-	avr_op[64] = (avr_op_t) avr_cln;
-	avr_rd[64] = 0;
-	avr_rs[64] = 0;
-	
-	avr_op[65] = (avr_op_t) avr_clv;
-	avr_rd[65] = 0;
-	avr_rs[65] = 0;
-	
-	avr_op[66] = (avr_op_t) avr_cls;
-	avr_rd[66] = 0;
-	avr_rs[66] = 0;
-	
-	avr_op[67] = (avr_op_t) avr_clh;
-	avr_rd[67] = 0;
-	avr_rs[67] = 0;
-	
-	avr_op[68] = (avr_op_t) avr_clt;
-	avr_rd[68] = 0;
-	avr_rs[68] = 0;
-	
-	avr_op[69] = (avr_op_t) avr_cli;
-	avr_rd[69] = 0;
-	avr_rs[69] = 0;
-	
-	avr_op[70] = (avr_op_t) avr_ret;
-	avr_rd[70] = 0;
-	avr_rs[70] = 0;
-	
-	avr_op[71] = (avr_op_t) avr_reti;
-	avr_rd[71] = 0;
-	avr_rs[71] = 0;
-	
-	avr_op[72] = (avr_op_t) avr_sleep;
-	avr_rd[72] = 0;
-	avr_rs[72] = 0;
-	
-	avr_op[73] = (avr_op_t) avr_break;
-	avr_rd[73] = 0;
-	avr_rs[73] = 0;
-	
-	avr_op[74] = (avr_op_t) avr_wdr;
-	avr_rd[74] = 0;
-	avr_rs[74] = 0;
-	
-	avr_op[75] = (avr_op_t) avr_spm;
-	avr_rd[75] = (avr_reg_t) avr_z0;
-	avr_rs[75] = 0;
-	
-	avr_op[76] = (avr_op_t) avr_ijmp;
-	avr_rd[76] = 0;
-	avr_rs[76] = 0;
-	
-	avr_op[77] = (avr_op_t) avr_eijmp;
-	avr_rd[77] = 0;
-	avr_rs[77] = 0;
-	
-	avr_op[78] = (avr_op_t) avr_icall;
-	avr_rd[78] = 0;
-	avr_rs[78] = 0;
-	
-	avr_op[79] = (avr_op_t) avr_eicall;
-	avr_rd[79] = 0;
-	avr_rs[79] = 0;
-	
-	avr_op[80] = (avr_op_t) avr_des;
-	avr_rd[80] = (avr_reg_t) avr_i4;
-	avr_rs[80] = 0;
-	
-	avr_op[81] = (avr_op_t) avr_jmp;
-	avr_rd[81] = (avr_reg_t) avr_i16;
-	avr_rs[81] = 0;
-	
-	avr_op[82] = (avr_op_t) avr_call;
-	avr_rd[82] = (avr_reg_t) avr_i16;
-	avr_rs[82] = 0;
-	
-	avr_op[83] = (avr_op_t) avr_adiw;
-	avr_rd[83] = (avr_reg_t) avr_r2;
-	avr_rs[83] = (avr_reg_t) avr_i6;
-	
-	avr_op[84] = (avr_op_t) avr_sbiw;
-	avr_rd[84] = (avr_reg_t) avr_r2;
-	avr_rs[84] = (avr_reg_t) avr_i6;
-	
-	avr_op[85] = (avr_op_t) avr_cbi;
-	avr_rd[85] = (avr_reg_t) avr_p5;
-	avr_rs[85] = (avr_reg_t) avr_b3;
-	
-	avr_op[86] = (avr_op_t) avr_sbi;
-	avr_rd[86] = (avr_reg_t) avr_p5;
-	avr_rs[86] = (avr_reg_t) avr_b3;
-	
-	avr_op[87] = (avr_op_t) avr_sbic;
-	avr_rd[87] = (avr_reg_t) avr_p5;
-	avr_rs[87] = (avr_reg_t) avr_b3;
-	
-	avr_op[88] = (avr_op_t) avr_sbis;
-	avr_rd[88] = (avr_reg_t) avr_p5;
-	avr_rs[88] = (avr_reg_t) avr_b3;
-	
-	avr_op[89] = (avr_op_t) avr_mul;
-	avr_rd[89] = (avr_reg_t) avr_r5;
-	avr_rs[89] = (avr_reg_t) avr_r5;
-	
-	avr_op[90] = (avr_op_t) avr_in;
-	avr_rd[90] = (avr_reg_t) avr_r5;
-	avr_rs[90] = (avr_reg_t) avr_p6;
-	
-	avr_op[91] = (avr_op_t) avr_out;
-	avr_rd[91] = (avr_reg_t) avr_p6;
-	avr_rs[91] = (avr_reg_t) avr_r5;
-	
-	avr_op[92] = (avr_op_t) avr_rjmp;
-	avr_rd[92] = (avr_reg_t) avr_i16;
-	avr_rs[92] = 0;
-	
-	avr_op[93] = (avr_op_t) avr_rcall;
-	avr_rd[93] = (avr_reg_t) avr_i16;
-	avr_rs[93] = 0;
-	
-	avr_op[94] = (avr_op_t) avr_ser;
-	avr_rd[94] = (avr_reg_t) avr_r4;
-	avr_rs[94] = 0;
-	
-	avr_op[95] = (avr_op_t) avr_brcs;
-	avr_rd[95] = (avr_reg_t) avr_i7;
-	avr_rs[95] = 0;
-	
-	avr_op[96] = (avr_op_t) avr_brlo;
-	avr_rd[96] = (avr_reg_t) avr_i7;
-	avr_rs[96] = 0;
-	
-	avr_op[97] = (avr_op_t) avr_brcc;
-	avr_rd[97] = (avr_reg_t) avr_i7;
-	avr_rs[97] = 0;
-	
-	avr_op[98] = (avr_op_t) avr_brsh;
-	avr_rd[98] = (avr_reg_t) avr_i7;
-	avr_rs[98] = 0;
-	
-	avr_op[99] = (avr_op_t) avr_breq;
-	avr_rd[99] = (avr_reg_t) avr_i7;
-	avr_rs[99] = 0;
-	
-	avr_op[100] = (avr_op_t) avr_brne;
-	avr_rd[100] = (avr_reg_t) avr_i7;
-	avr_rs[100] = 0;
-	
-	avr_op[101] = (avr_op_t) avr_brmi;
-	avr_rd[101] = (avr_reg_t) avr_i7;
-	avr_rs[101] = 0;
-	
-	avr_op[102] = (avr_op_t) avr_brpl;
-	avr_rd[102] = (avr_reg_t) avr_i7;
-	avr_rs[102] = 0;
-	
-	avr_op[103] = (avr_op_t) avr_brvs;
-	avr_rd[103] = (avr_reg_t) avr_i7;
-	avr_rs[103] = 0;
-	
-	avr_op[104] = (avr_op_t) avr_brvc;
-	avr_rd[104] = (avr_reg_t) avr_i7;
-	avr_rs[104] = 0;
-	
-	avr_op[105] = (avr_op_t) avr_brlt;
-	avr_rd[105] = (avr_reg_t) avr_i7;
-	avr_rs[105] = 0;
-	
-	avr_op[106] = (avr_op_t) avr_brge;
-	avr_rd[106] = (avr_reg_t) avr_i7;
-	avr_rs[106] = 0;
-	
-	avr_op[107] = (avr_op_t) avr_brhs;
-	avr_rd[107] = (avr_reg_t) avr_i7;
-	avr_rs[107] = 0;
-	
-	avr_op[108] = (avr_op_t) avr_brhc;
-	avr_rd[108] = (avr_reg_t) avr_i7;
-	avr_rs[108] = 0;
-	
-	avr_op[109] = (avr_op_t) avr_brts;
-	avr_rd[109] = (avr_reg_t) avr_i7;
-	avr_rs[109] = 0;
-	
-	avr_op[110] = (avr_op_t) avr_brtc;
-	avr_rd[110] = (avr_reg_t) avr_i7;
-	avr_rs[110] = 0;
-	
-	avr_op[111] = (avr_op_t) avr_brie;
-	avr_rd[111] = (avr_reg_t) avr_i7;
-	avr_rs[111] = 0;
-	
-	avr_op[112] = (avr_op_t) avr_brid;
-	avr_rd[112] = (avr_reg_t) avr_i7;
-	avr_rs[112] = 0;
-	
-	avr_op[113] = (avr_op_t) avr_brbs;
-	avr_rd[113] = (avr_reg_t) avr_b3;
-	avr_rs[113] = (avr_reg_t) avr_i7;
-	
-	avr_op[114] = (avr_op_t) avr_brbc;
-	avr_rd[114] = (avr_reg_t) avr_b3;
-	avr_rs[114] = (avr_reg_t) avr_i7;
-	
-	avr_op[115] = (avr_op_t) avr_bld;
-	avr_rd[115] = (avr_reg_t) avr_r5;
-	avr_rs[115] = (avr_reg_t) avr_b3;
-	
-	avr_op[116] = (avr_op_t) avr_bst;
-	avr_rd[116] = (avr_reg_t) avr_r5;
-	avr_rs[116] = (avr_reg_t) avr_b3;
-	
-	avr_op[117] = (avr_op_t) avr_sbrc;
-	avr_rd[117] = (avr_reg_t) avr_r5;
-	avr_rs[117] = (avr_reg_t) avr_b3;
-	
-	avr_op[118] = (avr_op_t) avr_sbrs;
-	avr_rd[118] = (avr_reg_t) avr_r5;
-	avr_rs[118] = (avr_reg_t) avr_b3;
-	
+void avr_enc(int8_t* op) {
+	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_nop;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_movw;
+		avr_rd = (avr_reg_t) avr_rw;
+		avr_rs = (avr_reg_t) avr_rw;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_muls;
+		avr_rd = (avr_reg_t) avr_rw;
+		avr_rs = (avr_reg_t) avr_rw;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 'u' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_mulsu;
+		avr_rd= (avr_reg_t) avr_r3;
+		avr_rs = (avr_reg_t) avr_r3;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_fmul;
+		avr_rd = (avr_reg_t) avr_r3;
+		avr_rs = (avr_reg_t) avr_r3;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_fmuls;
+		avr_rd = (avr_reg_t) avr_r3;
+		avr_rs = (avr_reg_t) avr_r3;
+	}
+	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 'u' && op[6] == 0) {
+		avr_op = (avr_op_t) avr_fmulsu;
+		avr_rd = (avr_reg_t) avr_r3;
+		avr_rs = (avr_reg_t) avr_r3;
+	}
+	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 0) {
+		avr_op = (avr_op_t) avr_cp;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cpc;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sub;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sbc;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_add;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_adc;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'l' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lsl;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'l' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_rol;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 's' && op[3] == 'e' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_cpse;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_and;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 't' && op[1] == 's' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_tst;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_eor;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clr;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
+		avr_op = (avr_op_t) avr_or;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_mov;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cpi;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 'i' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_subi;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 'i' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_sbci;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ori;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sbr;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 'i' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_andi;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cbr;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ldi;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = (avr_reg_t) avr_i8;
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ldd;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_d6;
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'd' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_std;
+		avr_rd = (avr_reg_t) avr_d6;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lds;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_i16;
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sts;
+		avr_rd = (avr_reg_t) avr_i16;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 0) {
+		avr_op = (avr_op_t) avr_ld;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_rex;
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 0) {
+		avr_op = (avr_op_t) avr_st;
+		avr_rd = (avr_reg_t) avr_rex;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lpm;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_z1;
+	}
+	else if (op[0] == 'e' && op[1] == 'l' && op[2] == 'p' && op[3] == 'm' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_elpm;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_z1;
+	}
+	else if (op[0] == 'x' && op[1] == 'c' && op[2] == 'h' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_xch;
+		avr_rd = (avr_reg_t) avr_z0;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_las;
+		avr_rd = (avr_reg_t) avr_z0;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lac;
+		avr_rd = (avr_reg_t) avr_z0;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lat;
+		avr_rd = (avr_reg_t) avr_z0;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_pop;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_push;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'o' && op[2] == 'm' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_com;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'e' && op[2] == 'g' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_neg;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'w' && op[2] == 'a' && op[3] == 'p' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_swap;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_inc;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_dec;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'a' && op[1] == 's' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_asr;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_lsr;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ror;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 's' && op[2] == 'e' && op[3] == 't' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_bset;
+		avr_rd = (avr_reg_t) avr_b3;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sec;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'z' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sez;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'n' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sen;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'v' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sev;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ses;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'h' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_seh;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_set;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sei;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'c' && op[2] == 'l' && op[3] == 'r' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_bclr;
+		avr_rd = (avr_reg_t) avr_b3;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'c' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clc;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'z' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clz;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'n' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cln;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clv;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cls;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'h' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clh;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_clt;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cli;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ret;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 'i' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_reti;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'l' && op[2] == 'e' && op[3] == 'e' && op[4] == 'p' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_sleep;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'a' && op[4] == 'k' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_break;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'w' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_wdr;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_spm;
+		avr_rd = (avr_reg_t) avr_z0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'i' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_ijmp;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'j' && op[3] == 'm' && op[4] == 'p' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_eijmp;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'i' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_icall;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'c' && op[3] == 'a' && op[4] == 'l' && op[5] == 'l' && op[6] == 0) {
+		avr_op = (avr_op_t) avr_eicall;
+		avr_rd = 0;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 's' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_des;
+		avr_rd = (avr_reg_t) avr_i4;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_jmp;
+		avr_rd = (avr_reg_t) avr_i16;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_call;
+		avr_rd = (avr_reg_t) avr_i16;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_adiw;
+		avr_rd = (avr_reg_t) avr_r2;
+		avr_rs = (avr_reg_t) avr_i6;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_sbiw;
+		avr_rd = (avr_reg_t) avr_r2;
+		avr_rs = (avr_reg_t) avr_i6;
+	}
+	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_cbi;
+		avr_rd = (avr_reg_t) avr_p5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_sbi;
+		avr_rd = (avr_reg_t) avr_p5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_sbic;
+		avr_rd = (avr_reg_t) avr_p5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 's') {
+		avr_op = (avr_op_t) avr_sbis;
+		avr_rd = (avr_reg_t) avr_p5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_mul;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 0) {
+		avr_op = (avr_op_t) avr_in;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_p6;
+	}
+	else if (op[0] == 'o' && op[1] == 'u' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_out;
+		avr_rd = (avr_reg_t) avr_p6;
+		avr_rs = (avr_reg_t) avr_r5;
+	}
+	else if (op[0] == 'r' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_rjmp;
+		avr_rd = (avr_reg_t) avr_i16;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'r' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
+		avr_op = (avr_op_t) avr_rcall;
+		avr_rd = (avr_reg_t) avr_i16;
+		avr_rs = 0;
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'r' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_ser;
+		avr_rd = (avr_reg_t) avr_r4;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brcs;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brlo;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brcc;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brsh;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_breq;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brne;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brmi;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brpl;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brvs;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brvc;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brlt;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brge;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brhs;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brhc;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brts;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brtc;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brie;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brid;
+		avr_rd = (avr_reg_t) avr_i7;
+		avr_rs = 0;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brbs;
+		avr_rd = (avr_reg_t) avr_b3;
+		avr_rs = (avr_reg_t) avr_i7;
+	}
+	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_brbc;
+		avr_rd = (avr_reg_t) avr_b3;
+		avr_rs = (avr_reg_t) avr_i7;
+	}
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'd' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_bld;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 'b' && op[1] == 's' && op[2] == 't' && op[3] == 0) {
+		avr_op = (avr_op_t) avr_bst;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 'c' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_sbrc;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 's' && op[4] == 0) {
+		avr_op = (avr_op_t) avr_sbrs;
+		avr_rd = (avr_reg_t) avr_r5;
+		avr_rs = (avr_reg_t) avr_b3;
+	}
+	else {
+		
+	}
 }
-

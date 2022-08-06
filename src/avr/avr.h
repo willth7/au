@@ -22,4 +22,11 @@ typedef struct err_s {
 	int8_t b;
 } err_t;
 
-enc_t avr_enc(int8_t*, int8_t*, int8_t*, uint8_t, err_t*);
+typedef enc_t (*avr_op_t) (uint16_t, uint16_t);
+typedef uint16_t (*avr_reg_t) (int8_t*);
+
+avr_op_t avr_op;
+avr_reg_t avr_rd;
+avr_reg_t avr_rs;
+
+enc_t avr_enc(int8_t*);

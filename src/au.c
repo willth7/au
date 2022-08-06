@@ -28,22 +28,11 @@ typedef struct line_s {
 
 int8_t main(int32_t argc, int8_t** argv) {
 	line_t l[65536];
-	uint16_t ln = 4;
+	uint16_t ln = 1;
 	l[0].op = "mov";
 	l[0].rd = "r3";
 	l[0].rs = "r17";
 	l[0].rn = 2;
-	l[1].op = "cp";
-	l[1].rd = "r16";
-	l[1].rs = "r18";
-	l[1].rn = 2;
-	l[2].op = "breq";
-	l[2].rd = "0";
-	l[2].rn = 1;
-	l[3].op = "add";
-	l[3].rd = "r19";
-	l[3].rs = "r20";
-	l[3].rn = 2;
 	
 	uint8_t byte[65536];
 	uint16_t bi = 0;
@@ -52,19 +41,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 		enc_t enc;
 		err_t err;
 		err.b = 0;
-		if (l[li].rn == 0) {
-			enc = avr_enc(l[li].op, 0, 0, l[li].rn, &err);
-		}
-		else if (l[li].rn == 1) {
-			enc = avr_enc(l[li].op, l[li].rd, 0, l[li].rn, &err);
-		}
-		else if (l[li].rn == 2) {
-			enc = avr_enc(l[li].op, l[li].rd, l[li].rs, l[li].rn, &err);
-		}
-		if (err.b) {
-			printf("error: %s\n", err.e);
-			return -1;
-		}
+		avr_enc(l[li].op);
+		uint16_t rd = avr_rd(l[li].rd);
+		uint16_t rs = avr_rd(l[li].rs);
+		enc = avr_op(rd, rs);
 		printf("0x%02x%02x\n", enc.x[0], enc.x[1]);
 		for (uint8_t ei = 0; ei < enc.n; ei++) {
 			byte[bi] = enc.x[ei];
