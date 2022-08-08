@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 #include <stdint.h>
+#include <string.h>
 
 typedef struct enc_s {
 	uint8_t x[4];
@@ -20,71 +21,73 @@ typedef struct enc_s {
 } enc_t;
 
 typedef struct err_s {
-	int8_t e[256];
+	int8_t* e;
 	int8_t b;
 } err_t;
 
-typedef enc_t (*avr_op_t) (uint16_t, uint16_t);
-typedef uint16_t (*avr_reg_t) (int8_t*);
+typedef enc_t (*avr_op_f) (uint16_t, uint16_t);
+typedef uint16_t (*avr_reg_f) (int8_t*, err_t*, int8_t*);
 
-avr_op_t avr_op;
-avr_reg_t avr_rd;
-avr_reg_t avr_rs;
+typedef struct avr_s {
+	avr_op_f op;
+	avr_reg_f rd;
+	avr_reg_f rs;
+} avr_t;
 
-uint64_t avr_strint(int8_t* s, uint8_t i, err_t* err) {
+uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* sb) {
 	uint64_t v = 0;
-	if (s[i] == 39 && s[i + 2] == 39) {
-		v = s[i + 1];
+	if (str[i] == 39 && str[i + 2] == 39) {
+		v = str[i + 1];
 	}
-	else if (s[i] == '0' && s[i + 1] == 'x') {
-		v = s[i + 1];
+	else if (str[i] == '0' && str[i + 1] == 'x') {
+		v = str[i + 1];
 	}
-	else {
-		int8_t n = 0;
-		if (s[i] == '-') {
-			n = 1;
-			i++;
-		}
+	else if (str[i] == '1' || str[i] == '2' || str[i] == '3' || str[i] == '4' || str[i] == '5' || str[i] == '6' || str[i] == '7' || str[i] == '8' || str[i] == '9') {
 		for (; i < 20; i++) {
-			if (s[i] == 0) {
+			if (str[i] == 0) {
 				return v;
 			}
 			v *= 10;
-			if (s[i] == '1') {
+			if (str[i] == '1') {
 				v += 1;
 			}
-			else if (s[i] == '2') {
+			else if (str[i] == '2') {
 				v += 2;
 			}
-			else if (s[i] == '3') {
+			else if (str[i] == '3') {
 				v += 3;
 			}
-			else if (s[i] == '4') {
+			else if (str[i] == '4') {
 				v += 4;
 			}
-			else if (s[i] == '5') {
+			else if (str[i] == '5') {
 				v += 5;
 			}
-			else if (s[i] == '6') {
+			else if (str[i] == '6') {
 				v += 6;
 			}
-			else if (s[i] == '7') {
+			else if (str[i] == '7') {
 				v += 7;
 			}
-			else if (s[i] == '8') {
+			else if (str[i] == '8') {
 				v += 8;
 			}
-			else if (s[i] == '9') {
+			else if (str[i] == '9') {
 				v += 9;
 			}
-			else if (s[i] != '0') {
+			else if (str[i] != '0') {
 				////err->e = "invalid character";
-				//err->b = 1;
+				err->b = 1;
 				return 0;
 			}
 		}
-		//error
 	}
+	else if (sb != 0) {
+		*sb = 1;
+		return 0;
+	}
+	err->b = 1;
+	return 0;
 }
 
 uint8_t avr_reg(int8_t* r, err_t* err) {
@@ -185,7 +188,7 @@ uint8_t avr_reg(int8_t* r, err_t* err) {
 		return 31;
 	}
 	else {
-		//error
+		err->b = 1;
 	}
 }
 
@@ -204,7 +207,7 @@ uint8_t avr_r2(int8_t* r, err_t* err) {
 	}
 	else {
 		////err->e = "illegal register";
-		//err->b = 1;
+		err->b = 1;
 	}
 }
 
@@ -241,10 +244,7 @@ uint8_t avr_rex(int8_t* r, err_t* err) {
 uint8_t avr_r3(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if ((a < 16 || a > 23) && a < 32) {
-		//error
-	}
-	else if (a == 255) {
-		//error
+		err->b = 1;
 	}
 	
 	return a & 7;
@@ -253,10 +253,7 @@ uint8_t avr_r3(int8_t* r, err_t* err) {
 uint8_t avr_r4(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if ((a < 16 || a > 32)) {
-		//error
-	}
-	else if (err->b) {
-		//error
+		err->b = 1;
 	}
 	
 	return a & 15;
@@ -264,9 +261,6 @@ uint8_t avr_r4(int8_t* r, err_t* err) {
 
 uint8_t avr_r5(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
-	if (a == 255) {
-		//error
-	}
 	
 	return a & 31;
 }
@@ -274,19 +268,16 @@ uint8_t avr_r5(int8_t* r, err_t* err) {
 uint8_t avr_rw(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if (a % 2 == 1) {
-		//error
-	}
-	else if (a == 255) {
-		//error
+		err->b = 1;
 	}
 	
 	return (a / 2) & 15;
 }
 
 uint8_t avr_d6(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err);
+	uint64_t k = avr_strint(r, 1, err, 0);
 	if (k > 63) {
-		//error
+		err->b = 1;
 	}
 	
 	if (r[0] == 'y') {
@@ -300,26 +291,26 @@ uint8_t avr_d6(int8_t* r, err_t* err) {
 		k |= z;
 	}
 	else {
-		//error
+		err->b = 1;
 	}
 	
 	return k;
 }
 
 uint8_t avr_z0(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err);
+	uint64_t k = avr_strint(r, 1, err, 0);
 	if (r[0] == 'z' && r[1] == 0) {
 		return 0;
 	}
 	else {
-		//error
+		err->b = 1;
 	}
 	
 	return k;
 }
 
 uint8_t avr_z1(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err);
+	uint64_t k = avr_strint(r, 1, err, 0);
 	if (r[0] == 'z' && r[1] == 0) {
 		return 0;
 	}
@@ -327,68 +318,68 @@ uint8_t avr_z1(int8_t* r, err_t* err) {
 		return 1;
 	}
 	else {
-		//error
+		err->b = 1;
 	}
 	
 	return k;
 }
 
 uint8_t avr_b3(int8_t* b, err_t* err) {
-	uint64_t a = avr_strint(b, 0, err);
+	uint64_t a = avr_strint(b, 0, err, 0);
 	if (a > 7) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
 uint8_t avr_p5(int8_t* p, err_t* err) {
-	uint64_t a = avr_strint(p, 0, err);
+	uint64_t a = avr_strint(p, 0, err, 0);
 	if (a > 31) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
 uint8_t avr_p6(int8_t* p, err_t* err) {
-	uint64_t a = avr_strint(p, 0, err);
+	uint64_t a = avr_strint(p, 0, err, 0);
 	if (a > 63) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i4(int8_t* k, err_t* err) {
-	uint64_t a = avr_strint(k, 0, err);
+uint8_t avr_i4(int8_t* k, err_t* err, int8_t* sb) {
+	uint64_t a = avr_strint(k, 0, err, sb);
 	if (a > 15) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i6(int8_t* k, err_t* err) {
-	uint64_t a = avr_strint(k, 0, err);
+uint8_t avr_i6(int8_t* k, err_t* err, int8_t* sb) {
+	uint64_t a = avr_strint(k, 0, err, sb);
 	if (a > 63) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i7(int8_t* k, err_t* err) {
+uint8_t avr_i7(int8_t* k, err_t* err, int8_t* sb) {
 	int64_t a;
 	if (k[0] == '-') {
-		a = -1 * avr_strint(k, 1, err);
+		a = -1 * avr_strint(k, 1, err, sb);
 	}
 	else {
-		a = avr_strint(k, 0, err);
+		a = avr_strint(k, 0, err, sb);
 	}
 	
 	if (a > 63 || a < -64) {
-		//error
+		err->b = 1;
 	}
 	if (a < 0) {
 		a = 256 + a;
@@ -397,19 +388,19 @@ uint8_t avr_i7(int8_t* k, err_t* err) {
 	return a;
 }
 
-uint8_t avr_i8(int8_t* k, err_t* err) {
-	uint64_t a = avr_strint(k, 0, err);
+uint8_t avr_i8(int8_t* k, err_t* err, int8_t* sb) {
+	uint64_t a = avr_strint(k, 0, err, sb);
 	if (a > 255) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint16_t avr_i16(int8_t* k, err_t* err) {
-	uint64_t a = avr_strint(k, 0, err);
+uint16_t avr_i16(int8_t* k, err_t* err, int8_t* sb) {
+	uint64_t a = avr_strint(k, 0, err, sb);
 	if (a > 65535) {
-		//error
+		err->b = 1;
 	}
 	
 	return a;
@@ -1827,603 +1818,610 @@ enc_t avr_sbrs(uint8_t rd, uint8_t b) {
 	return enc;
 }
 
-void avr_enc(int8_t* op) {
+avr_t avr_enc(int8_t* op, err_t* err) {
+	avr_t avr;
+	avr.op = 0;
+	avr.rd = 0;
+	avr.rs = 0;
+	
 	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_nop;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_nop;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_movw;
-		avr_rd = (avr_reg_t) avr_rw;
-		avr_rs = (avr_reg_t) avr_rw;
+		avr.op = (avr_op_f) avr_movw;
+		avr.rd = (avr_reg_f) avr_rw;
+		avr.rs = (avr_reg_f) avr_rw;
 	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_muls;
-		avr_rd = (avr_reg_t) avr_rw;
-		avr_rs = (avr_reg_t) avr_rw;
+		avr.op = (avr_op_f) avr_muls;
+		avr.rd = (avr_reg_f) avr_rw;
+		avr.rs = (avr_reg_f) avr_rw;
 	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 'u' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_mulsu;
-		avr_rd= (avr_reg_t) avr_r3;
-		avr_rs = (avr_reg_t) avr_r3;
+		avr.op = (avr_op_f) avr_mulsu;
+		avr.rd = (avr_reg_f) avr_r3;
+		avr.rs = (avr_reg_f) avr_r3;
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_fmul;
-		avr_rd = (avr_reg_t) avr_r3;
-		avr_rs = (avr_reg_t) avr_r3;
+		avr.op = (avr_op_f) avr_fmul;
+		avr.rd = (avr_reg_f) avr_r3;
+		avr.rs = (avr_reg_f) avr_r3;
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_fmuls;
-		avr_rd = (avr_reg_t) avr_r3;
-		avr_rs = (avr_reg_t) avr_r3;
+		avr.op = (avr_op_f) avr_fmuls;
+		avr.rd = (avr_reg_f) avr_r3;
+		avr.rs = (avr_reg_f) avr_r3;
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 'u' && op[6] == 0) {
-		avr_op = (avr_op_t) avr_fmulsu;
-		avr_rd = (avr_reg_t) avr_r3;
-		avr_rs = (avr_reg_t) avr_r3;
+		avr.op = (avr_op_f) avr_fmulsu;
+		avr.rd = (avr_reg_f) avr_r3;
+		avr.rs = (avr_reg_f) avr_r3;
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 0) {
-		avr_op = (avr_op_t) avr_cp;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_cp;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cpc;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_cpc;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sub;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_sub;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sbc;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_sbc;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_add;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_add;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_adc;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_adc;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'l' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lsl;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_lsl;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'l' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_rol;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_rol;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 's' && op[3] == 'e' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_cpse;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_cpse;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_and;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_and;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 't' && op[1] == 's' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_tst;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_tst;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_eor;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_eor;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clr;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clr;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
-		avr_op = (avr_op_t) avr_or;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_or;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_mov;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_mov;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cpi;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_cpi;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 'i' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_subi;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_subi;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 'i' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_sbci;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_sbci;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ori;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_ori;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sbr;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_sbr;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 'i' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_andi;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_andi;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cbr;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_cbr;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ldi;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = (avr_reg_t) avr_i8;
+		avr.op = (avr_op_f) avr_ldi;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = (avr_reg_f) avr_i8;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ldd;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_d6;
+		avr.op = (avr_op_f) avr_ldd;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_d6;
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 'd' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_std;
-		avr_rd = (avr_reg_t) avr_d6;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_std;
+		avr.rd = (avr_reg_f) avr_d6;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lds;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_i16;
+		avr.op = (avr_op_f) avr_lds;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_i16;
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sts;
-		avr_rd = (avr_reg_t) avr_i16;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_sts;
+		avr.rd = (avr_reg_f) avr_i16;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 0) {
-		avr_op = (avr_op_t) avr_ld;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_rex;
+		avr.op = (avr_op_f) avr_ld;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_rex;
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 0) {
-		avr_op = (avr_op_t) avr_st;
-		avr_rd = (avr_reg_t) avr_rex;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_st;
+		avr.rd = (avr_reg_f) avr_rex;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lpm;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_z1;
+		avr.op = (avr_op_f) avr_lpm;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_z1;
 	}
 	else if (op[0] == 'e' && op[1] == 'l' && op[2] == 'p' && op[3] == 'm' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_elpm;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_z1;
+		avr.op = (avr_op_f) avr_elpm;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_z1;
 	}
 	else if (op[0] == 'x' && op[1] == 'c' && op[2] == 'h' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_xch;
-		avr_rd = (avr_reg_t) avr_z0;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_xch;
+		avr.rd = (avr_reg_f) avr_z0;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_las;
-		avr_rd = (avr_reg_t) avr_z0;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_las;
+		avr.rd = (avr_reg_f) avr_z0;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lac;
-		avr_rd = (avr_reg_t) avr_z0;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_lac;
+		avr.rd = (avr_reg_f) avr_z0;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lat;
-		avr_rd = (avr_reg_t) avr_z0;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_lat;
+		avr.rd = (avr_reg_f) avr_z0;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_pop;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_pop;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_push;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_push;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'o' && op[2] == 'm' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_com;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_com;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'e' && op[2] == 'g' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_neg;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_neg;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'w' && op[2] == 'a' && op[3] == 'p' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_swap;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_swap;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_inc;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_inc;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_dec;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_dec;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'a' && op[1] == 's' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_asr;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_asr;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_lsr;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_lsr;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ror;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_ror;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 's' && op[2] == 'e' && op[3] == 't' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_bset;
-		avr_rd = (avr_reg_t) avr_b3;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_bset;
+		avr.rd = (avr_reg_f) avr_b3;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sec;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sec;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'z' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sez;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sez;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'n' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sen;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sen;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'v' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sev;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sev;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ses;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_ses;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'h' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_seh;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_seh;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_set;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_set;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sei;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sei;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'c' && op[2] == 'l' && op[3] == 'r' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_bclr;
-		avr_rd = (avr_reg_t) avr_b3;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_bclr;
+		avr.rd = (avr_reg_f) avr_b3;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'c' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clc;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clc;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'z' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clz;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clz;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'n' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cln;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_cln;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clv;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clv;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cls;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_cls;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'h' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clh;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clh;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_clt;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_clt;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cli;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_cli;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ret;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_ret;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'r' && op[1] == 'e' && op[2] == 't' && op[3] == 'i' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_reti;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_reti;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'l' && op[2] == 'e' && op[3] == 'e' && op[4] == 'p' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_sleep;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_sleep;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'a' && op[4] == 'k' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_break;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_break;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'w' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_wdr;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_wdr;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_spm;
-		avr_rd = (avr_reg_t) avr_z0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_spm;
+		avr.rd = (avr_reg_f) avr_z0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'i' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_ijmp;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_ijmp;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'j' && op[3] == 'm' && op[4] == 'p' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_eijmp;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_eijmp;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'i' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_icall;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_icall;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'e' && op[1] == 'i' && op[2] == 'c' && op[3] == 'a' && op[4] == 'l' && op[5] == 'l' && op[6] == 0) {
-		avr_op = (avr_op_t) avr_eicall;
-		avr_rd = 0;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_eicall;
+		avr.rd = 0;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'd' && op[1] == 'e' && op[2] == 's' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_des;
-		avr_rd = (avr_reg_t) avr_i4;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_des;
+		avr.rd = (avr_reg_f) avr_i4;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_jmp;
-		avr_rd = (avr_reg_t) avr_i16;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_jmp;
+		avr.rd = (avr_reg_f) avr_i16;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_call;
-		avr_rd = (avr_reg_t) avr_i16;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_call;
+		avr.rd = (avr_reg_f) avr_i16;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_adiw;
-		avr_rd = (avr_reg_t) avr_r2;
-		avr_rs = (avr_reg_t) avr_i6;
+		avr.op = (avr_op_f) avr_adiw;
+		avr.rd = (avr_reg_f) avr_r2;
+		avr.rs = (avr_reg_f) avr_i6;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_sbiw;
-		avr_rd = (avr_reg_t) avr_r2;
-		avr_rs = (avr_reg_t) avr_i6;
+		avr.op = (avr_op_f) avr_sbiw;
+		avr.rd = (avr_reg_f) avr_r2;
+		avr.rs = (avr_reg_f) avr_i6;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_cbi;
-		avr_rd = (avr_reg_t) avr_p5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_cbi;
+		avr.rd = (avr_reg_f) avr_p5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_sbi;
-		avr_rd = (avr_reg_t) avr_p5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_sbi;
+		avr.rd = (avr_reg_f) avr_p5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_sbic;
-		avr_rd = (avr_reg_t) avr_p5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_sbic;
+		avr.rd = (avr_reg_f) avr_p5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 's') {
-		avr_op = (avr_op_t) avr_sbis;
-		avr_rd = (avr_reg_t) avr_p5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_sbis;
+		avr.rd = (avr_reg_f) avr_p5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_mul;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_mul;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'i' && op[1] == 'n' && op[2] == 0) {
-		avr_op = (avr_op_t) avr_in;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_p6;
+		avr.op = (avr_op_f) avr_in;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_p6;
 	}
 	else if (op[0] == 'o' && op[1] == 'u' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_out;
-		avr_rd = (avr_reg_t) avr_p6;
-		avr_rs = (avr_reg_t) avr_r5;
+		avr.op = (avr_op_f) avr_out;
+		avr.rd = (avr_reg_f) avr_p6;
+		avr.rs = (avr_reg_f) avr_r5;
 	}
 	else if (op[0] == 'r' && op[1] == 'j' && op[2] == 'm' && op[3] == 'p' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_rjmp;
-		avr_rd = (avr_reg_t) avr_i16;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_rjmp;
+		avr.rd = (avr_reg_f) avr_i16;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'r' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
-		avr_op = (avr_op_t) avr_rcall;
-		avr_rd = (avr_reg_t) avr_i16;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_rcall;
+		avr.rd = (avr_reg_f) avr_i16;
+		avr.rs = 0;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'r' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_ser;
-		avr_rd = (avr_reg_t) avr_r4;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_ser;
+		avr.rd = (avr_reg_f) avr_r4;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brcs;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brcs;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brlo;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brlo;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brcc;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brcc;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brsh;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brsh;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_breq;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_breq;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brne;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brne;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brmi;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brmi;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brpl;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brpl;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brvs;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brvs;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brvc;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brvc;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brlt;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brlt;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brge;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brge;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brhs;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brhs;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brhc;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brhc;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brts;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brts;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brtc;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brtc;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brie;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brie;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brid;
-		avr_rd = (avr_reg_t) avr_i7;
-		avr_rs = 0;
+		avr.op = (avr_op_f) avr_brid;
+		avr.rd = (avr_reg_f) avr_i7;
+		avr.rs = 0;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brbs;
-		avr_rd = (avr_reg_t) avr_b3;
-		avr_rs = (avr_reg_t) avr_i7;
+		avr.op = (avr_op_f) avr_brbs;
+		avr.rd = (avr_reg_f) avr_b3;
+		avr.rs = (avr_reg_f) avr_i7;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_brbc;
-		avr_rd = (avr_reg_t) avr_b3;
-		avr_rs = (avr_reg_t) avr_i7;
+		avr.op = (avr_op_f) avr_brbc;
+		avr.rd = (avr_reg_f) avr_b3;
+		avr.rs = (avr_reg_f) avr_i7;
 	}
 	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'd' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_bld;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_bld;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 'b' && op[1] == 's' && op[2] == 't' && op[3] == 0) {
-		avr_op = (avr_op_t) avr_bst;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_bst;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 'c' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_sbrc;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_sbrc;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 's' && op[4] == 0) {
-		avr_op = (avr_op_t) avr_sbrs;
-		avr_rd = (avr_reg_t) avr_r5;
-		avr_rs = (avr_reg_t) avr_b3;
+		avr.op = (avr_op_f) avr_sbrs;
+		avr.rd = (avr_reg_f) avr_r5;
+		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else {
-		
+		err->b = 1;
 	}
+	
+	return avr;
 }

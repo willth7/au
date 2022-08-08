@@ -18,15 +18,18 @@ typedef struct enc_s {
 } enc_t;
 
 typedef struct err_s {
-	int8_t e[256];
+	int8_t* e;
 	int8_t b;
 } err_t;
 
-typedef enc_t (*avr_op_t) (uint16_t, uint16_t);
-typedef uint16_t (*avr_reg_t) (int8_t*);
+typedef enc_t (*avr_op_f) (uint16_t, uint16_t);
+typedef uint16_t (*avr_reg_f) (int8_t*, err_t*, int8_t*);
 
-avr_op_t avr_op;
-avr_reg_t avr_rd;
-avr_reg_t avr_rs;
+typedef struct avr_s {
+	avr_op_f op;
+	avr_reg_f rd;
+	avr_reg_f rs;
+} avr_t;
 
-enc_t avr_enc(int8_t*);
+avr_t avr_enc(int8_t*, err_t*);
+
