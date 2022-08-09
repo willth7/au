@@ -18,7 +18,7 @@ typedef struct enc_s {
 } enc_t;
 
 typedef struct err_s {
-	int8_t* e;
+	int8_t e[256];
 	int8_t b;
 } err_t;
 
@@ -29,6 +29,7 @@ typedef struct avr_s {
 	avr_op_f op;
 	avr_reg_f rd;
 	avr_reg_f rs;
+	uint8_t typ;
 } avr_t;
 
 avr_t avr_enc(int8_t*, err_t*);

@@ -21,7 +21,7 @@ typedef struct enc_s {
 } enc_t;
 
 typedef struct err_s {
-	int8_t* e;
+	int8_t e[256];
 	int8_t b;
 } err_t;
 
@@ -32,9 +32,10 @@ typedef struct avr_s {
 	avr_op_f op;
 	avr_reg_f rd;
 	avr_reg_f rs;
+	uint8_t typ;
 } avr_t;
 
-uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* sb) {
+uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* rb) {
 	uint64_t v = 0;
 	if (str[i] == 39 && str[i + 2] == 39) {
 		v = str[i + 1];
@@ -75,15 +76,19 @@ uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* sb) {
 			else if (str[i] == '9') {
 				v += 9;
 			}
+			else if (str[i] != '0' && rb != 0) {
+				*rb = 1;
+				return 0;
+			}
 			else if (str[i] != '0') {
-				////err->e = "invalid character";
+				strcpy(err->e, "illegal character");
 				err->b = 1;
 				return 0;
 			}
 		}
 	}
-	else if (sb != 0) {
-		*sb = 1;
+	else if (rb != 0) {
+		*rb = 1;
 		return 0;
 	}
 	err->b = 1;
@@ -188,6 +193,7 @@ uint8_t avr_reg(int8_t* r, err_t* err) {
 		return 31;
 	}
 	else {
+		strcpy(err->e, "illegal register");
 		err->b = 1;
 	}
 }
@@ -206,7 +212,7 @@ uint8_t avr_r2(int8_t* r, err_t* err) {
 		return 3;
 	}
 	else {
-		////err->e = "illegal register";
+		strcpy(err->e, "illegal register");
 		err->b = 1;
 	}
 }
@@ -244,6 +250,7 @@ uint8_t avr_rex(int8_t* r, err_t* err) {
 uint8_t avr_r3(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if ((a < 16 || a > 23) && a < 32) {
+		strcpy(err->e, "illegal register, must be between r16 and r23");
 		err->b = 1;
 	}
 	
@@ -253,6 +260,7 @@ uint8_t avr_r3(int8_t* r, err_t* err) {
 uint8_t avr_r4(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if ((a < 16 || a > 32)) {
+		strcpy(err->e, "illegal register, must be between r16 and r31");
 		err->b = 1;
 	}
 	
@@ -268,6 +276,7 @@ uint8_t avr_r5(int8_t* r, err_t* err) {
 uint8_t avr_rw(int8_t* r, err_t* err) {
 	uint8_t a = avr_reg(r, err);
 	if (a % 2 == 1) {
+		strcpy(err->e, "illegal register, must be r0, r2, r4, ... r30");
 		err->b = 1;
 	}
 	
@@ -277,6 +286,7 @@ uint8_t avr_rw(int8_t* r, err_t* err) {
 uint8_t avr_d6(int8_t* r, err_t* err) {
 	uint64_t k = avr_strint(r, 1, err, 0);
 	if (k > 63) {
+		strcpy(err->e, "displacement must be between 0 and 63");
 		err->b = 1;
 	}
 	
@@ -291,6 +301,7 @@ uint8_t avr_d6(int8_t* r, err_t* err) {
 		k |= z;
 	}
 	else {
+		strcpy(err->e, "illegal pointer, must be y or z");
 		err->b = 1;
 	}
 	
@@ -303,6 +314,7 @@ uint8_t avr_z0(int8_t* r, err_t* err) {
 		return 0;
 	}
 	else {
+		strcpy(err->e, "illegal pointer, must be z");
 		err->b = 1;
 	}
 	
@@ -318,6 +330,7 @@ uint8_t avr_z1(int8_t* r, err_t* err) {
 		return 1;
 	}
 	else {
+		strcpy(err->e, "illegal pointer, must be z");
 		err->b = 1;
 	}
 	
@@ -327,6 +340,7 @@ uint8_t avr_z1(int8_t* r, err_t* err) {
 uint8_t avr_b3(int8_t* b, err_t* err) {
 	uint64_t a = avr_strint(b, 0, err, 0);
 	if (a > 7) {
+		strcpy(err->e, "illegal bit, must be between 0 and 7");
 		err->b = 1;
 	}
 	
@@ -336,6 +350,7 @@ uint8_t avr_b3(int8_t* b, err_t* err) {
 uint8_t avr_p5(int8_t* p, err_t* err) {
 	uint64_t a = avr_strint(p, 0, err, 0);
 	if (a > 31) {
+		strcpy(err->e, "illegal port, must be ports 0 through 31");
 		err->b = 1;
 	}
 	
@@ -345,40 +360,44 @@ uint8_t avr_p5(int8_t* p, err_t* err) {
 uint8_t avr_p6(int8_t* p, err_t* err) {
 	uint64_t a = avr_strint(p, 0, err, 0);
 	if (a > 63) {
+		strcpy(err->e, "illegal port, must be ports 0 through 63");
 		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i4(int8_t* k, err_t* err, int8_t* sb) {
-	uint64_t a = avr_strint(k, 0, err, sb);
+uint8_t avr_i4(int8_t* k, err_t* err, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, err, rb);
 	if (a > 15) {
+		strcpy(err->e, "illegal immediate, must be between 0 and 15");
 		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i6(int8_t* k, err_t* err, int8_t* sb) {
-	uint64_t a = avr_strint(k, 0, err, sb);
+uint8_t avr_i6(int8_t* k, err_t* err, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, err, rb);
 	if (a > 63) {
+		strcpy(err->e, "illegal immediate, must be between 0 and 63");
 		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i7(int8_t* k, err_t* err, int8_t* sb) {
+uint8_t avr_i7(int8_t* k, err_t* err, int8_t* rb) {
 	int64_t a;
 	if (k[0] == '-') {
-		a = -1 * avr_strint(k, 1, err, sb);
+		a = -1 * avr_strint(k, 1, err, rb);
 	}
 	else {
-		a = avr_strint(k, 0, err, sb);
+		a = avr_strint(k, 0, err, rb);
 	}
 	
 	if (a > 63 || a < -64) {
+		strcpy(err->e, "illegal immediate, must be between -64 and 63");
 		err->b = 1;
 	}
 	if (a < 0) {
@@ -388,18 +407,20 @@ uint8_t avr_i7(int8_t* k, err_t* err, int8_t* sb) {
 	return a;
 }
 
-uint8_t avr_i8(int8_t* k, err_t* err, int8_t* sb) {
-	uint64_t a = avr_strint(k, 0, err, sb);
+uint8_t avr_i8(int8_t* k, err_t* err, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, err, rb);
 	if (a > 255) {
+		strcpy(err->e, "illegal immediate, must be between 0 and 255");
 		err->b = 1;
 	}
 	
 	return a;
 }
 
-uint16_t avr_i16(int8_t* k, err_t* err, int8_t* sb) {
-	uint64_t a = avr_strint(k, 0, err, sb);
+uint16_t avr_i16(int8_t* k, err_t* err, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, err, rb);
 	if (a > 65535) {
+		strcpy(err->e, "illegal immediate, must be between 0 and 65535");
 		err->b = 1;
 	}
 	
@@ -1823,6 +1844,7 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 	avr.op = 0;
 	avr.rd = 0;
 	avr.rs = 0;
+	avr.typ = 0;
 	
 	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_nop;
@@ -2233,11 +2255,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_jmp;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
+		avr.typ = 18;
 	}
 	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_call;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
+		avr.typ = 18;
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_adiw;
@@ -2420,6 +2444,7 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else {
+		strcpy(err->e, "illegal opcode");
 		err->b = 1;
 	}
 	

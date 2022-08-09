@@ -1,15 +1,15 @@
 //   Copyright 2022 Will Thomas
 //
-//   Licensed under the Apache License, Version 2.0 (the "License");
+//   Licensed under the Apache License, Verrion 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
 //       http://www.apache.org/licenses/LICENSE-2.0
 //
 //   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
+//   distributed under the License is distributed on an "AS IS" BAriS,
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
+//   See the License for the specific language governing permisrions and
 //   limitations under the License.
 
 #include <stdint.h>
@@ -19,35 +19,29 @@
 
 #include "avr/avr.h"
 
-typedef struct line_s {
-	int8_t* op;
-	int8_t* rd;
-	int8_t* rs;
-	int8_t* sym;
-	uint16_t ln;
-} line_t;
-
 typedef struct sym_s {
-	int8_t* str;
+	int8_t* sym;
 	uint16_t off;
 	uint16_t typ;
 } sym_t;
 
 int8_t main(int32_t argc, int8_t** argv) {
-	line_t l[65536];
-	uint16_t ln = 4;
-	l[0].op = "mov";
-	l[0].rd = "r3";
-	l[0].rs = "r17";
-	l[1].op = "call";
-	l[1].rd = "func";
-	l[1].rs = 0;
-	l[2].op = "breq";
-	l[2].rd = "gunc";
-	l[2].rs = 0;
-	l[3].op = "jmp";
-	l[3].rd = "func";
-	l[3].rs = 0;
+	if (argc != 3) {
+		printf("error: too few arguments\n");
+		return -1;
+	}
+	
+	FILE* f = fopen(argv[1], "r");
+	if (f == 0) {
+		printf("error: file %s doesn't exist'\n", argv[1]);
+		return -1;
+	}
+	fseek(f, 0, SEEK_END);
+	uint64_t fsz = ftell(f);
+	uint8_t* data = malloc(fsz);
+	fseek(f, 0, SEEK_SET);
+	fread(data, fsz, 1, f);
+	fclose(f);
 	
 	uint8_t byte[65536];
 	uint16_t bi = 0;
@@ -56,75 +50,127 @@ int8_t main(int32_t argc, int8_t** argv) {
 	sym_t sym[65536];
 	uint16_t si = 0;
 	
-	for (uint16_t li = 0; li < ln; li++) {
-		enc_t enc;
-		err_t err;
-		err.b = 0;
-		avr_t avr = avr_enc(l[li].op, &err);
-		int8_t sb = 0;
-		
-		uint16_t rd;
-		if (avr.rd && l[li].rd) {
-			rd = avr.rd(l[li].rd, &err, &sb);
-		}
-		else if (avr.rd && !l[li].rd) {
-			err.b = 1;
-		}
-		else if (l[li].rd) {
-			err.b = 1;
-		}
-		if (sb && !err.b) {
-			sym[si].str = malloc(strlen(l[li].rd) + 1);
-			strcpy(sym[si].str, l[li].rd);
-			sym[si].off = bi;
-			si++;
-			sb = 0;
+	sym_t rel[65536];
+	uint16_t ri = 0;
+	
+	int8_t str[3][256];
+	uint8_t sx = 0;
+	uint8_t sy = 0;
+	int8_t com = 0;
+	uint16_t ln = 0;
+	
+	for (uint64_t fi = 0; fi < fsz; fi++) {
+		if (data[fi] == '\n') {
+			ln++;
 		}
 		
-		uint16_t rs;
-		if (avr.rs && l[li].rs) {
-			rs = avr.rs(l[li].rs, &err, &sb);
+		if (data[fi] != ' ' && data[fi] != '\t' && data[fi] != '\n' && data[fi] != ';' && data[fi] != ',' && data[fi] != ':' && !com) {
+			str[sx][sy] = data[fi];
+			sy++;
+			str[sx][sy] = 0;
 		}
-		else if (avr.rs && !l[li].rs) {
-			err.b = 1;
+		else if ((data[fi] == ' ' || data[fi] == '\t') && sx == 0 && sy && !com) {
+			sx = 1;
+			sy = 0;
 		}
-		else if (l[li].rs) {
-			err.b = 1;
+		else if (data[fi] == ',' && sx == 1 && sy && !com) {
+			sx = 2;
+			sy = 0;
 		}
-		if (sb && !err.b) {
-			sym[si].str = malloc(strlen(l[li].rd) + 1);
-			strcpy(sym[si].str, l[li].rd);
-			sym[si].off = bi;
-			si++;
-			sb = 0;
+		else if (data[fi] == ':' && !com) {
+			com = 1;
+			str[sx][sy] = 0;
+			sy = 0;
 		}
-		
-		if (avr.op) {
-			enc = avr.op(rd, rs);
+		else if (data[fi] == ';' && !com) {
+			com = 1;
+			sy = 0;
 		}
-		
-		for (uint8_t ei = 0; ei < enc.n; ei++) {
-			if (bi % 2 == 0) {
-				printf("0x");
-				
+		else if (data[fi] == '\n') {
+			com = 0;
+			printf("%s %s, %s\n", str[0], str[1], str[2]);
+			sx = 0;
+			sy = 0;
+			
+			enc_t enc;
+			err_t err;
+			err.b = 0;
+			avr_t avr = avr_enc(str[0], &err);
+			int8_t rb = 0;
+			
+			uint16_t rd;
+			if (avr.rd && str[1][0]) {
+				rd = avr.rd(str[1], &err, &rb);
 			}
-			byte[bi] = enc.x[ei];
-			printf("%02x", byte[bi]);
-			bi++;
-			if (bi % 2 == 0) {
-				printf("\n");
-				
+			else if (avr.rd && !str[1][0]) {
+				strcpy(err.e, "too few arguments");
+				err.b = 1;
 			}
-		}
-		if (err.b) {
-			e = 1;
-			printf("error\n");
+			else if (str[1][0]) {
+				strcpy(err.e, "too many arguments");
+				err.b = 1;
+			}
+			if (rb && !err.b) {
+				rel[ri].sym = malloc(strlen(str[1]) + 1);
+				strcpy(rel[ri].sym, str[1]);
+				rel[ri].off = bi;
+				rel[ri].typ = avr.typ;
+				ri++;
+				rb = 0;
+			}
+			
+			uint16_t rs;
+			if (avr.rs && str[2][0]) {
+				rs = avr.rs(str[2], &err, &rb);
+			}
+			else if (avr.rs && !str[2][0]) {
+				strcpy(err.e, "too few arguments");
+				err.b = 1;
+			}
+			else if (str[2][0]) {
+				strcpy(err.e, "too many arguments");
+				err.b = 1;
+			}
+			if (rb && !err.b) {
+				rel[ri].sym = malloc(strlen(str[1]) + 1);
+				strcpy(rel[ri].sym, str[1]);
+				rel[ri].off = bi;
+				ri++;
+				rb = 0;
+			}
+			
+			if (avr.op) {
+				enc = avr.op(rd, rs);
+			}
+			
+			for (uint8_t ei = 0; ei < enc.n; ei++) {
+				if (bi % 2 == 0) {
+					printf("0x");
+					
+				}
+				byte[bi] = enc.x[ei];
+				printf("%02x", byte[bi]);
+				bi++;
+				if (bi % 2 == 0) {
+					printf("\n");
+					
+				}
+			}
+			if (err.b) {
+				e = 1;
+				printf("error: %s\n", err.e);
+			}
+			
+			str[0][0] = 0;
+			str[1][0] = 0;
+			str[2][0] = 0;
 		}
 	}
+	free(data);
 	
-	for (uint16_t i = 0; i < si; i++) {
-		printf("%s, %i\n", sym[i].str, sym[i].off);
-		free(sym[i].str);
+	for (uint16_t i = 0; i < ri; i++) {
+		printf("symbol: %s\noffset: %i\ntype: %i\n", rel[i].sym, rel[i].off, rel[i].typ);
+		free(rel[i].sym);
 	}
 	
 	return 0;
