@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 #include "avr/avr.h"
+#include "elf/elf.h"
 
 typedef struct sym_s {
 	int8_t* sym;
@@ -43,7 +44,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	fread(data, fsz, 1, f);
 	fclose(f);
 	
-	uint8_t byte[65536];
+	uint8_t bits[65536];
 	uint16_t bi = 0;
 	int8_t e = 0;
 	
@@ -77,16 +78,20 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sx = 2;
 			sy = 0;
 		}
-		else if (data[fi] == ':' && !com) {
-			com = 1;
-			str[sx][sy] = 0;
+		else if (data[fi] == ':' && sx == 0 && !com) {
+			sym[si].sym = malloc(strlen(str[0]) + 1);
+			strcpy(sym[si].sym, str[0]);
+			sym[si].off = bi;
+			sym[si].typ = 1;
+			si++;
+			str[0][0] = 0;
 			sy = 0;
 		}
 		else if (data[fi] == ';' && !com) {
 			com = 1;
 			sy = 0;
 		}
-		else if (data[fi] == '\n') {
+		else if (data[fi] == '\n' && sx) {
 			com = 0;
 			printf("%s %s, %s\n", str[0], str[1], str[2]);
 			sx = 0;
@@ -148,8 +153,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 					printf("0x");
 					
 				}
-				byte[bi] = enc.x[ei];
-				printf("%02x", byte[bi]);
+				bits[bi] = enc.x[ei];
+				printf("%02x", bits[bi]);
 				bi++;
 				if (bi % 2 == 0) {
 					printf("\n");
@@ -167,10 +172,31 @@ int8_t main(int32_t argc, int8_t** argv) {
 		}
 	}
 	free(data);
-	
+	for (uint16_t i = 0; i < si; i++) {
+		printf("symbol: %s\noffset: %i\ntype: %i\n", sym[i].sym, sym[i].off, sym[i].typ);
+		free(sym[i].sym);
+	}
 	for (uint16_t i = 0; i < ri; i++) {
-		printf("symbol: %s\noffset: %i\ntype: %i\n", rel[i].sym, rel[i].off, rel[i].typ);
+		printf("rel symbol: %s\noffset: %i\ntype: %i\n", rel[i].sym, rel[i].off, rel[i].typ);
 		free(rel[i].sym);
+	}
+	
+	if (!e) {
+		elf_e64_t eh;
+		eh.type = 1;
+		eh.machine = 83;
+		eh.version = 1;
+		eh.entry = 0;
+		eh.phoff = 0;
+		eh.shoff = 0;
+		eh.ehsize = 52;
+		eh.phentsize = 32;
+		eh.phnum = 0;
+		eh.shentsize = 40;
+		eh.shnum = 0;
+		eh.shstrndx = 0;
+		
+		elf_write(argv[2], 1, &eh, 0, 0, bits, bi);
 	}
 	
 	return 0;
