@@ -182,21 +182,59 @@ int8_t main(int32_t argc, int8_t** argv) {
 	}
 	
 	if (!e) {
-		elf_e64_t eh;
+		elf_e32_t eh;
 		eh.type = 1;
 		eh.machine = 83;
 		eh.version = 1;
 		eh.entry = 0;
 		eh.phoff = 0;
-		eh.shoff = 0;
+		eh.shoff = 52;
+		eh.flags = 133;
 		eh.ehsize = 52;
 		eh.phentsize = 32;
 		eh.phnum = 0;
 		eh.shentsize = 40;
-		eh.shnum = 0;
-		eh.shstrndx = 0;
+		eh.shnum = 2;
+		eh.shstrndx = 1;
 		
-		elf_write(argv[2], 1, &eh, 0, 0, bits, bi);
+		elf_sh32_t sh[2];
+		
+		sh[0].name = 10;
+		sh[0].type = 1;
+		sh[0].flags = 5;
+		sh[0].addr = 0;
+		sh[0].offset = 132;
+		sh[0].size = bi;
+		sh[0].link = 0;
+		sh[0].info = 0;
+		sh[0].addralign = 0;
+		sh[0].entsize = 0;
+		
+		sh[1].name = 0;
+		sh[1].type = 3;
+		sh[1].flags = 6;
+		sh[1].addr = 0;
+		sh[1].offset = 132 + bi;
+		sh[1].size = 15;
+		sh[1].link = 0;
+		sh[1].info = 0;
+		sh[1].addralign = 0;
+		sh[1].entsize = 0;
+		
+		bi = elf_copy(bits, bi, ".shstrtab\0.text\0", 15);
+		
+		FILE* f = fopen(argv[2], "w");
+		
+		uint8_t* elf = elf_write(argv[2], 1, &eh, 0, &sh, bits, bi);
+		uint64_t esz = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bi;
+		
+		for (uint64_t i = 0; i < esz; i++) {
+			fprintf(f, "%c", elf[i]);
+		}
+		
+		fclose(f);
+		
+		free(elf);
 	}
 	
 	return 0;

@@ -116,15 +116,29 @@ typedef struct elf_st64_s {
 typedef struct elf_r32_s {
 	uint32_t offset;
 	uint32_t info;
-	uint32_t addend;
 } elf_r32_t;
 
 typedef struct elf_r64_s {
 	uint64_t offset;
 	uint64_t info;
-	uint64_t addend;
 } elf_r64_t;
 
-void elf_write(int8_t*, uint8_t, void*, void*, void*, uint8_t*, uint64_t);
+typedef struct elf_ra32_s {
+	uint32_t offset;
+	uint32_t info;
+	uint32_t addend;
+} elf_ra32_t;
+
+typedef struct elf_ra64_s {
+	uint64_t offset;
+	uint64_t info;
+	uint64_t addend;
+} elf_ra64_t;
+
+uint64_t elf_copy(uint8_t*, uint64_t, void*, uint64_t);
+
+uint64_t elf_loct(uint8_t*, uint64_t, void*, uint64_t);
+
+uint8_t* elf_write(int8_t*, uint8_t, void*, void*, void*, uint8_t*, uint64_t);
 
 #endif
