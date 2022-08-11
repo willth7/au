@@ -32,10 +32,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	fseek(f, 0, SEEK_END);
-	uint64_t fsz = ftell(f);
-	uint8_t* data = malloc(fsz);
+	uint64_t fn = ftell(f);
+	uint8_t* data = malloc(fn);
 	fseek(f, 0, SEEK_SET);
-	fread(data, fsz, 1, f);
+	fread(data, fn, 1, f);
 	fclose(f);
 	
 	uint8_t bits[65536];
@@ -57,7 +57,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	int8_t com = 0;
 	uint16_t ln = 0;
 	
-	for (uint64_t fi = 0; fi < fsz; fi++) {
+	for (uint64_t fi = 0; fi < fn; fi++) {
 		if (data[fi] == '\n') {
 			ln++;
 		}
@@ -87,6 +87,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			for (uint8_t i = 0; i < symn; i++) {
 				if (sym[i].name == stri) {
 					sym[i].value = bn;
+					sym[i].info = 0;
 					symi = i;
 					break;
 				}
@@ -110,7 +111,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			com = 1;
 			y = 0;
 		}
-		else if (data[fi] == '\n' && x) {
+		else if (data[fi] == '\n' && (x || y)) {
 			com = 0;
 			printf("%s %s, %s\n", lex[0], lex[1], lex[2]);
 			x = 0;

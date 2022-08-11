@@ -1960,41 +1960,49 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_cpi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_subi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_sbci;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ori;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_sbr;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_andi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_cbr;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ldi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
+		avr.typ = 19;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ldd;
@@ -2010,11 +2018,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_lds;
 		avr.rd = (avr_reg_f) avr_r5;
 		avr.rs = (avr_reg_f) avr_i16;
+		avr.typ = 4;
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_sts;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = (avr_reg_f) avr_r5;
+		avr.typ = 4;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 0) {
 		avr.op = (avr_op_f) avr_ld;
@@ -2267,11 +2277,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_adiw;
 		avr.rd = (avr_reg_f) avr_r2;
 		avr.rs = (avr_reg_f) avr_i6;
+		avr.typ = 21;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_sbiw;
 		avr.rd = (avr_reg_f) avr_r2;
 		avr.rs = (avr_reg_f) avr_i6;
+		avr.typ = 21;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_cbi;
@@ -2312,11 +2324,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_rjmp;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
+		avr.typ = 3;
 	}
 	else if (op[0] == 'r' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
 		avr.op = (avr_op_f) avr_rcall;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
+		avr.typ = 3;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ser;
@@ -2327,101 +2341,121 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_brcs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brlo;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brcc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brsh;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_breq;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brne;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brmi;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brpl;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brvs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brvc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brlt;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brge;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brhs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brhc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brts;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brtc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brie;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brid;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brbs;
 		avr.rd = (avr_reg_f) avr_b3;
 		avr.rs = (avr_reg_f) avr_i7;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brbc;
 		avr.rd = (avr_reg_f) avr_b3;
 		avr.rs = (avr_reg_f) avr_i7;
+		avr.typ = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'd' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_bld;
