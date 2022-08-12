@@ -265,38 +265,90 @@ int8_t main(int32_t argc, int8_t** argv) {
 		eh.phentsize = 32;
 		eh.phnum = 0;
 		eh.shentsize = 40;
-		eh.shnum = 2;
-		eh.shstrndx = 1;
+		eh.shnum = 2 + !!strn + !!symn + !!reln;
+		eh.shstrndx = eh.shnum - 1;
 		
-		elf_sh32_t sh[2];
+		elf_sh32_t sh[5];
+		uint8_t shn = 0;
+		int8_t shstr[65536];
+		uint16_t shstrn = 0;
 		
-		sh[0].name = 10;
-		sh[0].type = 1;
-		sh[0].flags = 5;
-		sh[0].addr = 0;
-		sh[0].offset = 132;
-		sh[0].size = bn;
-		sh[0].link = 0;
-		sh[0].info = 0;
-		sh[0].addralign = 0;
-		sh[0].entsize = 0;
+		sh[shn].name = 0;
+		sh[shn].type = 1;
+		sh[shn].flags = 7;
+		sh[shn].addr = 0;
+		sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum);
+		sh[shn].size = bn;
+		sh[shn].link = 0;
+		sh[shn].info = 0;
+		sh[shn].addralign = 0;
+		sh[shn].entsize = 0;
+		shstrn = elf_copy(shstr, shstrn, ".text", 6);
+		shn++;
 		
-		sh[1].name = 0;
-		sh[1].type = 3;
-		sh[1].flags = 6;
-		sh[1].addr = 0;
-		sh[1].offset = 132 + bn;
-		sh[1].size = 15;
-		sh[1].link = 0;
-		sh[1].info = 0;
-		sh[1].addralign = 0;
-		sh[1].entsize = 0;
+		if (symn > 0) {
+			sh[shn].name = shstrn;
+			sh[shn].type = 3;
+			sh[shn].flags = 0;
+			sh[shn].addr = 0;
+			sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
+			sh[shn].size = strn;
+			sh[shn].link = 0;
+			sh[shn].info = 0;
+			sh[shn].addralign = 0;
+			sh[shn].entsize = 0;
+			shstrn = elf_copy(shstr, shstrn, ".strtab", 8);
+			bn = elf_copy(bits, bn, str, strn);
+			shn++;
+			
+			sh[shn].name = shstrn;
+			sh[shn].type = 2;
+			sh[shn].flags = 0;
+			sh[shn].addr = 0;
+			sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
+			sh[shn].size = symn * 16;
+			sh[shn].link = 1;
+			sh[shn].info = 0;
+			sh[shn].addralign = 0;
+			sh[shn].entsize = 0;
+			shstrn = elf_copy(shstr, shstrn, ".symtab", 8);
+			bn = elf_copy(bits, bn, sym, symn * 16);
+			shn++;
+		}
 		
-		bn = elf_copy(bits, bn, ".shstrtab\0.text\0", 15);
+		if (reln > 0) {
+			sh[shn].name = shstrn;
+			sh[shn].type = 9;
+			sh[shn].flags = 64;
+			sh[shn].addr = 0;
+			sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
+			sh[shn].size = reln * 8;
+			sh[shn].link = 1;
+			sh[shn].info = 0;
+			sh[shn].addralign = 0;
+			sh[shn].entsize = 0;
+			shstrn = elf_copy(shstr, shstrn, ".rel", 5);
+			bn = elf_copy(bits, bn, rel, reln * 8);
+			shn++;
+		}
+		
+		sh[shn].name = shstrn;
+		sh[shn].type = 3;
+		sh[shn].flags = 0;
+		sh[shn].addr = 0;
+		sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
+		sh[shn].size = shstrn + 10;
+		sh[shn].link = 0;
+		sh[shn].info = 0;
+		sh[shn].addralign = 0;
+		sh[shn].entsize = 0;
+		shstrn = elf_copy(shstr, shstrn, ".shstrtab", 10);
+		bn = elf_copy(bits, bn, shstr, shstrn);
+		shn++;
 		
 		FILE* f = fopen(argv[2], "w");
 		
-		uint8_t* elf = elf_write(argv[2], 1, &eh, 0, &sh, bits, bn);
+		uint8_t* elf = elf_write_32(&eh, 0, sh, bits, bn);
 		uint64_t esz = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
 		
 		for (uint64_t i = 0; i < esz; i++) {

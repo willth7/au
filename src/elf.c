@@ -163,42 +163,32 @@ uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 	return 18446744073709551615;
 }
 
-uint8_t* elf_write(int8_t* path, uint8_t cls, void* ehp, void* php, void* shp, uint8_t* bits, uint64_t bn) {
-	if (cls == 1) {
-		elf_e32_t* eh = ehp;
-		elf_p32_t* ph = php;
-		elf_sh32_t* sh = shp;
-		
-		uint8_t* elf = malloc(eh->ehsize + (eh->phentsize * eh->phnum) + (eh->shentsize * eh->shnum) + bn);
-		uint64_t esz;
-		
-		uint8_t sig[] = {127, 'E', 'L', 'F', 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		
-		esz = elf_copy(elf, 0, sig, 16);
-		esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
-		esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-		esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
-		esz = elf_copy(elf, esz, bits, bn);
-		
-		return elf;
-	}
+uint8_t* elf_write_32(elf_e32_t* eh, elf_p32_t* ph, elf_sh32_t* sh, uint8_t* bits, uint32_t bn) {
+	uint8_t* elf = malloc(eh->ehsize + (eh->phentsize * eh->phnum) + (eh->shentsize * eh->shnum) + bn);
+	uint64_t esz;
 	
-	else if (cls == 2) {
-		elf_e64_t* eh = ehp;
-		elf_p64_t* ph = php;
-		elf_sh64_t* sh = shp;
-		
-		uint8_t* elf = malloc(eh->ehsize + (eh->phentsize * eh->phnum) + (eh->shentsize * eh->shnum) + bn);
-		uint64_t esz;
-		
-		uint8_t sig[] = {127, 'E', 'L', 'F', 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		
-		esz = elf_copy(elf, 0, sig, 16);
-		esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
-		esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-		esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
-		esz = elf_copy(elf, esz, bits, bn);
-		
-		return elf;
-	}
+	uint8_t sig[] = {127, 'E', 'L', 'F', 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	esz = elf_copy(elf, 0, sig, 16);
+	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
+	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
+	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
+	esz = elf_copy(elf, esz, bits, bn);
+	
+	return elf;
+}
+
+uint8_t* elf_write_64(elf_e64_t* eh, elf_p64_t* ph, elf_sh64_t* sh, uint8_t* bits, uint64_t bn) {
+	uint8_t* elf = malloc(eh->ehsize + (eh->phentsize * eh->phnum) + (eh->shentsize * eh->shnum) + bn);
+	uint64_t esz;
+	
+	uint8_t sig[] = {127, 'E', 'L', 'F', 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	esz = elf_copy(elf, 0, sig, 16);
+	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
+	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
+	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
+	esz = elf_copy(elf, esz, bits, bn);
+	
+	return elf;
 }
