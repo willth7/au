@@ -98,7 +98,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 				sym[symn].size = 0;
 				sym[symn].info = 0;
 				sym[symn].other = 0;
-				sym[symn].shndx = 0;
+				sym[symn].shndx = 1;
 				
 				symi = symn;
 				symn++;
@@ -265,7 +265,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 		eh.phentsize = 32;
 		eh.phnum = 0;
 		eh.shentsize = 40;
-		eh.shnum = 2 + !!strn + !!symn + !!reln;
+		eh.shnum = 3 + !!strn + !!symn + !!reln;
 		eh.shstrndx = eh.shnum - 1;
 		
 		elf_sh32_t sh[5];
@@ -274,6 +274,19 @@ int8_t main(int32_t argc, int8_t** argv) {
 		uint16_t shstrn = 0;
 		
 		sh[shn].name = 0;
+		sh[shn].type = 0;
+		sh[shn].flags = 0;
+		sh[shn].addr = 0;
+		sh[shn].offset = 0;
+		sh[shn].size = 0;
+		sh[shn].link = 0;
+		sh[shn].info = 0;
+		sh[shn].addralign = 0;
+		sh[shn].entsize = 0;
+		shstrn = elf_copy(shstr, shstrn, "\0", 1);
+		shn++;
+		
+		sh[shn].name = shstrn;
 		sh[shn].type = 1;
 		sh[shn].flags = 7;
 		sh[shn].addr = 0;
@@ -307,8 +320,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].addr = 0;
 			sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
 			sh[shn].size = symn * 16;
-			sh[shn].link = 1;
-			sh[shn].info = 0;
+			sh[shn].link = 2;
+			sh[shn].info = 1;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 0;
 			shstrn = elf_copy(shstr, shstrn, ".symtab", 8);
@@ -323,8 +336,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].addr = 0;
 			sh[shn].offset = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
 			sh[shn].size = reln * 8;
-			sh[shn].link = 1;
-			sh[shn].info = 0;
+			sh[shn].link = 3;
+			sh[shn].info = 1;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 0;
 			shstrn = elf_copy(shstr, shstrn, ".rel", 5);
