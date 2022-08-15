@@ -172,8 +172,8 @@ uint8_t* elf_write_32(elf_e32_t* eh, elf_p32_t* ph, elf_sh32_t* sh, uint8_t* bit
 	esz = elf_copy(elf, 0, sig, 16);
 	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
 	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
 	esz = elf_copy(elf, esz, bits, bn);
+	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
 	
 	return elf;
 }
@@ -187,8 +187,8 @@ uint8_t* elf_write_64(elf_e64_t* eh, elf_p64_t* ph, elf_sh64_t* sh, uint8_t* bit
 	esz = elf_copy(elf, 0, sig, 16);
 	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
 	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
 	esz = elf_copy(elf, esz, bits, bn);
+	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
 	
 	return elf;
 }
