@@ -160,7 +160,7 @@ uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 			}
 		}
 	}
-	return 18446744073709551615;
+	return -1;
 }
 
 uint8_t* elf_write_32(elf_e32_t* eh, elf_p32_t* ph, elf_sh32_t* sh, uint8_t* bits, uint32_t bn) {
