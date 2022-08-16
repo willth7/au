@@ -20,25 +20,103 @@
 #include "avr/enc.h"
 #include "elf/elf.h"
 
-uint16_t au_sym_new(elf_st32_t* sym, uint16_t symn) {
-	sym[symn].name = 0;
-	sym[symn].value = 0;
-	sym[symn].size = 0;
-	sym[symn].info = 0;
-	sym[symn].other = 0;
-	sym[symn].shndx = 1;
-	return symn + 1;
-}
-
-uint16_t au_sym_loct(elf_st32_t* sym, uint16_t symn, uint16_t strn) {
+uint16_t au_sym_loct(elf_st32_t* sym, uint16_t* symn, uint16_t strn) {
 	uint16_t symi = -1;
-	for (uint16_t i = 0; i < symn; i++) {
+	for (uint16_t i = 0; i < *symn; i++) {
 		if (sym[i].name == strn) {
 			symi = i;
-			i = symn;
+			i = *symn;
 		}
 	}
+	
+	if (symi == (uint16_t) -1) { //create symbol if doesn't exist
+		symi = *symn;
+		sym[symi].name = strn;
+		sym[*symn].value = 0;
+		sym[*symn].size = 0;
+		sym[*symn].info = 0;
+		sym[*symn].other = 0;
+		sym[*symn].shndx = 0;
+		(*symn)++;
+	}
 	return symi;
+}
+
+uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bits, uint64_t bn, uint8_t* str, uint16_t* strn, elf_st32_t* sym, uint16_t* symn, elf_r32_t* rel, uint16_t* reln) {
+	if (r0 && r0[strlen(r0) - 1] == ',') {
+		r0[strlen(r0) - 1] = 0;
+	}
+	if (r1 && r1[strlen(r1) - 1] == ',') {
+		r1[strlen(r1) - 1] = 0;
+	}
+	
+	int8_t eb = 0;
+	int8_t rb = 0;
+	
+	avr_t avr = avr_enc(op, &eb);
+	
+	uint16_t rd;
+	if (avr.rd) {
+		rd = avr.rd(r0, &eb, &rb);
+	}
+	else if (r0) {
+		eb = 1;
+	}
+	if (rb && !eb) {
+		uint32_t stri = elf_loct(str, *strn, r0, strlen(r0) + 1);
+		if (stri == -1) {
+			stri = *strn;
+			*strn = elf_copy(str, *strn, r0, strlen(r0) + 1);
+		}
+		
+		uint16_t symi = au_sym_loct(sym, symn, stri);
+		
+		rel[*reln].offset = bn;
+		rel[*reln].info = (avr.rel & 255) | (symi << 8);
+		(*reln)++;
+		
+		rb = 0;
+	}
+	
+	uint16_t rs;
+	if (avr.rs) {
+		rs = avr.rs(r1, &eb, &rb);
+	}
+	else if (r1) {
+		eb = 1;
+	}
+	if (rb && !eb) {
+		uint32_t stri = elf_loct(str, *strn, r1, strlen(r1) + 1);
+		if (stri == -1) {
+			stri = *strn;
+			*strn = elf_copy(str, *strn, r1, strlen(r1) + 1);
+		}
+		
+		uint16_t symi = au_sym_loct(sym, symn, stri);
+		
+		rel[*reln].offset = bn;
+		rel[*reln].info = (avr.rel & 255) | (symi << 8);
+		(*reln)++;
+		
+		rb = 0;
+	}
+	
+	if (avr.op) {
+		uint64_t bi = bn;
+		bn = avr.op(bits, bn, rd, rs);
+		
+		printf("0x");
+		for (uint8_t i = bi; i < bn; i++) {
+			printf("%02x", bits[i]);
+		}
+		printf("\n");
+	}
+	
+	if (eb) {
+		printf("error\n");
+	}
+	
+	return bn;
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
@@ -64,7 +142,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	int8_t e = 0;
 	
 	int8_t str[65536];
-	uint16_t strn = 0;;
+	uint16_t strn = 0;
 	
 	elf_st32_t sym[65536];
 	uint16_t symn = 0;
@@ -86,6 +164,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	for (uint64_t fi = 0; fi < fn; fi++) {
 		if (data[fi] == '\n') {
 			ln++;
+			com = 0;
 		}
 		
 		if (data[fi] != ' ' && data[fi] != '\t' && data[fi] != '\n' && data[fi] != ';' && !com) {
@@ -93,7 +172,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			lexn++;
 			lex[lexn] = 0;
 		}
-		else if ((data[fi] == ' ' || data[fi] == '\t' || data[fi] == '\n' || data[fi] == ';') && !com) {
+		else if ((data[fi] == ' ' || data[fi] == '\t' || data[fi] == '\n' || data[fi] == ';') && lexn && !com) {
 			if (lex[lexn - 1] == ':') { //symbol
 				lex[lexn - 1] = 0;
 				
@@ -103,14 +182,9 @@ int8_t main(int32_t argc, int8_t** argv) {
 					strn = elf_copy(str, strn, lex, lexn);
 				}
 				
-				uint16_t symi = au_sym_loct(sym, symn, stri);
-				if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-					symi = symn;
-					symn = au_sym_new(sym, symn);
-					sym[symi].name = stri;
-				}
-				
+				uint16_t symi = au_sym_loct(sym, &symn, stri);
 				sym[symi].value = bn;
+				sym[symi].shndx = 1;
 				
 				lex[0] = 0;
 				lexn = 0;
@@ -134,13 +208,13 @@ int8_t main(int32_t argc, int8_t** argv) {
 			
 			lexn = 0;
 		}
-		else if (data[fi] == ';' && !com) {
+		
+		if (data[fi] == ';' && !com) {
 			com = 1;
 			lexn = 0;
 		}
 		
 		if (data[fi] == '\n' && op) {
-			com = 0;
 			lexn = 0;
 			
 			if (op[0] == '.') { //directive
@@ -151,13 +225,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
 					}
 					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						
-					}
-					
+					uint16_t symi = au_sym_loct(sym, &symn, stri);
 					sym[symi].info &= 240;
 					sym[symi].info |= 1;
 				}
@@ -168,13 +236,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
 					}
 					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						sym[symi].name = stri;
-					}
-					
+					uint16_t symi = au_sym_loct(sym, &symn, stri);
 					sym[symi].info &= 240;
 					sym[symi].info |= 2;
 					
@@ -186,13 +248,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
 					}
 					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						sym[symi].name = stri;
-					}
-					
+					uint16_t symi = au_sym_loct(sym, &symn, stri);
 					sym[symi].info &= 15;
 				}
 				else if (op[1] == 'g' && op[2] == 'l' && op[3] == 'o' && op[4] == 'b' && op[5] == 'l' && op[6] == 0) {
@@ -202,13 +258,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
 					}
 					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						sym[symi].name = stri;
-					}
-					
+					uint16_t symi = au_sym_loct(sym, &symn, stri);
 					sym[symi].info &= 15;
 					sym[symi].info |= 16;
 				}
@@ -226,89 +276,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 				}
 				printf("\n");
 				
-				if (r0 && r0[strlen(r0) - 1] == ',') {
-					r0[strlen(r0) - 1] = 0;
-				}
-				if (r1 && r1[strlen(r1) - 1] == ',') {
-					r1[strlen(r1) - 1] = 0;
-				}
-				
-				int8_t eb = 0;
-				int8_t rb = 0;
-				
-				avr_t avr = avr_enc(op, &eb);
-				uint16_t rd;
-				
-				if (avr.rd) {
-					rd = avr.rd(r0, &eb, &rb);
-				}
-				else if (r0) {
-					eb = 1;
-				}
-				if (rb && !eb) {
-					uint32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
-					if (stri == -1) {
-						stri = strn;
-						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
-					}
-					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						sym[symi].name = stri;
-					}
-					
-					rel[reln].offset = bn;
-					rel[reln].info = (avr.rel & 255) | (symi << 8);
-					reln++;
-					
-					rb = 0;
-				}
-				
-				uint16_t rs;
-				if (avr.rs) {
-					rs = avr.rs(r1, &eb, &rb);
-				}
-				else if (r1) {
-					eb = 1;
-				}
-				if (rb && !eb) {
-					uint32_t stri = elf_loct(str, strn, r1, strlen(r1) + 1);
-					if (stri == -1) {
-						stri = strn;
-						strn = elf_copy(str, strn, r1, strlen(r1) + 1);
-					}
-					
-					uint16_t symi = au_sym_loct(sym, symn, stri);
-					if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-						symi = symn;
-						symn = au_sym_new(sym, symn);
-						sym[symi].name = stri;
-					}
-					
-					rel[reln].offset = bn;
-					rel[reln].info = (avr.rel & 255) | (symi << 8);
-					reln++;
-					
-					rb = 0;
-				}
-				
-				if (avr.op) {
-					uint64_t bi = bn;
-					bn = avr.op(bits, bn, rd, rs);
-					
-					printf("0x");
-					for (uint8_t i = bi; i < bn; i++) {
-						printf("%02x", bits[i]);
-					}
-					printf("\n");
-				}
-				
-				if (eb) {
-					e = 1;
-					printf("error\n");
-				}
+				bn = au_enc_avr(op, r0, r1, 0, bits, bn, str, &strn, sym, &symn, rel, &reln);
 			}
 			lex[0] = 0;
 			if (op) {
@@ -325,6 +293,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			}
 		}
 	}
+	
 	free(data);
 	printf("\n");
 	for (uint16_t i = 0; i < symn; i++) {
@@ -377,7 +346,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 		sh[shn].info = 0;
 		sh[shn].addralign = 0;
 		sh[shn].entsize = 0;
-		shstrn = elf_copy(shstr, shstrn, ".text", 6);
+		shstrn = elf_copy(shstr, shstrn, "code", 5);
 		shn++;
 		
 		if (symn > 0) {
@@ -391,7 +360,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = 0;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 0;
-			shstrn = elf_copy(shstr, shstrn, ".strtab", 8);
+			shstrn = elf_copy(shstr, shstrn, "str", 4);
 			bn = elf_copy(bits, bn, str, strn);
 			shn++;
 			
@@ -405,7 +374,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = symn;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 16;
-			shstrn = elf_copy(shstr, shstrn, ".symtab", 8);
+			shstrn = elf_copy(shstr, shstrn, "sym", 4);
 			bn = elf_copy(bits, bn, sym, symn * 16);
 			shn++;
 		}
@@ -421,7 +390,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = 1;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 8;
-			shstrn = elf_copy(shstr, shstrn, ".rel", 5);
+			shstrn = elf_copy(shstr, shstrn, "rel", 4);
 			bn = elf_copy(bits, bn, rel, reln * 8);
 			shn++;
 		}
@@ -436,7 +405,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 		sh[shn].info = 0;
 		sh[shn].addralign = 0;
 		sh[shn].entsize = 0;
-		shstrn = elf_copy(shstr, shstrn, ".shstrtab", 10);
+		shstrn = elf_copy(shstr, shstrn, "shstr", 6);
 		bn = elf_copy(bits, bn, shstr, shstrn);
 		eh.shstrndx = shn;
 		shn++;
