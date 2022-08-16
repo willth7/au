@@ -12,25 +12,15 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-typedef struct enc_s {
-	uint8_t x[4];
-	uint8_t n;
-} enc_t;
-
-typedef struct err_s {
-	int8_t e[256];
-	int8_t b;
-} err_t;
-
-typedef enc_t (*avr_op_f) (uint16_t, uint16_t);
-typedef uint16_t (*avr_reg_f) (int8_t*, err_t*, int8_t*);
+typedef uint64_t (*avr_op_f) (uint8_t*, uint64_t, uint16_t, uint16_t);
+typedef uint16_t (*avr_reg_f) (int8_t*, int8_t*, int8_t*);
 
 typedef struct avr_s {
 	avr_op_f op;
 	avr_reg_f rd;
 	avr_reg_f rs;
-	uint8_t typ;
+	uint8_t rel;
 } avr_t;
 
-avr_t avr_enc(int8_t*, err_t*);
+avr_t avr_enc(int8_t*, int8_t*);
 

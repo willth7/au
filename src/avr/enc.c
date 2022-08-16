@@ -15,27 +15,17 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef struct enc_s {
-	uint8_t x[4];
-	uint8_t n;
-} enc_t;
-
-typedef struct err_s {
-	int8_t e[256];
-	int8_t b;
-} err_t;
-
-typedef enc_t (*avr_op_f) (uint16_t, uint16_t);
-typedef uint16_t (*avr_reg_f) (int8_t*, err_t*, int8_t*);
+typedef uint64_t (*avr_op_f) (uint8_t*, uint64_t, uint16_t, uint16_t);
+typedef uint16_t (*avr_reg_f) (int8_t*, int8_t*, int8_t*);
 
 typedef struct avr_s {
 	avr_op_f op;
 	avr_reg_f rd;
 	avr_reg_f rs;
-	uint8_t typ;
+	uint8_t rel;
 } avr_t;
 
-uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* rb) {
+uint64_t avr_strint(int8_t* str, uint8_t i, int8_t* eb, int8_t* rb) {
 	uint64_t v = 0;
 	if (str[i] == 39 && str[i + 2] == 39) {
 		v = str[i + 1];
@@ -81,8 +71,7 @@ uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* rb) {
 				return 0;
 			}
 			else if (str[i] != '0') {
-				strcpy(err->e, "illegal character");
-				err->b = 1;
+				*eb = 1;
 				return 0;
 			}
 		}
@@ -91,11 +80,11 @@ uint64_t avr_strint(int8_t* str, uint8_t i, err_t* err, int8_t* rb) {
 		*rb = 1;
 		return 0;
 	}
-	err->b = 1;
+	*eb = 1;
 	return 0;
 }
 
-uint8_t avr_reg(int8_t* r, err_t* err) {
+uint8_t avr_reg(int8_t* r, int8_t* eb) {
 	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
 		return 0;
 	}
@@ -193,12 +182,11 @@ uint8_t avr_reg(int8_t* r, err_t* err) {
 		return 31;
 	}
 	else {
-		strcpy(err->e, "illegal register");
-		err->b = 1;
+		*eb = 1;
 	}
 }
 
-uint8_t avr_r2(int8_t* r, err_t* err) {
+uint8_t avr_r2(int8_t* r, int8_t* eb) {
 	if ((r[0] == 'r' && r[1] == '2' && r[2] == '4' && r[3] == 0) || (r[0] == 'w' && r[1] == 0)) {
 		return 0;
 	}
@@ -212,12 +200,11 @@ uint8_t avr_r2(int8_t* r, err_t* err) {
 		return 3;
 	}
 	else {
-		strcpy(err->e, "illegal register");
-		err->b = 1;
+		*eb = 1;
 	}
 }
 
-uint8_t avr_rex(int8_t* r, err_t* err) {
+uint8_t avr_rex(int8_t* r, int8_t* eb) {
 	if (r[0] == 'x' && r[1] == 0) {
 		return 28;
 	}
@@ -247,47 +234,43 @@ uint8_t avr_rex(int8_t* r, err_t* err) {
 	}
 }
 
-uint8_t avr_r3(int8_t* r, err_t* err) {
-	uint8_t a = avr_reg(r, err);
+uint8_t avr_r3(int8_t* r, int8_t* eb) {
+	uint8_t a = avr_reg(r, eb);
 	if ((a < 16 || a > 23) && a < 32) {
-		strcpy(err->e, "illegal register, must be between r16 and r23");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a & 7;
 }
 
-uint8_t avr_r4(int8_t* r, err_t* err) {
-	uint8_t a = avr_reg(r, err);
+uint8_t avr_r4(int8_t* r, int8_t* eb) {
+	uint8_t a = avr_reg(r, eb);
 	if ((a < 16 || a > 32)) {
-		strcpy(err->e, "illegal register, must be between r16 and r31");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a & 15;
 }
 
-uint8_t avr_r5(int8_t* r, err_t* err) {
-	uint8_t a = avr_reg(r, err);
+uint8_t avr_r5(int8_t* r, int8_t* eb) {
+	uint8_t a = avr_reg(r, eb);
 	
 	return a & 31;
 }
 
-uint8_t avr_rw(int8_t* r, err_t* err) {
-	uint8_t a = avr_reg(r, err);
+uint8_t avr_rw(int8_t* r, int8_t* eb) {
+	uint8_t a = avr_reg(r, eb);
 	if (a % 2 == 1) {
-		strcpy(err->e, "illegal register, must be r0, r2, r4, ... r30");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return (a / 2) & 15;
 }
 
-uint8_t avr_d6(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err, 0);
+uint8_t avr_d6(int8_t* r, int8_t* eb) {
+	uint64_t k = avr_strint(r, 1, eb, 0);
 	if (k > 63) {
-		strcpy(err->e, "displacement must be between 0 and 63");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	if (r[0] == 'y') {
@@ -301,28 +284,26 @@ uint8_t avr_d6(int8_t* r, err_t* err) {
 		k |= z;
 	}
 	else {
-		strcpy(err->e, "illegal pointer, must be y or z");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return k;
 }
 
-uint8_t avr_z0(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err, 0);
+uint8_t avr_z0(int8_t* r, int8_t* eb) {
+	uint64_t k = avr_strint(r, 1, eb, 0);
 	if (r[0] == 'z' && r[1] == 0) {
 		return 0;
 	}
 	else {
-		strcpy(err->e, "illegal pointer, must be z");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return k;
 }
 
-uint8_t avr_z1(int8_t* r, err_t* err) {
-	uint64_t k = avr_strint(r, 1, err, 0);
+uint8_t avr_z1(int8_t* r, int8_t* eb) {
+	uint64_t k = avr_strint(r, 1, eb, 0);
 	if (r[0] == 'z' && r[1] == 0) {
 		return 0;
 	}
@@ -330,75 +311,68 @@ uint8_t avr_z1(int8_t* r, err_t* err) {
 		return 1;
 	}
 	else {
-		strcpy(err->e, "illegal pointer, must be z");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return k;
 }
 
-uint8_t avr_b3(int8_t* b, err_t* err) {
-	uint64_t a = avr_strint(b, 0, err, 0);
+uint8_t avr_b3(int8_t* b, int8_t* eb) {
+	uint64_t a = avr_strint(b, 0, eb, 0);
 	if (a > 7) {
-		strcpy(err->e, "illegal bit, must be between 0 and 7");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_p5(int8_t* p, err_t* err) {
-	uint64_t a = avr_strint(p, 0, err, 0);
+uint8_t avr_p5(int8_t* p, int8_t* eb) {
+	uint64_t a = avr_strint(p, 0, eb, 0);
 	if (a > 31) {
-		strcpy(err->e, "illegal port, must be ports 0 through 31");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_p6(int8_t* p, err_t* err) {
-	uint64_t a = avr_strint(p, 0, err, 0);
+uint8_t avr_p6(int8_t* p, int8_t* eb) {
+	uint64_t a = avr_strint(p, 0, eb, 0);
 	if (a > 63) {
-		strcpy(err->e, "illegal port, must be ports 0 through 63");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i4(int8_t* k, err_t* err, int8_t* rb) {
-	uint64_t a = avr_strint(k, 0, err, rb);
+uint8_t avr_i4(int8_t* k, int8_t* eb, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, eb, rb);
 	if (a > 15) {
-		strcpy(err->e, "illegal immediate, must be between 0 and 15");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i6(int8_t* k, err_t* err, int8_t* rb) {
-	uint64_t a = avr_strint(k, 0, err, rb);
+uint8_t avr_i6(int8_t* k, int8_t* eb, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, eb, rb);
 	if (a > 63) {
-		strcpy(err->e, "illegal immediate, must be between 0 and 63");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint8_t avr_i7(int8_t* k, err_t* err, int8_t* rb) {
+uint8_t avr_i7(int8_t* k, int8_t* eb, int8_t* rb) {
 	int64_t a;
 	if (k[0] == '-') {
-		a = -1 * avr_strint(k, 1, err, rb);
+		a = -1 * avr_strint(k, 1, eb, rb);
 	}
 	else {
-		a = avr_strint(k, 0, err, rb);
+		a = avr_strint(k, 0, eb, rb);
 	}
 	
 	if (a > 63 || a < -64) {
-		strcpy(err->e, "illegal immediate, must be between -64 and 63");
-		err->b = 1;
+		*eb = 1;
 	}
 	if (a < 0) {
 		a = 256 + a;
@@ -407,1444 +381,1203 @@ uint8_t avr_i7(int8_t* k, err_t* err, int8_t* rb) {
 	return a;
 }
 
-uint8_t avr_i8(int8_t* k, err_t* err, int8_t* rb) {
-	uint64_t a = avr_strint(k, 0, err, rb);
+uint8_t avr_i8(int8_t* k, int8_t* eb, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, eb, rb);
 	if (a > 255) {
-		strcpy(err->e, "illegal immediate, must be between 0 and 255");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-uint16_t avr_i16(int8_t* k, err_t* err, int8_t* rb) {
-	uint64_t a = avr_strint(k, 0, err, rb);
+uint16_t avr_i16(int8_t* k, int8_t* eb, int8_t* rb) {
+	uint64_t a = avr_strint(k, 0, eb, rb);
 	if (a > 65535) {
-		strcpy(err->e, "illegal immediate, must be between 0 and 65535");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return a;
 }
 
-enc_t avr_nop() {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 0;
-	enc.n = 2;
-	
-	return enc;
+uint64_t avr_nop(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 0;
+	bits[bn + 1] = 0;
+	return bn + 2;
 }
 
-enc_t avr_movw(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 1;
-	enc.n = 2;
+uint64_t avr_movw(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 1;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_muls(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 2;
-	enc.n = 2;
+uint64_t avr_muls(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 2;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_mulsu(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 3;
-	enc.n = 2;
+uint64_t avr_mulsu(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 3;
 		
-	enc.x[0] |= (rs) & 7;
-	enc.x[0] |= (rd << 4) & 112;
+	bits[bn] |= (rs) & 7;
+	bits[bn] |= (rd << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_fmul(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 8;
-	enc.x[1] = 3;
-	enc.n = 2;
+uint64_t avr_fmul(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 8;
+	bits[bn + 1] = 3;
 	
-	enc.x[0] |= (rs) & 7;
-	enc.x[0] |= (rd << 4) & 112;
+	bits[bn] |= (rs) & 7;
+	bits[bn] |= (rd << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_fmuls(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 128;
-	enc.x[1] = 3;
-	enc.n = 2;
+uint64_t avr_fmuls(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 128;
+	bits[bn + 1] = 3;
 		
-	enc.x[0] |= (rs) & 7;
-	enc.x[0] |= (rd << 4) & 112;
+	bits[bn] |= (rs) & 7;
+	bits[bn] |= (rd << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_fmulsu(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 136;
-	enc.x[1] = 3;
-	enc.n = 2;
+uint64_t avr_fmulsu(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 136;
+	bits[bn + 1] = 3;
 		
-	enc.x[0] |= (rs) & 7;
-	enc.x[0] |= (rd << 4) & 112;
+	bits[bn] |= (rs) & 7;
+	bits[bn] |= (rd << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cp(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 20;
-	enc.n = 2;
+uint64_t avr_cp(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 20;
 		
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cpc(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 4;
-	enc.n = 2;
+uint64_t avr_cpc(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 4;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sub(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 24;
-	enc.n = 2;
+uint64_t avr_sub(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 24;
 		
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbc(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 8;
-	enc.n = 2;
+uint64_t avr_sbc(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 8;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_add(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 12;
-	enc.n = 2;
+uint64_t avr_add(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 12;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_adc(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 28;
-	enc.n = 2;
+uint64_t avr_adc(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 28;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lsl(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 12;
-	enc.n = 2;
+uint64_t avr_lsl(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 0;
+	bits[bn + 1] = 12;
 		
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_rol(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 28;
-	enc.n = 2;
+uint64_t avr_rol(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 0;
+	bits[bn + 1] = 28;
 	
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cpse(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 16;
-	enc.n = 2;
+uint64_t avr_cpse(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 16;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_and(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 32;
-	enc.n = 2;
+uint64_t avr_and(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 32;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_tst(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 32;
-	enc.n = 2;
+uint64_t avr_tst(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 0;
+	bits[bn + 1] = 32;
 	
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_eor(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 36;
-	enc.n = 2;
+uint64_t avr_eor(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 36;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clr(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 36;
-	enc.n = 2;
+uint64_t avr_clr(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 0;
+	bits[bn + 1] = 36;
 	
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_or(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 40;
-	enc.n = 2;
+uint64_t avr_or(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 40;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_mov(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 44;
-	enc.n = 2;
+uint64_t avr_mov(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 44;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cpi(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 48;
-	enc.n = 2;
+uint64_t avr_cpi(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 48;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_subi(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 80;
-	enc.n = 2;
+uint64_t avr_subi(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 80;
 		
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbci(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 64;
-	enc.n = 2;
+uint64_t avr_sbci(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 64;
 		
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ori(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 96;
-	enc.n = 2;
+uint64_t avr_ori(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 96;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbr(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 96;
-	enc.n = 2;
+uint64_t avr_sbr(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 96;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_andi(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 112;
-	enc.n = 2;
+uint64_t avr_andi(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 112;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cbr(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 112;
-	enc.n = 2;
+uint64_t avr_cbr(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 112;
 	
-	enc.x[0] |= (~k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (~k >> 4) & 15;
+	bits[bn] |= (~k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (~k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ldi(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 224;
-	enc.n = 2;
+uint64_t avr_ldi(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 224;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (k >> 4) & 15;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (k >> 4) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ldd(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 128;
-	enc.n = 2;
+uint64_t avr_ldd(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 128;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 2) & 12;
-	enc.x[1] |= (rs >> 1) & 32;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 2) & 12;
+	bits[bn + 1] |= (rs >> 1) & 32;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_std(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 130;
-	enc.n = 2;
+uint64_t avr_std(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 130;
 		
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rd >> 2) & 12;
-	enc.x[1] |= (rd >> 1) & 32;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rd >> 2) & 12;
+	bits[bn + 1] |= (rd >> 1) & 32;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lds(uint8_t rd, uint16_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 144;
-	enc.n = 4;
+uint64_t avr_lds(uint8_t* bits, uint64_t bn, uint8_t rd, uint16_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 144;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
-	enc.x[2] = k;
-	enc.x[3] = k >> 8;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
+	bits[bn + 2] = k;
+	bits[bn + 3] = k >> 8;
 	
-	return enc;
+	return bn + 4;
 }
 
-enc_t avr_sts(uint8_t k, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 146;
-	enc.n = 4;
+uint64_t avr_sts(uint8_t* bits, uint64_t bn, uint8_t k, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rs >> 4) & 1;
-	enc.x[2] = k;
-	enc.x[3] = k >> 8;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rs >> 4) & 1;
+	bits[bn + 2] = k;
+	bits[bn + 3] = k >> 8;
 	
-	return enc;
+	return bn + 4;
 }
 
-enc_t avr_ld(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 128;
-	enc.n = 2;
+uint64_t avr_ld(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 128;
 		
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs) & 16;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs) & 16;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_st(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 130;
-	enc.n = 2;
+uint64_t avr_st(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 130;
 	
-	enc.x[0] |= (rd) & 15;
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rd) & 16;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rd) & 15;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rd) & 16;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lpm(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 4;
-	enc.x[1] = 144;
-	enc.n = 2;
+uint64_t avr_lpm(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 4;
+	bits[bn + 1] = 144;
 	//todo
-	enc.x[0] |= (rs) & 1;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_elpm(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 6;
-	enc.x[1] = 144;
-	enc.n = 2;
+uint64_t avr_elpm(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 6;
+	bits[bn + 1] = 144;
 	//todo
-	enc.x[0] |= (rs) & 1;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_xch(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 4;
-	enc.x[1] = 146;
-	enc.n = 2;
+uint64_t avr_xch(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 4;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_las(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 5;
-	enc.x[1] = 146;
-	enc.n = 2;
+uint64_t avr_las(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 5;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lac(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 6;
-	enc.x[1] = 146;
-	enc.n = 2;
+uint64_t avr_lac(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 6;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lat(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 7;
-	enc.x[1] = 146;
-	enc.n = 2;
+uint64_t avr_lat(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 7;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_pop(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 15;
-	enc.x[1] = 144;
-	enc.n = 2;
+uint64_t avr_pop(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 15;
+	bits[bn + 1] = 144;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_push(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 15;
-	enc.x[1] = 146;
-	enc.n = 2;
+uint64_t avr_push(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 15;
+	bits[bn + 1] = 146;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_com(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_com(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 0;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_neg(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 1;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_neg(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 1;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_swap(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 2;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_swap(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 2;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_inc(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 3;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_inc(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 3;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_dec(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 10;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_dec(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 10;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_asr(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 5;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_asr(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 5;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_lsr(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 6;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_lsr(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 6;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ror(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 7;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_ror(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 7;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_bset(uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 8;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_bset(uint8_t* bits, uint64_t bn, uint8_t b) {
+	bits[bn] = 8;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (b << 4) & 112;
+	bits[bn] |= (b << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sec() {
-	enc_t enc;
-	enc.x[0] = 8;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_sec(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 8;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sez() {
-	enc_t enc;
-	enc.x[0] = 24;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_sez(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 24;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sen() {
-	enc_t enc;
-	enc.x[0] = 40;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_sen(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 40;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sev() {
-	enc_t enc;
-	enc.x[0] = 56;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_sev(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 56;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ses() {
-	enc_t enc;
-	enc.x[0] = 72;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_ses(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 72;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_seh() {
-	enc_t enc;
-	enc.x[0] = 88;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_seh(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 88;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_set() {
-	enc_t enc;
-	enc.x[0] = 104;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_set(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 104;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sei() {
-	enc_t enc;
-	enc.x[0] = 120;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_sei(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 120;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_bclr(uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 136;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_bclr(uint8_t* bits, uint64_t bn, uint8_t b) {
+	bits[bn] = 136;
+	bits[bn + 1] = 148;
 	
-	enc.x[0] |= (b << 4) & 112;
+	bits[bn] |= (b << 4) & 112;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clc() {
-	enc_t enc;
-	enc.x[0] = 136;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_clc(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 136;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clz() {
-	enc_t enc;
-	enc.x[0] = 152;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_clz(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 152;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cln() {
-	enc_t enc;
-	enc.x[0] = 168;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_cln(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 168;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clv() {
-	enc_t enc;
-	enc.x[0] = 184;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_clv(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 184;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cls() {
-	enc_t enc;
-	enc.x[0] = 200;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_cls(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 200;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clh() {
-	enc_t enc;
-	enc.x[0] = 216;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_clh(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 216;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_clt() {
-	enc_t enc;
-	enc.x[0] = 232;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_clt(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 232;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cli() {
-	enc_t enc;
-	enc.x[0] = 248;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_cli(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 248;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
 
-enc_t avr_ret() {
-	enc_t enc;
-	enc.x[0] = 8;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_ret(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 8;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_reti() {
-	enc_t enc;
-	enc.x[0] = 24;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_reti(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 24;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sleep() {
-	enc_t enc;
-	enc.x[0] = 136;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_sleep(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 136;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_break() {
-	enc_t enc;
-	enc.x[0] = 152;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_break(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 152;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_wdr() {
-	enc_t enc;
-	enc.x[0] = 168;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_wdr(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 168;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_spm(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 232;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_spm(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 232;
+	bits[bn + 1] = 149;
 	
-	enc.x[0] |= (rd << 4) & 16;
+	bits[bn] |= (rd << 4) & 16;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ijmp() {
-	enc_t enc;
-	enc.x[0] = 9;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_ijmp(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 9;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_eijmp() {
-	enc_t enc;
-	enc.x[0] = 25;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_eijmp(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 25;
+	bits[bn + 1] = 148;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_icall() {
-	enc_t enc;
-	enc.x[0] = 9;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_icall(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 9;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_eicall() {
-	enc_t enc;
-	enc.x[0] = 25;
-	enc.x[1] = 149;
-	enc.n = 2;
+uint64_t avr_eicall(uint8_t* bits, uint64_t bn) {
+	bits[bn] = 25;
+	bits[bn + 1] = 149;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_des(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 11;
-	enc.x[1] = 148;
-	enc.n = 2;
+uint64_t avr_des(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 11;
+	bits[bn + 1] = 148;
 		
-	enc.x[0] |= (k << 4) & 240;
+	bits[bn] |= (k << 4) & 240;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_jmp(uint16_t k) {
-	enc_t enc;
-	enc.x[0] = 12;
-	enc.x[1] = 148;
-	enc.x[2] = k;
-	enc.x[3] = k >> 8;
-	enc.n = 4;
+uint64_t avr_jmp(uint8_t* bits, uint64_t bn, uint16_t k) {
+	bits[bn] = 12;
+	bits[bn + 1] = 148;
+	bits[bn + 2] = k;
+	bits[bn + 3] = k >> 8;
 	
-	return enc;
+	return bn + 4;
 }
 
-enc_t avr_call(uint16_t k) {
-	enc_t enc;
-	enc.x[0] = 14;
-	enc.x[1] = 148;
-	enc.x[2] = k;
-	enc.x[3] = k >> 8;
-	enc.n = 4;
+uint64_t avr_call(uint8_t* bits, uint64_t bn, uint16_t k) {
+	bits[bn] = 14;
+	bits[bn + 1] = 148;
+	bits[bn + 2] = k;
+	bits[bn + 3] = k >> 8;
 	
-	return enc;
+	return bn + 4;
 }
 
-enc_t avr_adiw(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 150;
-	enc.n = 2;
+uint64_t avr_adiw(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 150;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (k << 2) & 192;
-	enc.x[0] |= (rd << 4) & 48;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (k << 2) & 192;
+	bits[bn] |= (rd << 4) & 48;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbiw(uint8_t rd, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 151;
-	enc.n = 2;
+uint64_t avr_sbiw(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 151;
 	
-	enc.x[0] |= (k) & 15;
-	enc.x[0] |= (k << 2) & 192;
-	enc.x[0] |= (rd << 4) & 48;
+	bits[bn] |= (k) & 15;
+	bits[bn] |= (k << 2) & 192;
+	bits[bn] |= (rd << 4) & 48;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_cbi(uint8_t p, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 152;
-	enc.n = 2;
+uint64_t avr_cbi(uint8_t* bits, uint64_t bn, uint8_t p, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 152;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (p << 3) & 248;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (p << 3) & 248;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbi(uint8_t p, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 154;
-	enc.n = 2;
+uint64_t avr_sbi(uint8_t* bits, uint64_t bn, uint8_t p, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 154;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (p << 3) & 248;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (p << 3) & 248;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbic(uint8_t p, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 153;
-	enc.n = 2;
+uint64_t avr_sbic(uint8_t* bits, uint64_t bn, uint8_t p, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 153;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (p << 3) & 248;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (p << 3) & 248;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbis(uint8_t p, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 155;
-	enc.n = 2;
+uint64_t avr_sbis(uint8_t* bits, uint64_t bn, uint8_t p, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 155;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (p << 3) & 248;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (p << 3) & 248;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_mul(uint8_t rd, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 156;
-	enc.n = 2;
+uint64_t avr_mul(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 156;
 	
-	enc.x[0] |= (rs) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rs >> 3) & 2;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (rs) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rs >> 3) & 2;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_in(uint8_t rd, uint8_t p) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 176;
-	enc.n = 2;
+uint64_t avr_in(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t p) {
+	bits[bn] = 0;
+	bits[bn + 1] = 176;
 	
-	enc.x[0] |= (p) & 15;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (p >> 3) & 6;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (p) & 15;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (p >> 3) & 6;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_out(uint8_t p, uint8_t rs) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 184;
-	enc.n = 2;
+uint64_t avr_out(uint8_t* bits, uint64_t bn, uint8_t p, uint8_t rs) {
+	bits[bn] = 0;
+	bits[bn + 1] = 184;
 	
-	enc.x[0] |= (p) & 15;
-	enc.x[0] |= (rs << 4) & 240;
-	enc.x[1] |= (p >> 3) & 6;
-	enc.x[1] |= (rs >> 4) & 1;
+	bits[bn] |= (p) & 15;
+	bits[bn] |= (rs << 4) & 240;
+	bits[bn + 1] |= (p >> 3) & 6;
+	bits[bn + 1] |= (rs >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_rjmp(uint16_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 192;
-	enc.n = 2;
+uint64_t avr_rjmp(uint8_t* bits, uint64_t bn, uint16_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 192;
 	
-	enc.x[0] |= (k) & 255;
-	enc.x[1] |= (k >> 8) & 15;
+	bits[bn] |= (k) & 255;
+	bits[bn + 1] |= (k >> 8) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_rcall(uint16_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 208;
-	enc.n = 2;
+uint64_t avr_rcall(uint8_t* bits, uint64_t bn, uint16_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 208;
 	
-	enc.x[0] |= (k) & 255;
-	enc.x[1] |= (k >> 8) & 15;
+	bits[bn] |= (k) & 255;
+	bits[bn + 1] |= (k >> 8) & 15;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_ser(uint8_t rd) {
-	enc_t enc;
-	enc.x[0] = 15;
-	enc.x[1] = 239;
-	enc.n = 2;
+uint64_t avr_ser(uint8_t* bits, uint64_t bn, uint8_t rd) {
+	bits[bn] = 15;
+	bits[bn + 1] = 239;
 	
-	enc.x[0] |= (rd << 4) && 240;
+	bits[bn] |= (rd << 4) && 240;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brcs(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brcs(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brlo(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brlo(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brcc(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brcc(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brsh(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brsh(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_breq(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 1;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_breq(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 1;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brne(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 1;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brne(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 1;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brmi(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 2;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brmi(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 2;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brpl(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 2;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brpl(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 2;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brvs(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 3;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brvs(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 3;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brvc(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 3;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brvc(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 3;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brlt(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 4;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brlt(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 4;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brge(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 4;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brge(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 4;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brhs(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 5;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brhs(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 5;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brhc(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 5;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brhc(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 5;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brts(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 6;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brts(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 6;
+	bits[bn + 1] = 240;
 		
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brtc(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 6;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brtc(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 6;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brie(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 7;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brie(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 7;
+	bits[bn + 1] = 240;
 		
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brid(uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 7;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brid(uint8_t* bits, uint64_t bn, uint8_t k) {
+	bits[bn] = 7;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brbs(uint8_t b, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 240;
-	enc.n = 2;
+uint64_t avr_brbs(uint8_t* bits, uint64_t bn, uint8_t b, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 240;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_brbc(uint8_t b, uint8_t k) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 244;
-	enc.n = 2;
+uint64_t avr_brbc(uint8_t* bits, uint64_t bn, uint8_t b, uint8_t k) {
+	bits[bn] = 0;
+	bits[bn + 1] = 244;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (k << 3) & 248;
-	enc.x[1] |= (k >> 5) & 3;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (k << 3) & 248;
+	bits[bn + 1] |= (k >> 5) & 3;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_bld(uint8_t rd, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 248;
-	enc.n = 2;
+uint64_t avr_bld(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 248;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_bst(uint8_t rd, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 250;
-	enc.n = 2;
+uint64_t avr_bst(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 250;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[1] |= (rd >> 4) & 1;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn + 1] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbrc(uint8_t rd, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 252;
-	enc.n = 2;
+uint64_t avr_sbrc(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 252;
 		
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[0] |= (rd >> 4) & 1;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-enc_t avr_sbrs(uint8_t rd, uint8_t b) {
-	enc_t enc;
-	enc.x[0] = 0;
-	enc.x[1] = 254;
-	enc.n = 2;
+uint64_t avr_sbrs(uint8_t* bits, uint64_t bn, uint8_t rd, uint8_t b) {
+	bits[bn] = 0;
+	bits[bn + 1] = 254;
 	
-	enc.x[0] |= (b) & 7;
-	enc.x[0] |= (rd << 4) & 240;
-	enc.x[0] |= (rd >> 4) & 1;
+	bits[bn] |= (b) & 7;
+	bits[bn] |= (rd << 4) & 240;
+	bits[bn] |= (rd >> 4) & 1;
 	
-	return enc;
+	return bn + 2;
 }
 
-avr_t avr_enc(int8_t* op, err_t* err) {
+avr_t avr_enc(int8_t* op, int8_t* eb) {
 	avr_t avr;
 	avr.op = 0;
 	avr.rd = 0;
 	avr.rs = 0;
-	avr.typ = 0;
+	avr.rel = 0;
 	
 	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_nop;
@@ -1960,49 +1693,49 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_cpi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_subi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_sbci;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ori;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_sbr;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_andi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_cbr;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ldi;
 		avr.rd = (avr_reg_f) avr_r4;
 		avr.rs = (avr_reg_f) avr_i8;
-		avr.typ = 19;
+		avr.rel = 19;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ldd;
@@ -2018,13 +1751,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_lds;
 		avr.rd = (avr_reg_f) avr_r5;
 		avr.rs = (avr_reg_f) avr_i16;
-		avr.typ = 4;
+		avr.rel = 4;
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_sts;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = (avr_reg_f) avr_r5;
-		avr.typ = 4;
+		avr.rel = 4;
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 0) {
 		avr.op = (avr_op_f) avr_ld;
@@ -2265,25 +1998,25 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_jmp;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
-		avr.typ = 18;
+		avr.rel = 18;
 	}
 	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_call;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
-		avr.typ = 18;
+		avr.rel = 18;
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_adiw;
 		avr.rd = (avr_reg_f) avr_r2;
 		avr.rs = (avr_reg_f) avr_i6;
-		avr.typ = 21;
+		avr.rel = 21;
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_sbiw;
 		avr.rd = (avr_reg_f) avr_r2;
 		avr.rs = (avr_reg_f) avr_i6;
-		avr.typ = 21;
+		avr.rel = 21;
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'i' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_cbi;
@@ -2324,13 +2057,13 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_rjmp;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
-		avr.typ = 3;
+		avr.rel = 3;
 	}
 	else if (op[0] == 'r' && op[1] == 'c' && op[2] == 'a' && op[3] == 'l' && op[4] == 'l' && op[5] == 0) {
 		avr.op = (avr_op_f) avr_rcall;
 		avr.rd = (avr_reg_f) avr_i16;
 		avr.rs = 0;
-		avr.typ = 3;
+		avr.rel = 3;
 	}
 	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'r' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_ser;
@@ -2341,121 +2074,121 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.op = (avr_op_f) avr_brcs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 'o' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brlo;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'c' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brcc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brsh;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'e' && op[3] == 'q' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_breq;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'n' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brne;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'm' && op[3] == 'i' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brmi;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'p' && op[3] == 'l' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brpl;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brvs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'v' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brvc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'l' && op[3] == 't' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brlt;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'g' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brge;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brhs;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'h' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brhc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brts;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 't' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brtc;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'e' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brie;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'i' && op[3] == 'd' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brid;
 		avr.rd = (avr_reg_f) avr_i7;
 		avr.rs = 0;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 's' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brbs;
 		avr.rd = (avr_reg_f) avr_b3;
 		avr.rs = (avr_reg_f) avr_i7;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'r' && op[2] == 'b' && op[3] == 'c' && op[4] == 0) {
 		avr.op = (avr_op_f) avr_brbc;
 		avr.rd = (avr_reg_f) avr_b3;
 		avr.rs = (avr_reg_f) avr_i7;
-		avr.typ = 2;
+		avr.rel = 2;
 	}
 	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'd' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_bld;
@@ -2478,8 +2211,7 @@ avr_t avr_enc(int8_t* op, err_t* err) {
 		avr.rs = (avr_reg_f) avr_b3;
 	}
 	else {
-		strcpy(err->e, "illegal opcode");
-		err->b = 1;
+		*eb = 1;
 	}
 	
 	return avr;

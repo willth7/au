@@ -17,7 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "avr/avr.h"
+#include "avr/enc.h"
 #include "elf/elf.h"
 
 int8_t main(int32_t argc, int8_t** argv) {
@@ -51,7 +51,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	elf_r32_t rel[256];
 	uint8_t reln = 0;
 	
-	int8_t lex[3][256];
+	int8_t lex[4][256];
 	uint8_t x = 0;
 	uint8_t y = 0;
 	int8_t com = 0;
@@ -103,6 +103,14 @@ int8_t main(int32_t argc, int8_t** argv) {
 				symi = symn;
 				symn++;
 			}
+			else {
+				sym[symi].name = stri;
+				sym[symi].value = bn;
+				sym[symi].size = 0;
+				sym[symi].info = 0;
+				sym[symi].other = 0;
+				sym[symi].shndx = 1;
+			}
 			
 			lex[0][0] = 0;
 			y = 0;
@@ -117,25 +125,22 @@ int8_t main(int32_t argc, int8_t** argv) {
 			x = 0;
 			y = 0;
 			
-			enc_t enc;
-			err_t err;
-			err.b = 0;
-			avr_t avr = avr_enc(lex[0], &err);
+			int8_t eb = 0;
 			int8_t rb = 0;
 			
+			avr_t avr = avr_enc(lex[0], &eb);
 			uint16_t rd;
+			
 			if (avr.rd && lex[1][0]) {
-				rd = avr.rd(lex[1], &err, &rb);
+				rd = avr.rd(lex[1], &eb, &rb);
 			}
 			else if (avr.rd && !lex[1][0]) {
-				strcpy(err.e, "too few arguments");
-				err.b = 1;
+				eb = 1;
 			}
 			else if (lex[1][0]) {
-				strcpy(err.e, "too many arguments");
-				err.b = 1;
+				eb = 1;
 			}
-			if (rb && !err.b) {
+			if (rb && !eb) {
 				uint32_t stri = elf_loct(str, strn, lex[1], strlen(lex[1]) + 1);
 				if (stri == 4294967295) {
 					stri = strn;
@@ -163,7 +168,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 				}
 				
 				rel[reln].offset = bn;
-				rel[reln].info = (avr.typ & 255) | (symi << 8);
+				rel[reln].info = (avr.rel & 255) | (symi << 8);
 				reln++;
 				
 				rb = 0;
@@ -171,17 +176,15 @@ int8_t main(int32_t argc, int8_t** argv) {
 			
 			uint16_t rs;
 			if (avr.rs && lex[2][0]) {
-				rs = avr.rs(lex[2], &err, &rb);
+				rs = avr.rs(lex[2], &eb, &rb);
 			}
 			else if (avr.rs && !lex[2][0]) {
-				strcpy(err.e, "too few arguments");
-				err.b = 1;
+				eb = 1;
 			}
 			else if (lex[2][0]) {
-				strcpy(err.e, "too many arguments");
-				err.b = 1;
+				eb = 1;
 			}
-			if (rb && !err.b) {
+			if (rb && !eb) {
 				uint32_t stri = elf_loct(str, strn, lex[2], strlen(lex[2]) + 1);
 				if (stri == 4294967295) {
 					stri = strn;
@@ -209,32 +212,26 @@ int8_t main(int32_t argc, int8_t** argv) {
 				}
 				
 				rel[reln].offset = bn;
-				rel[reln].info = (avr.typ & 255) | (symi << 8);
+				rel[reln].info = (avr.rel & 255) | (symi << 8);
 				reln++;
 				
 				rb = 0;
 			}
 			
 			if (avr.op) {
-				enc = avr.op(rd, rs);
+				uint64_t bi = bn;
+				bn = avr.op(bits, bn, rd, rs);
+				
+				printf("0x");
+				for (uint8_t i = bi; i < bn; i++) {
+					printf("%02x", bits[i]);
+				}
+				printf("\n");
 			}
 			
-			for (uint8_t ei = 0; ei < enc.n; ei++) {
-				if (bn % 2 == 0) {
-					printf("0x");
-					
-				}
-				bits[bn] = enc.x[ei];
-				printf("%02x", bits[bn]);
-				bn++;
-				if (bn % 2 == 0) {
-					printf("\n");
-					
-				}
-			}
-			if (err.b) {
+			if (eb) {
 				e = 1;
-				printf("error: %s\n", err.e);
+				printf("error\n");
 			}
 			
 			lex[0][0] = 0;
@@ -319,7 +316,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].offset = eh.ehsize + bn;
 			sh[shn].size = symn * 16;
 			sh[shn].link = shn - 1;
-			sh[shn].info = 1;
+			sh[shn].info = symn;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 16;
 			shstrn = elf_copy(shstr, shstrn, ".symtab", 8);
