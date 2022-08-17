@@ -135,7 +135,9 @@ typedef struct elf_ra64_s {
 	uint64_t addend;
 } elf_ra64_t;
 
-uint64_t elf_loct(uint8_t*, uint64_t, void*, uint64_t);
+uint64_t elf_str_loct(uint8_t*, uint64_t, void*, uint64_t);
+
+uint16_t elf_sym_loct(elf_st32_t*, uint16_t* symn, uint16_t strn);
 
 uint8_t* elf_write_32(elf_e32_t*, elf_p32_t*, elf_sh32_t*, uint8_t*, uint32_t);
 

@@ -137,7 +137,7 @@ typedef struct elf_ra64_s {
 	uint64_t addend;
 } elf_ra64_t;
 
-uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
+uint64_t elf_str_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 	uint8_t* a = v;
 	for (uint64_t i = 0; i < bn; i++) {
 		if (b[i] == a[0]) {
@@ -153,6 +153,28 @@ uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 		}
 	}
 	return -1;
+}
+
+uint16_t elf_sym_loct(elf_st32_t* sym, uint16_t* symn, uint16_t strn) {
+	uint16_t symi = -1;
+	for (uint16_t i = 0; i < *symn; i++) {
+		if (sym[i].name == strn) {
+			symi = i;
+			i = *symn;
+		}
+	}
+	
+	if (symi == (uint16_t) -1) {
+		symi = *symn;
+		sym[symi].name = strn;
+		sym[*symn].value = 0;
+		sym[*symn].size = 0;
+		sym[*symn].info = 0;
+		sym[*symn].other = 0;
+		sym[*symn].shndx = 0;
+		(*symn)++;
+	}
+	return symi;
 }
 
 uint8_t* elf_write_32(elf_e32_t* eh, elf_p32_t* ph, elf_sh32_t* sh, uint8_t* bits, uint32_t bn) {

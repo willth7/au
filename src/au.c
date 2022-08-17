@@ -20,28 +20,6 @@
 #include "avr/enc.h"
 #include "elf/elf.h"
 
-uint16_t au_sym_loct(elf_st32_t* sym, uint16_t* symn, uint16_t strn) {
-	uint16_t symi = -1;
-	for (uint16_t i = 0; i < *symn; i++) {
-		if (sym[i].name == strn) {
-			symi = i;
-			i = *symn;
-		}
-	}
-	
-	if (symi == (uint16_t) -1) { //create symbol if doesn't exist
-		symi = *symn;
-		sym[symi].name = strn;
-		sym[*symn].value = 0;
-		sym[*symn].size = 0;
-		sym[*symn].info = 0;
-		sym[*symn].other = 0;
-		sym[*symn].shndx = 0;
-		(*symn)++;
-	}
-	return symi;
-}
-
 uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bits, uint64_t bn, uint8_t* str, uint16_t* strn, elf_st32_t* sym, uint16_t* symn, elf_r32_t* rel, uint16_t* reln) {
 	if (r0 && r0[strlen(r0) - 1] == ',') {
 		r0[strlen(r0) - 1] = 0;
@@ -63,14 +41,14 @@ uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bit
 		eb = 1;
 	}
 	if (rb && !eb) {
-		uint32_t stri = elf_loct(str, *strn, r0, strlen(r0) + 1);
+		uint32_t stri = elf_str_loct(str, *strn, r0, strlen(r0) + 1);
 		if (stri == -1) {
 			stri = *strn;
 			memcpy(str + *strn, r0, strlen(r0) + 1);
 			*strn += strlen(r0) + 1;
 		}
 		
-		uint16_t symi = au_sym_loct(sym, symn, stri);
+		uint16_t symi = elf_sym_loct(sym, symn, stri);
 		
 		rel[*reln].offset = bn;
 		rel[*reln].info = (avr.rel & 255) | (symi << 8);
@@ -87,14 +65,14 @@ uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bit
 		eb = 1;
 	}
 	if (rb && !eb) {
-		uint32_t stri = elf_loct(str, *strn, r1, strlen(r1) + 1);
+		uint32_t stri = elf_str_loct(str, *strn, r1, strlen(r1) + 1);
 		if (stri == -1) {
 			stri = *strn;
 			memcpy(str + *strn, r1, strlen(r1) + 1);
 			*strn += strlen(r1) + 1;
 		}
 		
-		uint16_t symi = au_sym_loct(sym, symn, stri);
+		uint16_t symi = elf_sym_loct(sym, symn, stri);
 		
 		rel[*reln].offset = bn;
 		rel[*reln].info = (avr.rel & 255) | (symi << 8);
@@ -179,14 +157,14 @@ int8_t main(int32_t argc, int8_t** argv) {
 				if (lex[lexn - 1] == ':') { //symbol
 					lex[lexn - 1] = 0;
 					
-					uint32_t stri = elf_loct(str, strn, lex, lexn); //look for string
+					uint32_t stri = elf_str_loct(str, strn, lex, lexn); //look for string
 					if (stri == -1) { //create string if doesn't exist
 						stri = strn;
 						memcpy(str + strn, lex, lexn);
 						strn += lexn;
 					}
 					
-					uint16_t symi = au_sym_loct(sym, &symn, stri);
+					uint16_t symi = elf_sym_loct(sym, &symn, stri);
 					sym[symi].value = bn;
 					sym[symi].shndx = 1;
 					
@@ -223,50 +201,50 @@ int8_t main(int32_t argc, int8_t** argv) {
 				
 				if (op[0] == '.') { //directive
 					 if (op[1] == 'v' && op[2] == 'a' && op[3] == 'r' && op[4] == 0) {
-						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						int32_t stri = elf_str_loct(str, strn, r0, strlen(r0) + 1);
 						if (stri == -1) {
 							stri = strn;
 							memcpy(str + strn, r0, strlen(r0) + 1);
 							strn += strlen(r0) + 1;
 						}
 						
-						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						uint16_t symi = elf_sym_loct(sym, &symn, stri);
 						sym[symi].info &= 240;
 						sym[symi].info |= 1;
 					}
 					else if (op[1] == 'f' && op[2] == 'u' && op[3] == 'n' && op[4] == 'c' && op[5] == 0) {
-						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						int32_t stri = elf_str_loct(str, strn, r0, strlen(r0) + 1);
 						if (stri == -1) {
 							stri = strn;
 							memcpy(str + strn, r0, strlen(r0) + 1);
 							strn += strlen(r0) + 1;
 						}
 						
-						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						uint16_t symi = elf_sym_loct(sym, &symn, stri);
 						sym[symi].info &= 240;
 						sym[symi].info |= 2;
 						
 					}
 					else if (op[1] == 'l' && op[2] == 'o' && op[3] == 'c' && op[4] == 'a' && op[5] == 'l' && op[6] == 0) {
-						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						int32_t stri = elf_str_loct(str, strn, r0, strlen(r0) + 1);
 						if (stri == -1) {
 							stri = strn;
 							memcpy(str + strn, r0, strlen(r0) + 1);
 							strn += strlen(r0) + 1;
 						}
 						
-						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						uint16_t symi = elf_sym_loct(sym, &symn, stri);
 						sym[symi].info &= 15;
 					}
 					else if (op[1] == 'g' && op[2] == 'l' && op[3] == 'o' && op[4] == 'b' && op[5] == 'l' && op[6] == 0) {
-						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						int32_t stri = elf_str_loct(str, strn, r0, strlen(r0) + 1);
 						if (stri == -1) {
 							stri = strn;
 							memcpy(str + strn, r0, strlen(r0) + 1);
 							strn += strlen(r0) + 1;
 						}
 						
-						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						uint16_t symi = elf_sym_loct(sym, &symn, stri);
 						sym[symi].info &= 15;
 						sym[symi].info |= 16;
 					}
