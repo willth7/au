@@ -122,22 +122,10 @@ uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bit
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
-	if (argc != 3) {
+	if (argc < 3) {
 		printf("error: too few arguments\n");
 		return -1;
 	}
-	
-	FILE* f = fopen(argv[1], "r");
-	if (f == 0) {
-		printf("error: file %s doesn't exist'\n", argv[1]);
-		return -1;
-	}
-	fseek(f, 0, SEEK_END);
-	uint64_t fn = ftell(f);
-	uint8_t* data = malloc(fn);
-	fseek(f, 0, SEEK_SET);
-	fread(data, fn, 1, f);
-	fclose(f);
 	
 	uint8_t bits[65536];
 	uint16_t bn = 0;
@@ -163,145 +151,160 @@ int8_t main(int32_t argc, int8_t** argv) {
 	int8_t* r1 = 0;
 	int8_t* r2 = 0;
 	
-	for (uint64_t fi = 0; fi < fn; fi++) {
-		if (data[fi] == '\n') {
-			ln++;
-			com = 0;
+	for (uint8_t ai = 1; ai < argc - 1; ai ++) {
+		FILE* f = fopen(argv[ai], "r");
+		if (f == 0) {
+			printf("error: file %s doesn't exist'\n", argv[1]);
+			return -1;
 		}
+		fseek(f, 0, SEEK_END);
+		uint64_t fn = ftell(f);
+		uint8_t* data = malloc(fn);
+		fseek(f, 0, SEEK_SET);
+		fread(data, fn, 1, f);
+		fclose(f);
 		
-		if (data[fi] != ' ' && data[fi] != '\t' && data[fi] != '\n' && data[fi] != ';' && !com) {
-			lex[lexn] = data[fi];
-			lexn++;
-			lex[lexn] = 0;
-		}
-		else if ((data[fi] == ' ' || data[fi] == '\t' || data[fi] == '\n' || data[fi] == ';') && lexn && !com) {
-			if (lex[lexn - 1] == ':') { //symbol
-				lex[lexn - 1] = 0;
-				
-				uint32_t stri = elf_loct(str, strn, lex, lexn); //look for string
-				if (stri == -1) { //create string if doesn't exist
-					stri = strn;
-					memcpy(str + strn, lex, lexn);
-					strn += lexn;
+		for (uint64_t fi = 0; fi < fn; fi++) {
+			if (data[fi] == '\n') {
+				ln++;
+				com = 0;
+			}
+			
+			if (data[fi] != ' ' && data[fi] != '\t' && data[fi] != '\n' && data[fi] != ';' && !com) {
+				lex[lexn] = data[fi];
+				lexn++;
+				lex[lexn] = 0;
+			}
+			else if ((data[fi] == ' ' || data[fi] == '\t' || data[fi] == '\n' || data[fi] == ';') && lexn && !com) {
+				if (lex[lexn - 1] == ':') { //symbol
+					lex[lexn - 1] = 0;
+					
+					uint32_t stri = elf_loct(str, strn, lex, lexn); //look for string
+					if (stri == -1) { //create string if doesn't exist
+						stri = strn;
+						memcpy(str + strn, lex, lexn);
+						strn += lexn;
+					}
+					
+					uint16_t symi = au_sym_loct(sym, &symn, stri);
+					sym[symi].value = bn;
+					sym[symi].shndx = 1;
+					
+					lex[0] = 0;
+					lexn = 0;
+				}
+				else if (!op && lexn) {
+					op = malloc(lexn + 1);
+					strcpy(op, lex);
+				}
+				else if (!r0 && lexn) {
+					r0 = malloc(lexn + 1);
+					strcpy(r0, lex);
+				}
+				else if (!r1 && lexn) {
+					r1 = malloc(lexn + 1);
+					strcpy(r1, lex);
+				}
+				else if (!r2 && lexn) {
+					r2 = malloc(lexn + 1);
+					strcpy(r2, lex);
 				}
 				
-				uint16_t symi = au_sym_loct(sym, &symn, stri);
-				sym[symi].value = bn;
-				sym[symi].shndx = 1;
-				
-				lex[0] = 0;
 				lexn = 0;
 			}
-			else if (!op && lexn) {
-				op = malloc(lexn + 1);
-				strcpy(op, lex);
-			}
-			else if (!r0 && lexn) {
-				r0 = malloc(lexn + 1);
-				strcpy(r0, lex);
-			}
-			else if (!r1 && lexn) {
-				r1 = malloc(lexn + 1);
-				strcpy(r1, lex);
-			}
-			else if (!r2 && lexn) {
-				r2 = malloc(lexn + 1);
-				strcpy(r2, lex);
+			
+			if (data[fi] == ';' && !com) {
+				com = 1;
+				lexn = 0;
 			}
 			
-			lexn = 0;
-		}
-		
-		if (data[fi] == ';' && !com) {
-			com = 1;
-			lexn = 0;
-		}
-		
-		if (data[fi] == '\n' && op) {
-			lexn = 0;
-			
-			if (op[0] == '.') { //directive
-				 if (op[1] == 'v' && op[2] == 'a' && op[3] == 'r' && op[4] == 0) {
-					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
-					if (stri == -1) {
-						stri = strn;
-						memcpy(str + strn, r0, strlen(r0) + 1);
-						strn += strlen(r0) + 1;
+			if (data[fi] == '\n' && op) {
+				lexn = 0;
+				
+				if (op[0] == '.') { //directive
+					 if (op[1] == 'v' && op[2] == 'a' && op[3] == 'r' && op[4] == 0) {
+						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						if (stri == -1) {
+							stri = strn;
+							memcpy(str + strn, r0, strlen(r0) + 1);
+							strn += strlen(r0) + 1;
+						}
+						
+						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						sym[symi].info &= 240;
+						sym[symi].info |= 1;
 					}
-					
-					uint16_t symi = au_sym_loct(sym, &symn, stri);
-					sym[symi].info &= 240;
-					sym[symi].info |= 1;
-				}
-				else if (op[1] == 'f' && op[2] == 'u' && op[3] == 'n' && op[4] == 'c' && op[5] == 0) {
-					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
-					if (stri == -1) {
-						stri = strn;
-						memcpy(str + strn, r0, strlen(r0) + 1);
-						strn += strlen(r0) + 1;
+					else if (op[1] == 'f' && op[2] == 'u' && op[3] == 'n' && op[4] == 'c' && op[5] == 0) {
+						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						if (stri == -1) {
+							stri = strn;
+							memcpy(str + strn, r0, strlen(r0) + 1);
+							strn += strlen(r0) + 1;
+						}
+						
+						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						sym[symi].info &= 240;
+						sym[symi].info |= 2;
+						
 					}
-					
-					uint16_t symi = au_sym_loct(sym, &symn, stri);
-					sym[symi].info &= 240;
-					sym[symi].info |= 2;
-					
-				}
-				else if (op[1] == 'l' && op[2] == 'o' && op[3] == 'c' && op[4] == 'a' && op[5] == 'l' && op[6] == 0) {
-					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
-					if (stri == -1) {
-						stri = strn;
-						memcpy(str + strn, r0, strlen(r0) + 1);
-						strn += strlen(r0) + 1;
+					else if (op[1] == 'l' && op[2] == 'o' && op[3] == 'c' && op[4] == 'a' && op[5] == 'l' && op[6] == 0) {
+						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						if (stri == -1) {
+							stri = strn;
+							memcpy(str + strn, r0, strlen(r0) + 1);
+							strn += strlen(r0) + 1;
+						}
+						
+						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						sym[symi].info &= 15;
 					}
-					
-					uint16_t symi = au_sym_loct(sym, &symn, stri);
-					sym[symi].info &= 15;
-				}
-				else if (op[1] == 'g' && op[2] == 'l' && op[3] == 'o' && op[4] == 'b' && op[5] == 'l' && op[6] == 0) {
-					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
-					if (stri == -1) {
-						stri = strn;
-						memcpy(str + strn, r0, strlen(r0) + 1);
-						strn += strlen(r0) + 1;
+					else if (op[1] == 'g' && op[2] == 'l' && op[3] == 'o' && op[4] == 'b' && op[5] == 'l' && op[6] == 0) {
+						int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
+						if (stri == -1) {
+							stri = strn;
+							memcpy(str + strn, r0, strlen(r0) + 1);
+							strn += strlen(r0) + 1;
+						}
+						
+						uint16_t symi = au_sym_loct(sym, &symn, stri);
+						sym[symi].info &= 15;
+						sym[symi].info |= 16;
 					}
-					
-					uint16_t symi = au_sym_loct(sym, &symn, stri);
-					sym[symi].info &= 15;
-					sym[symi].info |= 16;
+					else {
+						//error
+					}
 				}
 				else {
-					//error
+					printf("%s", op);
+					if (r0) {
+						printf(" %s", r0);
+					}
+					if (r1) {
+						printf(" %s", r1);
+					}
+					printf("\n");
+					
+					bn = au_enc_avr(op, r0, r1, 0, bits, bn, str, &strn, sym, &symn, rel, &reln);
 				}
-			}
-			else {
-				printf("%s", op);
+				lex[0] = 0;
+				if (op) {
+					op = 0;
+					free(op);
+				}
 				if (r0) {
-					printf(" %s", r0);
+					r0 = 0;
+					free(r0);
 				}
 				if (r1) {
-					printf(" %s", r1);
+					r1 = 0;
+					free(r1);
 				}
-				printf("\n");
-				
-				bn = au_enc_avr(op, r0, r1, 0, bits, bn, str, &strn, sym, &symn, rel, &reln);
-			}
-			lex[0] = 0;
-			if (op) {
-				op = 0;
-				free(op);
-			}
-			if (r0) {
-				r0 = 0;
-				free(r0);
-			}
-			if (r1) {
-				r1 = 0;
-				free(r1);
 			}
 		}
+		
+		free(data);
 	}
 	
-	free(data);
 	printf("\n");
 	for (uint16_t i = 0; i < symn; i++) {
 		printf("symbol: %s\noffset: %i\ninfo: %i\n", str + sym[i].name, sym[i].value, sym[i].info);
@@ -430,7 +433,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 		eh.shoff = eh.ehsize + bn;
 		eh.shnum = shn;
 		
-		FILE* f = fopen(argv[2], "w");
+		FILE* f = fopen(argv[argc - 1], "w");
 		
 		uint8_t* elf = elf_write_32(&eh, 0, sh, bits, bn);
 		uint64_t esz = eh.ehsize + (eh.phentsize * eh.phnum) + (eh.shentsize * eh.shnum) + bn;
