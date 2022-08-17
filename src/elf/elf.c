@@ -137,14 +137,6 @@ typedef struct elf_ra64_s {
 	uint64_t addend;
 } elf_ra64_t;
 
-uint64_t elf_copy(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
-	uint8_t* a = v;
-	for (uint64_t i = 0; i < an; i++) {
-		b[bn + i] = a[i];
-	}
-	return an + bn;
-}
-
 uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 	uint8_t* a = v;
 	for (uint64_t i = 0; i < bn; i++) {
@@ -165,15 +157,20 @@ uint64_t elf_loct(uint8_t* b, uint64_t bn, void* v, uint64_t an) {
 
 uint8_t* elf_write_32(elf_e32_t* eh, elf_p32_t* ph, elf_sh32_t* sh, uint8_t* bits, uint32_t bn) {
 	uint8_t* elf = malloc(eh->ehsize + (eh->phentsize * eh->phnum) + (eh->shentsize * eh->shnum) + bn);
-	uint64_t esz;
+	uint64_t esz = 0;
 	
 	uint8_t sig[] = {127, 'E', 'L', 'F', 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
-	esz = elf_copy(elf, 0, sig, 16);
-	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
-	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-	esz = elf_copy(elf, esz, bits, bn);
-	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
+	memcpy(elf + esz, sig, 16);
+	esz += 16;
+	memcpy(elf + esz, eh, eh->ehsize - 16);
+	esz += eh->ehsize - 16;
+	memcpy(elf + esz, ph, eh->phentsize * eh->phnum);
+	esz += eh->phentsize * eh->phnum;
+	memcpy(elf + esz, bits, bn);
+	esz += bn;
+	memcpy(elf + esz, sh, eh->shentsize * eh->shnum);
+	esz += eh->shentsize * eh->shnum;
 	
 	return elf;
 }
@@ -184,11 +181,16 @@ uint8_t* elf_write_64(elf_e64_t* eh, elf_p64_t* ph, elf_sh64_t* sh, uint8_t* bit
 	
 	uint8_t sig[] = {127, 'E', 'L', 'F', 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
-	esz = elf_copy(elf, 0, sig, 16);
-	esz = elf_copy(elf, esz, eh, eh->ehsize - 16);
-	esz = elf_copy(elf, esz, ph, eh->phentsize * eh->phnum);
-	esz = elf_copy(elf, esz, bits, bn);
-	esz = elf_copy(elf, esz, sh, eh->shentsize * eh->shnum);
+	memcpy(elf + esz, sig, 16);
+	esz += 16;
+	memcpy(elf + esz, eh, eh->ehsize - 16);
+	esz += eh->ehsize - 16;
+	memcpy(elf + esz, ph, eh->phentsize * eh->phnum);
+	esz += eh->phentsize * eh->phnum;
+	memcpy(elf + esz, bits, bn);
+	esz += bn;
+	memcpy(elf + esz, sh, eh->shentsize * eh->shnum);
+	esz += eh->shentsize * eh->shnum;
 	
 	return elf;
 }

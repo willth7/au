@@ -66,7 +66,8 @@ uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bit
 		uint32_t stri = elf_loct(str, *strn, r0, strlen(r0) + 1);
 		if (stri == -1) {
 			stri = *strn;
-			*strn = elf_copy(str, *strn, r0, strlen(r0) + 1);
+			memcpy(str + *strn, r0, strlen(r0) + 1);
+			*strn += strlen(r0) + 1;
 		}
 		
 		uint16_t symi = au_sym_loct(sym, symn, stri);
@@ -89,7 +90,8 @@ uint64_t au_enc_avr(int8_t* op, int8_t* r0, int8_t* r1, int8_t* r2, uint8_t* bit
 		uint32_t stri = elf_loct(str, *strn, r1, strlen(r1) + 1);
 		if (stri == -1) {
 			stri = *strn;
-			*strn = elf_copy(str, *strn, r1, strlen(r1) + 1);
+			memcpy(str + *strn, r1, strlen(r1) + 1);
+			*strn += strlen(r1) + 1;
 		}
 		
 		uint16_t symi = au_sym_loct(sym, symn, stri);
@@ -179,7 +181,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 				uint32_t stri = elf_loct(str, strn, lex, lexn); //look for string
 				if (stri == -1) { //create string if doesn't exist
 					stri = strn;
-					strn = elf_copy(str, strn, lex, lexn);
+					memcpy(str + strn, lex, lexn);
+					strn += lexn;
 				}
 				
 				uint16_t symi = au_sym_loct(sym, &symn, stri);
@@ -222,7 +225,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
 					if (stri == -1) {
 						stri = strn;
-						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
+						memcpy(str + strn, r0, strlen(r0) + 1);
+						strn += strlen(r0) + 1;
 					}
 					
 					uint16_t symi = au_sym_loct(sym, &symn, stri);
@@ -233,7 +237,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
 					if (stri == -1) {
 						stri = strn;
-						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
+						memcpy(str + strn, r0, strlen(r0) + 1);
+						strn += strlen(r0) + 1;
 					}
 					
 					uint16_t symi = au_sym_loct(sym, &symn, stri);
@@ -245,7 +250,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
 					if (stri == -1) {
 						stri = strn;
-						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
+						memcpy(str + strn, r0, strlen(r0) + 1);
+						strn += strlen(r0) + 1;
 					}
 					
 					uint16_t symi = au_sym_loct(sym, &symn, stri);
@@ -255,7 +261,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 					int32_t stri = elf_loct(str, strn, r0, strlen(r0) + 1);
 					if (stri == -1) {
 						stri = strn;
-						strn = elf_copy(str, strn, r0, strlen(r0) + 1);
+						memcpy(str + strn, r0, strlen(r0) + 1);
+						strn += strlen(r0) + 1;
 					}
 					
 					uint16_t symi = au_sym_loct(sym, &symn, stri);
@@ -333,7 +340,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 		sh[shn].info = 0;
 		sh[shn].addralign = 0;
 		sh[shn].entsize = 0;
-		shstrn = elf_copy(shstr, shstrn, "\0", 1);
+		memcpy(shstr + shstrn, "\0", 1);
+		shstrn += 1;
 		shn++;
 		
 		sh[shn].name = shstrn;
@@ -346,7 +354,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 		sh[shn].info = 0;
 		sh[shn].addralign = 0;
 		sh[shn].entsize = 0;
-		shstrn = elf_copy(shstr, shstrn, "code", 5);
+		memcpy(shstr + shstrn, "code", 5);
+		shstrn += 5;
 		shn++;
 		
 		if (symn > 0) {
@@ -360,8 +369,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = 0;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 0;
-			shstrn = elf_copy(shstr, shstrn, "str", 4);
-			bn = elf_copy(bits, bn, str, strn);
+			memcpy(shstr + shstrn, "str", 4);
+			shstrn += 4;
+			memcpy(bits + bn, str, strn);
+			bn += strn;
 			shn++;
 			
 			sh[shn].name = shstrn;
@@ -374,8 +385,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = symn;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 16;
-			shstrn = elf_copy(shstr, shstrn, "sym", 4);
-			bn = elf_copy(bits, bn, sym, symn * 16);
+			memcpy(shstr + shstrn, "sym", 4);
+			shstrn += 4;
+			memcpy(bits + bn, sym, symn * 16);
+			bn += symn * 16;
 			shn++;
 		}
 		
@@ -390,8 +403,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 			sh[shn].info = 1;
 			sh[shn].addralign = 0;
 			sh[shn].entsize = 8;
-			shstrn = elf_copy(shstr, shstrn, "rel", 4);
-			bn = elf_copy(bits, bn, rel, reln * 8);
+			memcpy(shstr + shstrn, "rel", 4);
+			shstrn += 4;
+			memcpy(bits + bn, rel, reln * 8);
+			bn += reln * 8;
 			shn++;
 		}
 		
@@ -405,8 +420,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 		sh[shn].info = 0;
 		sh[shn].addralign = 0;
 		sh[shn].entsize = 0;
-		shstrn = elf_copy(shstr, shstrn, "shstr", 6);
-		bn = elf_copy(bits, bn, shstr, shstrn);
+		memcpy(shstr + shstrn, "shstr", 6);
+		shstrn += 6;
+		memcpy(bits + bn, shstr, shstrn);
+		bn += shstrn;
 		eh.shstrndx = shn;
 		shn++;
 		
