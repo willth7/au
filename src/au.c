@@ -17,23 +17,36 @@
 #include <string.h>
 #include <stdio.h>
 
-int8_t au_lex(int8_t* path) {
+int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 	printf("%s\n", path);
+	return 0;
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
-	if (argc == 1) {
-		//help
-		return 0;
+	if (argc != 3) {
+		printf("usage: au [source.au] [binary.bin]\n");
+		return -1;
 	}
 	
-	for (uint8_t ai = 1; ai < argc; ai++) {
-		int8_t* path = malloc(strlen(argv[ai]) + 4);
-		strcpy(path, argv[ai]);
-		strcpy(path + strlen(path), ".au");
-		au_lex(path);
-		free(path);
+	if (strcmp(argv[1] + strlen(argv[1]) - 3, ".au")) {
+		printf("error: expected .au file\n");
+		return -1;
 	}
+	if (strcmp(argv[2] + strlen(argv[2]) - 4, ".bin")) {
+		printf("error: expected .bin file\n");
+		return -1;
+	}
+	
+	uint8_t* bin;
+	uint64_t bn = 0;
+	if(au_lex(argv[1], bin, &bn)) {
+		printf("failed to assemble binary\n");
+		return -1;
+	}
+	
+	FILE* f = fopen(argv[2], "w");
+	fwrite(bin, bn, 1, f);
+	fclose(f);
 	
 	return 0;
 }
