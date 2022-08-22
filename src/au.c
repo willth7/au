@@ -23,7 +23,7 @@ typedef uint8_t (*au_reg) (uint8_t*);
 
 typedef struct au_sym_s {
 	int8_t* str;
-	uint8_t rel;
+	uint8_t typ;
 	uint64_t addr;
 } au_sym_t;
 
@@ -94,6 +94,11 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 	uint8_t ri = 0;
 	uint8_t rn = 0;
 	
+	au_sym_t sym[65536];
+	uint16_t symn = 0;
+	au_sym_t rel[65536];
+	uint16_t reln = 0;
+	
 	for (uint64_t fi = 0; fi < fn; fi++) {
 		if (((fx[fi] >= 97 && fx[fi] <= 122) || (fx[fi] >= 48 && fx[fi] <= 57) || fx[fi] == '_') && !c) { //string
 			lex[li] = fx[fi];
@@ -142,6 +147,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			
 			uint8_t rt[3] = {0, 0, 0};
 			uint64_t rv[3] = {0, 0, 0};
+			uint8_t* relp = 0;
 			
 			for (uint8_t i = 0; i < ri; i++) {
 				if (rg[i][0] >= 97 && rg[i][0] <= 122) { //arch-spec reg
@@ -158,6 +164,11 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122) { //symbol
 					rt[i] = 2;
 					rv[i] = 0;
+					rel[reln].str = malloc(strlen(rg[i] + 1));
+					rel[reln].addr = *bn;
+					relp = &(rel[reln].typ);
+					strcpy(rel[reln].str, rg[i]);
+					reln++;
 				}
 				else {
 					printf("[line %lu] error: invalid operand '%s'\n", ln, rg[i]);
@@ -168,7 +179,10 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
-				
+				sym[symn].str = malloc(strlen(op + 1));
+				sym[symn].addr = *bn;
+				strcpy(sym[symn].str, op);
+				symn++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
 				
@@ -190,6 +204,16 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			c = 0;
 			ln++;
 		}
+	}
+	
+	for (uint16_t i = 0; i < symn; i++) {
+		printf("[sym]\tname: %s\n\taddr:%lu\n", sym[i].str, sym[i].addr);
+		free(sym[i].str);
+	}
+	
+	for (uint16_t i = 0; i < reln; i++) {
+		printf("[rel]\tname: %s\n\taddr:%lu\n", rel[i].str, rel[i].addr);
+		free(rel[i].str);
 	}
 	
 	free(fx);
