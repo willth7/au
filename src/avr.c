@@ -116,7 +116,42 @@ uint8_t avr_reg(int8_t* r) {
 	}
 }
 
-void avr_nop(uint8_t* bin, uint64_t* bn) {
+void avr_enc_r3(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r < 16 || r > 23) {
+		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
+void avr_enc_r4(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r < 16 || r > 32) {
+		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
+void avr_enc_r5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r > 23) {
+		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
+void avr_enc_r4w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r % 2) {
+		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
+void avr_enc_rp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r != 26 && r != 28 && r != 30) {
+		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
+void avr_enc_nop(uint8_t* bin, uint64_t* bn) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 0;
 	
@@ -1293,21 +1328,25 @@ uint64_t avr_sbrs(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t b) {
 	return bn + 2;
 }
 
-void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv) {
+void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
 		if (rt[0] == 0 && rt[1] == 0 && rt[2] == 0) {
-			avr_nop(bin, bn);
+			avr_enc_nop(bin, bn);
 		}
 		else {
-			//error
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "nop");
+			*e = -1;
 		}
 	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w' && op[4] == 0) {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && !(rv[0] % 2) && !(rv[1] % 2)) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_enc_r4w(rv[0], e, path, ln);
+			avr_enc_r4w(rv[1], e, path, ln);
 			avr_movw(bin, bn, rv[0], rv[1]);
 		}
 		else {
-			//error
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "nop");
+			*e = -1;
 		}
 	}
 	/*else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) {

@@ -21,7 +21,7 @@
 #include "avr/avr.h"
 
 uint8_t (*au_reg) (int8_t*);
-void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*);
+void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 typedef struct au_sym_s {
 	int8_t* str;
@@ -86,6 +86,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 	uint8_t li = 0;
 	uint64_t ln = 0;
 	int8_t c = 0;
+	int8_t e = 0;
 	
 	int8_t op[256];
 	op[0] = 0;
@@ -116,7 +117,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				rn++;
 			}
 			else {
-				printf("[line %lu] error: too many operands\n", ln);
+				printf("[%s, %lu] error: too many operands\n", path, ln);
 			}
 		}
 		else if ((fx[fi] == ' ' || fx[fi] == '\t' || fx[fi] == '\n') && li && !c) { //next string
@@ -130,7 +131,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				
 			}
 			else {
-				printf("[line %lu] error: expected ','\n", ln);
+				printf("[%s, %lu] error: expected ','\n", path, ln);
 			}
 			lex[0] = 0;
 			li = 0;
@@ -139,12 +140,12 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			c = 1;
 		}
 		else if (fx[fi] != ' ' && fx[fi] != '\t' && !c) {
-			printf("[line %lu] error: junk character '%c'\n", ln, fx[fi]);
+			printf("[%s, %lu] error: junk character '%c'\n", path, ln, fx[fi]);
 		}
 		
 		if (fx[fi] == '\n' && op[0]) { //encode line
 			if (ri != rn && rn > 1) {
-				printf("[line %lu] error: expected operand\n" , ln);
+				printf("[%s, %lu] error: expected operand\n", path, ln);
 			}
 			
 			uint8_t rt[3] = {0, 0, 0};
@@ -174,13 +175,13 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 					reln++;
 				}
 				else {
-					printf("[line %lu] error: invalid operand '%s'\n", ln, rg[i]);
+					printf("[%s, %lu] error: unknown operand '%s'\n", path, ln, rg[i]);
 				}
 			}
 			
 			
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
-				au_op(bin, bn, op, rt, rv);
+				au_op(bin, bn, op, rt, rv, &e, path, ln);
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
 				sym[symn].str = malloc(strlen(op + 1));
@@ -189,10 +190,10 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				symn++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
-				au_pseu_op(bin, bn, op + 1, rt, rv);
+				au_pseu_op(bin, bn, op + 1, rt, rv, &e, path, ln);
 			}
 			else {
-				printf("[line %lu] error: invalid opcode '%s'\n", ln, op);
+				printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 			}
 			
 		}
