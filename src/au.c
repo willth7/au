@@ -4,7 +4,7 @@
 //   you may not use this file except in compliance with the License.
 //   You may obtain a copy of the License at
 //
-//       http://www.apache.org/licenses/LICENSE-2.0
+//       http://www.apache.org/licenses/LICENSE-2.0;
 //
 //   Unless required by applicable law or agreed to in writing, software
 //   distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,11 @@
 #include <string.h>
 #include <stdio.h>
 
-typedef uint64_t (*au_op) (uint8_t*, uint64_t, uint64_t, uint64_t);
+#include "au/pseu.h"
+#include "avr/avr.h"
 
-typedef uint8_t (*au_reg) (uint8_t*);
+uint8_t (*au_reg) (int8_t*);
+void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*);
 
 typedef struct au_sym_s {
 	int8_t* str;
@@ -152,6 +154,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			for (uint8_t i = 0; i < ri; i++) {
 				if (rg[i][0] >= 97 && rg[i][0] <= 122) { //arch-spec reg
 					rt[i] = 1;
+					rv[i] = au_reg(rg[i]);
 				}
 				else if (rg[i][0] >= 48 && rg[i][0] <= 57) { //imm
 					rt[i] = 2;
@@ -161,8 +164,8 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 					rt[i] = 2;
 					rv[i] = -1 * au_str_int(rg[i] + 1);
 				}
-				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122) { //symbol
-					rt[i] = 2;
+				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122 && !relp) { //symbol
+					rt[i] = 3;
 					rv[i] = 0;
 					rel[reln].str = malloc(strlen(rg[i] + 1));
 					rel[reln].addr = *bn;
@@ -175,8 +178,9 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				}
 			}
 			
+			
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
-				
+				au_op(bin, bn, op, rt, rv);
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
 				sym[symn].str = malloc(strlen(op + 1));
@@ -185,11 +189,12 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 				symn++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
-				
+				au_pseu_op(bin, bn, op + 1, rt, rv);
 			}
 			else {
 				printf("[line %lu] error: invalid opcode '%s'\n", ln, op);
 			}
+			
 		}
 		
 		if (fx[fi] == '\n') {
@@ -207,12 +212,12 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 	}
 	
 	for (uint16_t i = 0; i < symn; i++) {
-		printf("[sym]\tname: %s\n\taddr:%lu\n", sym[i].str, sym[i].addr);
+		printf("[sym]\tname: %s\n\taddr: %lu\n", sym[i].str, sym[i].addr);
 		free(sym[i].str);
 	}
 	
 	for (uint16_t i = 0; i < reln; i++) {
-		printf("[rel]\tname: %s\n\taddr:%lu\n", rel[i].str, rel[i].addr);
+		printf("[rel]\tname: %s\n\taddr: %lu\n", rel[i].str, rel[i].addr);
 		free(rel[i].str);
 	}
 	
@@ -221,28 +226,36 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("usage: au [source.au] [binary.bin]\n");
 		return -1;
 	}
 	
-	if (strcmp(argv[1] + strlen(argv[1]) - 3, ".au")) {
+	if (!strcmp(argv[1], "avr")) {
+		au_reg = avr_reg;
+		au_op = avr_op;
+	}
+	else {
+		printf("error: unsupported architecture\n");
+	}
+	
+	if (strcmp(argv[2] + strlen(argv[2]) - 3, ".au")) {
 		printf("error: expected .au file\n");
 		return -1;
 	}
-	if (strcmp(argv[2] + strlen(argv[2]) - 4, ".bin")) {
+	if (strcmp(argv[3] + strlen(argv[3]) - 4, ".bin")) {
 		printf("error: expected .bin file\n");
 		return -1;
 	}
 	
-	uint8_t* bin;
+	uint8_t* bin = malloc(1000);
 	uint64_t bn = 0;
-	if(au_lex(argv[1], bin, &bn)) {
+	if(au_lex(argv[2], bin, &bn)) {
 		printf("failed to assemble binary\n");
 		return -1;
 	}
 	
-	FILE* f = fopen(argv[2], "w");
+	FILE* f = fopen(argv[3], "w");
 	fwrite(bin, bn, 1, f);
 	fclose(f);
 	
