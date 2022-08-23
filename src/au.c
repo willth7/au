@@ -162,11 +162,11 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 					rv[i] = au_str_int(rg[i]);
 				}
 				else if (rg[i][0] == '-' && rg[i][1] >= 48 && rg[i][1] <= 57) { //neg imm
-					rt[i] = 2;
+					rt[i] = 3;
 					rv[i] = -1 * au_str_int(rg[i] + 1);
 				}
 				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122 && !relp) { //symbol
-					rt[i] = 3;
+					rt[i] = 4;
 					rv[i] = 0;
 					rel[reln].str = malloc(strlen(rg[i] + 1));
 					rel[reln].addr = *bn;
