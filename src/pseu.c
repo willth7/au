@@ -17,58 +17,23 @@
 #include <string.h>
 #include <stdio.h>
 
-void au_enc_k8(uint64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k > ((uint8_t) -1)) {
+void au_enc_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -128 || k > 255) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_enc_k16(uint64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k > ((uint16_t) -1)) {
+void au_enc_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -32768 || k > ((uint16_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_enc_k32(uint64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k > ((uint32_t) -1)) {
+void au_enc_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -2147483648 || k > ((uint32_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-void au_enc_k64(uint64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k > ((uint64_t) -1)) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-void au_enc_k8s(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k < -128) {
-		printf("[%s, %li] error: immediate '%li' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-void au_enc_k16s(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k < -32768) {
-		printf("[%s, %li] error: immediate '%li' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-void au_enc_k32s(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k < -2147483648) {
-		printf("[%s, %li] error: immediate '%li' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-void au_enc_k64s(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k < -9223372036854775808) {
-		printf("[%s, %li] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
@@ -110,12 +75,8 @@ void au_enc_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
 
 void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == 'e' && op[4] == 0) {
-		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
 			au_enc_k8(rv[0], e, path, ln);
-			au_enc_byte(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 3 && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k8s(rv[0], e, path, ln);
 			au_enc_byte(bin, bn, rv[0]);
 		}
 		else {
@@ -124,12 +85,8 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '2' && op[4] == 0) {
-		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
 			au_enc_k16(rv[0], e, path, ln);
-			au_enc_byt2(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 3 && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k16s(rv[0], e, path, ln);
 			au_enc_byt2(bin, bn, rv[0]);
 		}
 		else {
@@ -138,12 +95,8 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '4' && op[4] == 0) {
-		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
 			au_enc_k32(rv[0], e, path, ln);
-			au_enc_byt4(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 3 && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k32s(rv[0], e, path, ln);
 			au_enc_byt4(bin, bn, rv[0]);
 		}
 		else {
@@ -152,12 +105,7 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '8' && op[4] == 0) {
-		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k64(rv[0], e, path, ln);
-			au_enc_byt8(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 3 && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k64s(rv[0], e, path, ln);
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
 			au_enc_byt8(bin, bn, rv[0]);
 		}
 		else {
