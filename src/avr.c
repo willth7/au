@@ -116,93 +116,107 @@ uint8_t avr_reg(int8_t* r) {
 	}
 }
 
-void avr_enc_r3(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_r3(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 16 || r > 23) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_r4(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_r4(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 16 || r > 32) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_r5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_r5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r > 23) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_r4w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_r4w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r % 2) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_rp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_rp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 26 && r != 28 && r != 30) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_ry(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_ry(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 28 && r != 30) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_rz(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_rz(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 30) {
 		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
-void avr_enc_k3(uint64_t u, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_k1(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k != 1) {
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
+		*e = -1;
+	}
+}
+
+void avr_err_k2(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -1 || k > 1) {
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
+		*e = -1;
+	}
+}
+
+void avr_err_u3(uint64_t u, int8_t* e, int8_t* path, uint64_t ln) {
 	if (u > 7) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, u);
 		*e = -1;
 	}
 }
 
-void avr_enc_k5(uint64_t u, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_u5(uint64_t u, int8_t* e, int8_t* path, uint64_t ln) {
 	if (u > 31) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, u);
 		*e = -1;
 	}
 }
 
-void avr_enc_k6(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_k6(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -32 || k > 63) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void avr_enc_k7(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_k7(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -64 || k > 127) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void avr_enc_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -128 || k > 255) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void avr_enc_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void avr_err_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -32768 || k > 65535) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
@@ -296,9 +310,6 @@ void avr_enc_cp(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 20;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -311,9 +322,6 @@ void avr_enc_cpc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 4;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -326,9 +334,6 @@ void avr_enc_sub(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 24;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -341,9 +346,6 @@ void avr_enc_sbc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 8;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -356,9 +358,6 @@ void avr_enc_add(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 12;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -371,9 +370,6 @@ void avr_enc_adc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 28;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -386,8 +382,6 @@ void avr_enc_lsl(uint8_t* bin, uint64_t* bn, uint8_t rd) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 12;
 	
-	rd &= 31;
-		
 	bin[*bn] |= (rd) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 3) & 2;
@@ -400,8 +394,6 @@ void avr_enc_rol(uint8_t* bin, uint64_t* bn, uint8_t rd) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 28;
 	
-	rd &= 31;
-		
 	bin[*bn] |= (rd) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 3) & 2;
@@ -414,9 +406,6 @@ void avr_enc_cpse(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 16;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -429,9 +418,6 @@ void avr_enc_and(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 32;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -444,8 +430,6 @@ void avr_enc_tst(uint8_t* bin, uint64_t* bn, uint8_t rd) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 32;
 	
-	rd &= 31;
-		
 	bin[*bn] |= (rd) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 3) & 2;
@@ -458,9 +442,6 @@ void avr_enc_eor(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 36;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -473,8 +454,6 @@ void avr_enc_clr(uint8_t* bin, uint64_t* bn, uint8_t rd) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 36;
 	
-	rd &= 31;
-		
 	bin[*bn] |= (rd) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 3) & 2;
@@ -487,9 +466,6 @@ void avr_enc_or(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 40;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -502,9 +478,6 @@ void avr_enc_mov(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 44;
 	
-	rd &= 31;
-	rs &= 31;
-		
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rs >> 3) & 2;
@@ -653,7 +626,7 @@ void avr_enc_lds(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
 	bin[*bn] = 0;
 	bin[*bn + 1] = 144;
 	
-	rd &= 31;
+	
 	
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 4) & 1;
@@ -667,7 +640,7 @@ void avr_enc_sts(uint8_t* bin, uint64_t* bn, uint8_t rs) { //todo
 	bin[*bn] = 0;
 	bin[*bn + 1] = 146;
 	
-	rs &= 31;
+	
 	
 	bin[*bn] |= (rs << 4) & 240;
 	bin[*bn + 1] |= (rs >> 4) & 1;
@@ -677,7 +650,7 @@ void avr_enc_sts(uint8_t* bin, uint64_t* bn, uint8_t rs) { //todo
 	*bn += 4;
 }
 
-void avr_enc_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp) {
+void avr_enc_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp, int8_t k) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 144;
 	
@@ -690,7 +663,12 @@ void avr_enc_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp) {
 	else if (rp == 30) {
 		rp = 0;
 	}
-		
+	
+	if (k == -1) {
+		k = 2;
+	}
+	
+	bin[*bn] |= k;
 	bin[*bn] |= (rp) & 12;
 	bin[*bn] |= (rd << 4) & 240;
 	bin[*bn + 1] |= (rd >> 4) & 1;
@@ -698,7 +676,7 @@ void avr_enc_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp) {
 	*bn += 2;
 }
 
-void avr_enc_st(uint8_t* bin, uint64_t* bn, uint8_t rp, uint8_t rs) {
+void avr_enc_st(uint8_t* bin, uint64_t* bn, uint8_t rp, int8_t k, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 146;
 	
@@ -711,7 +689,12 @@ void avr_enc_st(uint8_t* bin, uint64_t* bn, uint8_t rp, uint8_t rs) {
 	else if (rp == 30) {
 		rp = 0;
 	}
-		
+	
+	if (k == -1) {
+		k = 2;
+	}
+	
+	bin[*bn] |= k;
 	bin[*bn] |= (rp) & 12;
 	bin[*bn] |= (rs << 4) & 240;
 	bin[*bn + 1] |= (rs >> 4) & 1;
@@ -719,86 +702,100 @@ void avr_enc_st(uint8_t* bin, uint64_t* bn, uint8_t rp, uint8_t rs) {
 	*bn += 2;
 }
 
-uint64_t avr_lpm(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 4;
-	bin[bn + 1] = 144;
-	//todo
-	bin[bn] |= (rs) & 1;
-	bin[bn] |= (rd << 4) & 240;
-	bin[bn + 1] |= (rd >> 4) & 1;
+void avr_enc_lpm0(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 200;
+	bin[*bn + 1] = 149;
 	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_elpm(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 6;
-	bin[bn + 1] = 144;
-	//todo
-	bin[bn] |= (rs) & 1;
-	bin[bn] |= (rd << 4) & 240;
-	bin[bn + 1] |= (rd >> 4) & 1;
+void avr_enc_lpm1(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t k) {
+	bin[*bn] = 4;
+	bin[*bn + 1] = 144;
 	
-	return bn + 2;
+	bin[*bn] |= k;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
+	
+	*bn += 2;
 }
 
-uint64_t avr_xch(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 4;
-	bin[bn + 1] = 146;
+void avr_enc_elpm0(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 216;
+	bin[*bn + 1] = 149;
 	
-	bin[bn] |= (rs << 4) & 240;
-	bin[bn + 1] |= (rs >> 4) & 1;
-	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_las(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 5;
-	bin[bn + 1] = 146;
+void avr_enc_elpm1(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t k) {
+	bin[*bn] = 6;
+	bin[*bn + 1] = 144;
 	
-	bin[bn] |= (rs << 4) & 240;
-	bin[bn + 1] |= (rs >> 4) & 1;
+	bin[*bn] |= k;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
 	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_lac(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 6;
-	bin[bn + 1] = 146;
+void avr_enc_xch(uint8_t* bin, uint64_t* bn, uint8_t rd) {
+	bin[*bn] = 4;
+	bin[*bn + 1] = 146;
 	
-	bin[bn] |= (rs << 4) & 240;
-	bin[bn + 1] |= (rs >> 4) & 1;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
 	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_lat(uint8_t* bin, uint64_t bn, uint8_t rd, uint8_t rs) {
-	bin[bn] = 7;
-	bin[bn + 1] = 146;
+void avr_enc_las(uint8_t* bin, uint64_t* bn, uint8_t rd) {
+	bin[*bn] = 5;
+	bin[*bn + 1] = 146;
 	
-	bin[bn] |= (rs << 4) & 240;
-	bin[bn + 1] |= (rs >> 4) & 1;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
 	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_pop(uint8_t* bin, uint64_t bn, uint8_t rd) {
-	bin[bn] = 15;
-	bin[bn + 1] = 144;
+void avr_enc_lac(uint8_t* bin, uint64_t* bn, uint8_t rd) {
+	bin[*bn] = 6;
+	bin[*bn + 1] = 146;
 	
-	bin[bn] |= (rd << 4) & 240;
-	bin[bn + 1] |= (rd >> 4) & 1;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
 	
-	return bn + 2;
+	*bn += 2;
 }
 
-uint64_t avr_push(uint8_t* bin, uint64_t bn, uint8_t rd) {
-	bin[bn] = 15;
-	bin[bn + 1] = 146;
+void avr_enc_lat(uint8_t* bin, uint64_t* bn, uint8_t rd) {
+	bin[*bn] = 7;
+	bin[*bn + 1] = 146;
 	
-	bin[bn] |= (rd << 4) & 240;
-	bin[bn + 1] |= (rd >> 4) & 1;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
 	
-	return bn + 2;
+	*bn += 2;
+}
+
+void avr_enc_pop(uint8_t* bin, uint64_t* bn, uint8_t rd) {
+	bin[*bn] = 15;
+	bin[*bn + 1] = 144;
+	
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rd >> 4) & 1;
+	
+	*bn += 2;
+}
+
+void avr_enc_push(uint8_t* bin, uint64_t* bn, uint8_t rs) {
+	bin[*bn] = 15;
+	bin[*bn + 1] = 146;
+	
+	bin[*bn] |= (rs << 4) & 240;
+	bin[*bn + 1] |= (rs >> 4) & 1;
+	
+	*bn += 2;
 }
 
 uint64_t avr_com(uint8_t* bin, uint64_t bn, uint8_t rd) {
@@ -1496,8 +1493,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w' && op[4] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r4w(rv[0], e, path, ln);
-			avr_enc_r4w(rv[1], e, path, ln);
+			avr_err_r4w(rv[0], e, path, ln);
+			avr_err_r4w(rv[1], e, path, ln);
 			avr_enc_movw(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1507,8 +1504,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_r4(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_r4(rv[1], e, path, ln);
 			avr_enc_muls(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1518,8 +1515,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's' && op[4] == 'u' && op[5] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r3(rv[0], e, path, ln);
-			avr_enc_r3(rv[1], e, path, ln);
+			avr_err_r3(rv[0], e, path, ln);
+			avr_err_r3(rv[1], e, path, ln);
 			avr_enc_mulsu(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1529,8 +1526,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r3(rv[0], e, path, ln);
-			avr_enc_r3(rv[1], e, path, ln);
+			avr_err_r3(rv[0], e, path, ln);
+			avr_err_r3(rv[1], e, path, ln);
 			avr_enc_fmul(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1540,8 +1537,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r3(rv[0], e, path, ln);
-			avr_enc_r3(rv[1], e, path, ln);
+			avr_err_r3(rv[0], e, path, ln);
+			avr_err_r3(rv[1], e, path, ln);
 			avr_enc_fmuls(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1551,8 +1548,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'f' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 's' && op[5] == 'u' && op[6] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r3(rv[0], e, path, ln);
-			avr_enc_r3(rv[1], e, path, ln);
+			avr_err_r3(rv[0], e, path, ln);
+			avr_err_r3(rv[1], e, path, ln);
 			avr_enc_fmulsu(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1562,8 +1559,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_cp(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1573,8 +1570,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'c' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_cpc(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1584,8 +1581,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_sub(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1595,8 +1592,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_sbc(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1606,8 +1603,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_add(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1617,8 +1614,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_adc(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1628,7 +1625,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'l' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
 			avr_enc_lsl(bin, bn, rv[0]);
 		}
 		else {
@@ -1638,7 +1635,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'l' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
 			avr_enc_rol(bin, bn, rv[0]);
 		}
 		else {
@@ -1648,8 +1645,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 's' && op[3] == 'e' && op[4] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_cpse(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1659,8 +1656,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_and(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1670,7 +1667,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 't' && op[1] == 's' && op[2] == 't' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
 			avr_enc_tst(bin, bn, rv[0]);
 		}
 		else {
@@ -1680,8 +1677,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_eor(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1691,7 +1688,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'l' && op[2] == 'r' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
 			avr_enc_clr(bin, bn, rv[0]);
 		}
 		else {
@@ -1701,8 +1698,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_or(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1712,8 +1709,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_mov(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1723,8 +1720,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'i' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_cpi(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1734,8 +1731,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 'i' && op[4] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_subi(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1745,8 +1742,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 'i' && op[4] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_sbci(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1756,8 +1753,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'i' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_ori(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1767,8 +1764,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_sbr(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1778,8 +1775,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 'i' && op[4] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_andi(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1789,8 +1786,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'b' && op[2] == 'r' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_cbr(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1800,8 +1797,8 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'i' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_enc_r4(rv[0], e, path, ln);
-			avr_enc_k8(rv[1], e, path, ln);
+			avr_err_r4(rv[0], e, path, ln);
+			avr_err_k8(rv[1], e, path, ln);
 			avr_enc_ldi(bin, bn, rv[0], rv[1]);
 		}
 		else {
@@ -1811,9 +1808,9 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_ry(rv[1], e, path, ln);
-			avr_enc_k6(rv[2], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_ry(rv[1], e, path, ln);
+			avr_err_k6(rv[2], e, path, ln);
 			avr_enc_ldd(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
@@ -1823,9 +1820,9 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 'd' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 1) {
-			avr_enc_ry(rv[0], e, path, ln);
-			avr_enc_k6(rv[1], e, path, ln);
-			avr_enc_r5(rv[2], e, path, ln);
+			avr_err_ry(rv[0], e, path, ln);
+			avr_err_k6(rv[1], e, path, ln);
+			avr_err_r5(rv[2], e, path, ln);
 			avr_enc_std(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
@@ -1835,7 +1832,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 's' && op[3] == 0) { //todo
 		if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[0], e, path, ln);
 			avr_enc_lds(bin, bn, rv[0]);
 		}
 		else {
@@ -1845,7 +1842,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) { //todo
 		if (rt[0] == 4 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[1], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_enc_sts(bin, bn, rv[0]);
 		}
 		else {
@@ -1855,9 +1852,15 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_r5(rv[0], e, path, ln);
-			avr_enc_rp(rv[1], e, path, ln);
-			avr_enc_ld(bin, bn, rv[0], rv[1]);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rp(rv[1], e, path, ln);
+			avr_enc_ld(bin, bn, rv[0], rv[1], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && (rt[2] == 2 || rt[2] == 3)) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rp(rv[1], e, path, ln);
+			avr_err_k2(rv[2], e, path, ln);
+			avr_enc_ld(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ld");
@@ -1866,56 +1869,126 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_enc_rp(rv[0], e, path, ln);
-			avr_enc_r5(rv[1], e, path, ln);
-			avr_enc_st(bin, bn, rv[0], rv[1]);
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rp(rv[1], e, path, ln);
+			avr_enc_st(bin, bn, rv[0], 0, rv[1]);
+		}
+		else if (rt[0] == 1 && rt[1] == 2 && (rt[2] == 1 || rt[2] == 3)) {
+			avr_err_rp(rv[0], e, path, ln);
+			avr_err_k2(rv[1], e, path, ln);
+			avr_err_r5(rv[2], e, path, ln);
+			avr_enc_st(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "st");
 			*e = -1;
 		}
 	}
-	/*else if (op[0] == 'l' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_lpm;
-		avr.rd = (avr_reg_f) avr_r5;
-		avr.rs = (avr_reg_f) avr_z1;
+	else if (op[0] == 'l' && op[1] == 'p' && op[2] == 'm' && op[3] == 0) {
+		if (rt[0] == 0 && rt[1] == 0 && rt[2] == 0) {
+			avr_enc_lpm0(bin, bn);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rz(rv[1], e, path, ln);
+			avr_enc_lpm1(bin, bn, rv[0], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rz(rv[1], e, path, ln);
+			avr_err_k1(rv[2], e, path, ln);
+			avr_enc_lpm1(bin, bn, rv[0], rv[2]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lpm");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'e' && op[1] == 'l' && op[2] == 'p' && op[3] == 'm' && op[4] == 0) {
-		avr.op = (avr_op_f) avr_elpm;
-		avr.rd = (avr_reg_f) avr_r5;
-		avr.rs = (avr_reg_f) avr_z1;
+		if (rt[0] == 0 && rt[1] == 0 && rt[2] == 0) {
+			avr_enc_lpm0(bin, bn);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rz(rv[1], e, path, ln);
+			avr_enc_elpm1(bin, bn, rv[0], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_rz(rv[1], e, path, ln);
+			avr_err_k1(rv[2], e, path, ln);
+			avr_enc_elpm1(bin, bn, rv[0], rv[2]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "elpm");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'x' && op[1] == 'c' && op[2] == 'h' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_xch;
-		avr.rd = (avr_reg_f) avr_z0;
-		avr.rs = (avr_reg_f) avr_r5;
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_rz(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
+			avr_enc_xch(bin, bn, rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "xch");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 's' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_las;
-		avr.rd = (avr_reg_f) avr_z0;
-		avr.rs = (avr_reg_f) avr_r5;
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_rz(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
+			avr_enc_las(bin, bn, rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "las");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 'c' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_lac;
-		avr.rd = (avr_reg_f) avr_z0;
-		avr.rs = (avr_reg_f) avr_r5;
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_rz(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
+			avr_enc_lac(bin, bn, rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lac");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 't' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_lat;
-		avr.rd = (avr_reg_f) avr_z0;
-		avr.rs = (avr_reg_f) avr_r5;
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_rz(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
+			avr_enc_lat(bin, bn, rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lat");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
-		avr.op = (avr_op_f) avr_pop;
-		avr.rd = (avr_reg_f) avr_r5;
-		avr.rs = 0;
+		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_enc_pop(bin, bn, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "pop");
+			*e = -1;
+		}
 	}
 	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
-		avr.op = (avr_op_f) avr_push;
-		avr.rd = (avr_reg_f) avr_r5;
-		avr.rs = 0;
+		if (rt[0] == 1 && rt[1] == 0 && rt[2] == 0) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_enc_push(bin, bn, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "push");
+			*e = -1;
+		}
 	}
-	else if (op[0] == 'c' && op[1] == 'o' && op[2] == 'm' && op[3] == 0) {
+	/*else if (op[0] == 'c' && op[1] == 'o' && op[2] == 'm' && op[3] == 0) {
 		avr.op = (avr_op_f) avr_com;
 		avr.rd = (avr_reg_f) avr_r5;
 		avr.rs = 0;
