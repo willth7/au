@@ -228,7 +228,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 
 int8_t main(int32_t argc, int8_t** argv) {
 	if (argc != 4) {
-		printf("usage: au [source.au] [binary.bin]\n");
+		printf("usage: au [source.s] [binary.bin]\n");
 		return -1;
 	}
 	
@@ -240,8 +240,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 		printf("error: unsupported architecture\n");
 	}
 	
-	if (strcmp(argv[2] + strlen(argv[2]) - 3, ".au")) {
-		printf("error: expected .au file\n");
+	if (strcmp(argv[2] + strlen(argv[2]) - 2, ".s")) {
+		printf("error: expected .s file\n");
 		return -1;
 	}
 	if (strcmp(argv[3] + strlen(argv[3]) - 4, ".bin")) {
