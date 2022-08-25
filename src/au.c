@@ -12,6 +12,8 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+//   gloria in excelsis deo
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +23,7 @@
 #include "avr/avr.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
+
 void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 typedef struct au_sym_s {
@@ -29,7 +32,7 @@ typedef struct au_sym_s {
 	uint8_t typ;
 } au_sym_t;
 
-void (*au_out) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
+void (*au_writ) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
 
 uint64_t au_str_int(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
@@ -93,10 +96,14 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	
 	int8_t op[256];
 	*((uint64_t*) op) = 0;
+	*((uint64_t*) op + 1) = 0;
 	int8_t rg[3][256];
 	*((uint64_t*) rg[0]) = 0;
+	*((uint64_t*) rg[0] + 1) = 0;
 	*((uint64_t*) rg[1]) = 0;
+	*((uint64_t*) rg[1] + 1) = 0;
 	*((uint64_t*) rg[2]) = 0;
+	*((uint64_t*) rg[2] + 1) = 0;
 	uint8_t ri = 0;
 	uint8_t rn = 0;
 	
@@ -200,9 +207,13 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 		
 		if (fx[fi] == '\n') {
 			*((uint64_t*) op) = 0;
+			*((uint64_t*) op + 1) = 0;
 			*((uint64_t*) rg[0]) = 0;
+			*((uint64_t*) rg[0] + 1) = 0;
 			*((uint64_t*) rg[1]) = 0;
+			*((uint64_t*) rg[1] + 1) = 0;
 			*((uint64_t*) rg[2]) = 0;
+			*((uint64_t*) rg[2] + 1) = 0;
 			ri = 0;
 			rn = 0;
 			lex[0] = 0;
@@ -215,21 +226,13 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	free(fx);
 }
 
-void au_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
+void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
 	FILE* f = fopen(path, "w");
 	fwrite(bin, bn, 1, f);
 	fclose(f);
 }
 
-void au_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
-	//4 bytes magic
-	//8 bytes binary offset
-	//8 bytes binary size
-	//8 bytes symbol offset
-	//8 bytes symbol number
-	//8 bytes relocation offset
-	//8 bytes relocation number
-	
+void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
 	uint8_t* buf = malloc(52 + bn + (symn * 17) + (reln * 17));
 	
 	uint64_t binoff = 52;
@@ -257,7 +260,7 @@ void au_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* re
 
 int8_t main(int32_t argc, int8_t** argv) {
 	if (argc != 4) {
-		printf("usage: au [source.s] [binary.bin]\n");
+		printf("usage: au [architecture] [source.s] [binary.bin or link.zn]\n");
 		return -1;
 	}
 	
@@ -275,13 +278,13 @@ int8_t main(int32_t argc, int8_t** argv) {
 	}
 	
 	if (!strcmp(argv[3] + strlen(argv[3]) - 4, ".bin")) {
-		au_out = au_bin;
+		au_writ = au_writ_bin;
 	}
 	else if (!strcmp(argv[3] + strlen(argv[3]) - 3, ".zn")) {
-		au_out = au_zn;
+		au_writ = au_writ_zn;
 	}
 	else {
-		printf("error: invalid output format\n");
+		printf("error: invalid writput format\n");
 		return -1;
 	}
 	
@@ -303,7 +306,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 			printf("[rel]\tname: %s\n\taddr: %lu\n\ttyp: %hhu\n", (int8_t*) &(rel[i].str), rel[i].addr, rel[i].typ);
 		}
 		
-		au_out(bin, bn, sym, symn, rel, reln, argv[3]);
+		au_writ(bin, bn, sym, symn, rel, reln, argv[3]);
 	}
 	
 	free(bin);

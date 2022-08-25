@@ -12,6 +12,8 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+//   gloria in excelsis deo
+
 uint8_t avr_reg(int8_t*, int8_t*, int8_t*, uint64_t);
 
 void avr_op(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);

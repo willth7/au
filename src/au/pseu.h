@@ -12,4 +12,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+//   gloria in excelsis deo
+
 void au_pseu_op(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
