@@ -17,7 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 
-uint8_t avr_reg(int8_t* r) {
+uint8_t avr_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
 		return 0;
 	}
@@ -113,6 +113,10 @@ uint8_t avr_reg(int8_t* r) {
 	}
 	else if (r[0] == 'r' && r[1] == '3' && r[2] == '1' && r[3] == 0) {
 		return 31;
+	}
+	else {
+		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);
+		*e = -1;
 	}
 }
 
@@ -2017,6 +2021,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) { //todo
 		if (rt[0] == 4 && rt[1] == 0 && rt[2] == 0) {
+			*((uint8_t*) rv[0]) = 1;
 			avr_enc_jmp(bin, bn);
 		}
 		else {
@@ -2026,6 +2031,7 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 	}
 	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) { //todo
 		if (rt[0] == 4 && rt[1] == 0 && rt[2] == 0) {
+			*((uint8_t*) rv[0]) = 1;
 			avr_enc_call(bin, bn);
 		}
 		else {
@@ -2467,5 +2473,9 @@ void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, i
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sbrs");
 			*e = -1;
 		}
+	}
+	else {
+		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, "sbrs");
+			*e = -1;
 	}
 }

@@ -20,16 +20,18 @@
 #include "au/pseu.h"
 #include "avr/avr.h"
 
-uint8_t (*au_reg) (int8_t*);
+uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 typedef struct au_sym_s {
-	int8_t* str;
-	uint8_t typ;
+	int64_t str;
 	uint64_t addr;
+	uint8_t typ;
 } au_sym_t;
 
-uint64_t au_str_int(int8_t* a) {
+void (*au_out) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
+
+uint64_t au_str_int(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
 	for(uint8_t i = 0; i < 20; i++) {
 		if (a[i] == 0) {
@@ -64,16 +66,18 @@ uint64_t au_str_int(int8_t* a) {
 			b += 9;
 		}
 		else if (a[i] != '0') {
-			//error
+			printf("[%s, %lu] error: illegal character '%c'\n", path, ln, a[i]);
+			*e = -1;
 		}
 	}
 }
 
-int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
+void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t* rel, uint64_t* reln, int8_t* path, int8_t* e) {
 	FILE* f = fopen(path, "r");
 	if (!f) {
-		printf("error: file %s doesn't exists\n", path);
-		return -1;
+		printf("[%s] error: file doesn't exist\n", path);
+		*e = -1;
+		return;
 	}
 	fseek(f, 0, SEEK_END);
 	uint64_t fn = ftell(f);
@@ -86,21 +90,15 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 	uint8_t li = 0;
 	uint64_t ln = 0;
 	int8_t c = 0;
-	int8_t e = 0;
 	
 	int8_t op[256];
-	op[0] = 0;
+	*((uint64_t*) op) = 0;
 	int8_t rg[3][256];
-	rg[0][0] = 0;
-	rg[1][0] = 0;
-	rg[2][0] = 0;
+	*((uint64_t*) rg[0]) = 0;
+	*((uint64_t*) rg[1]) = 0;
+	*((uint64_t*) rg[2]) = 0;
 	uint8_t ri = 0;
 	uint8_t rn = 0;
-	
-	au_sym_t sym[65536];
-	uint16_t symn = 0;
-	au_sym_t rel[65536];
-	uint16_t reln = 0;
 	
 	for (uint64_t fi = 0; fi < fn; fi++) {
 		if (((fx[fi] >= 97 && fx[fi] <= 122) || (fx[fi] >= 48 && fx[fi] <= 57) || fx[fi] == '_') && !c) { //string
@@ -118,6 +116,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			}
 			else {
 				printf("[%s, %lu] error: too many operands\n", path, ln);
+				*e = -1;
 			}
 		}
 		else if ((fx[fi] == ' ' || fx[fi] == '\t' || fx[fi] == '\n') && li && !c) { //next string
@@ -132,6 +131,7 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 			}
 			else {
 				printf("[%s, %lu] error: expected ','\n", path, ln);
+				*e = -1;
 			}
 			lex[0] = 0;
 			li = 0;
@@ -139,70 +139,70 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 		else if (fx[fi] == ';') { //comment
 			c = 1;
 		}
-		else if (fx[fi] != ' ' && fx[fi] != '\t' && !c) {
+		else if (fx[fi] != ' ' && fx[fi] != '\t' && fx[fi] != '\n' && !c) {
 			printf("[%s, %lu] error: junk character '%c'\n", path, ln, fx[fi]);
+			*e = -1;
 		}
 		
 		if (fx[fi] == '\n' && op[0]) { //encode line
 			if (ri != rn && rn > 1) {
 				printf("[%s, %lu] error: expected operand\n", path, ln);
+				*e = -1;
 			}
 			
 			uint8_t rt[3] = {0, 0, 0};
 			uint64_t rv[3] = {0, 0, 0};
-			uint8_t* relp = 0;
 			
 			for (uint8_t i = 0; i < ri; i++) {
 				if (rg[i][0] >= 97 && rg[i][0] <= 122) { //arch-spec reg
 					rt[i] = 1;
-					rv[i] = au_reg(rg[i]);
+					rv[i] = au_reg(rg[i], e, path, ln);
 				}
 				else if (rg[i][0] >= 48 && rg[i][0] <= 57) { //imm
 					rt[i] = 2;
-					rv[i] = au_str_int(rg[i]);
+					rv[i] = au_str_int(rg[i], e, path, ln);
 				}
 				else if (rg[i][0] == '-' && rg[i][1] >= 48 && rg[i][1] <= 57) { //neg imm
 					rt[i] = 3;
-					rv[i] = -1 * au_str_int(rg[i] + 1);
+					rv[i] = -1 * au_str_int(rg[i] + 1, e, path, ln);
 				}
-				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122 && !relp) { //symbol
+				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122) { //relocation
 					rt[i] = 4;
-					rv[i] = 0;
-					rel[reln].str = malloc(strlen(rg[i] + 1));
-					rel[reln].addr = *bn;
-					relp = &(rel[reln].typ);
-					strcpy(rel[reln].str, rg[i]);
-					reln++;
+					rv[i] = (uint64_t) &(rel[*reln].typ);
+					rel[*reln].addr = *bn;
+					memcpy(&(rel[*reln].str), rg[i] + 1, 8);
+					(*reln)++;
 				}
 				else {
 					printf("[%s, %lu] error: unknown operand '%s'\n", path, ln, rg[i]);
+					*e = -1;
 				}
 			}
 			
 			
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
-				au_op(bin, bn, op, rt, rv, &e, path, ln);
+				au_op(bin, bn, op, rt, rv, e, path, ln);
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
-				sym[symn].str = malloc(strlen(op + 1));
-				sym[symn].addr = *bn;
-				strcpy(sym[symn].str, op);
-				symn++;
+				sym[*symn].addr = *bn;
+				memcpy(&(sym[*symn].str), op + 1, 8);
+				(*symn)++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
-				au_pseu_op(bin, bn, op + 1, rt, rv, &e, path, ln);
+				au_pseu_op(bin, bn, op + 1, rt, rv, e, path, ln);
 			}
 			else {
 				printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
+				*e = -1;
 			}
 			
 		}
 		
 		if (fx[fi] == '\n') {
-			op[0] = 0;
-			rg[0][0] = 0;
-			rg[1][0] = 0;
-			rg[2][0] = 0;
+			*((uint64_t*) op) = 0;
+			*((uint64_t*) rg[0]) = 0;
+			*((uint64_t*) rg[1]) = 0;
+			*((uint64_t*) rg[2]) = 0;
 			ri = 0;
 			rn = 0;
 			lex[0] = 0;
@@ -212,18 +212,47 @@ int8_t au_lex(int8_t* path, uint8_t* bin, uint64_t* bn) {
 		}
 	}
 	
-	for (uint16_t i = 0; i < symn; i++) {
-		printf("[sym]\tname: %s\n\taddr: %lu\n", sym[i].str, sym[i].addr);
-		free(sym[i].str);
-	}
-	
-	for (uint16_t i = 0; i < reln; i++) {
-		printf("[rel]\tname: %s\n\taddr: %lu\n", rel[i].str, rel[i].addr);
-		free(rel[i].str);
-	}
-	
 	free(fx);
-	return 0;
+}
+
+void au_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
+	FILE* f = fopen(path, "w");
+	fwrite(bin, bn, 1, f);
+	fclose(f);
+}
+
+void au_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
+	//4 bytes magic
+	//8 bytes binary offset
+	//8 bytes binary size
+	//8 bytes symbol offset
+	//8 bytes symbol number
+	//8 bytes relocation offset
+	//8 bytes relocation number
+	
+	uint8_t* buf = malloc(52 + bn + (symn * 17) + (reln * 17));
+	
+	uint64_t binoff = 52;
+	uint64_t symoff = 52 + bn;
+	uint64_t reloff = 52 + bn + (symn * 17);
+	
+	memcpy(buf, "zinc", 4);
+	memcpy(buf + 4, &binoff, 8);
+	memcpy(buf + 12, &bn, 8);
+	memcpy(buf + 20, &symoff, 8);
+	memcpy(buf + 28, &symn, 8);
+	memcpy(buf + 36, &reloff, 8);
+	memcpy(buf + 44, &reln, 8);
+	
+	memcpy(buf + binoff, bin, bn);
+	memcpy(buf + symoff, sym, symn * 17);
+	memcpy(buf + reloff, rel, reln * 17);
+	
+	FILE* f = fopen(path, "w");
+	fwrite(buf, 52 + bn + (symn * 17) + (reln * 17), 1, f);
+	fclose(f);
+	
+	free(buf);
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
@@ -244,21 +273,41 @@ int8_t main(int32_t argc, int8_t** argv) {
 		printf("error: expected .s file\n");
 		return -1;
 	}
-	if (strcmp(argv[3] + strlen(argv[3]) - 4, ".bin")) {
-		printf("error: expected .bin file\n");
+	
+	if (!strcmp(argv[3] + strlen(argv[3]) - 4, ".bin")) {
+		au_out = au_bin;
+	}
+	else if (!strcmp(argv[3] + strlen(argv[3]) - 3, ".zn")) {
+		au_out = au_zn;
+	}
+	else {
+		printf("error: invalid output format\n");
 		return -1;
 	}
 	
-	uint8_t* bin = malloc(1000);
+	uint8_t* bin = calloc(1000, 1);
 	uint64_t bn = 0;
-	if(au_lex(argv[2], bin, &bn)) {
-		printf("failed to assemble binary\n");
-		return -1;
+	au_sym_t* sym = calloc(1000, 1);
+	uint64_t symn = 0;
+	au_sym_t* rel = calloc(1000, 1);
+	uint64_t reln = 0;
+	int8_t e = 0;
+	au_lex(bin, &bn, sym, &symn, rel, &reln, argv[2], &e);
+	
+	if (!e) {
+		for (uint16_t i = 0; i < symn; i++) {
+			printf("[sym]\tname: %s\n\taddr: %lu\n\ttyp: %hhu\n", (int8_t*) &(sym[i].str), sym[i].addr, sym[i].typ);
+		}
+		
+		for (uint16_t i = 0; i < reln; i++) {
+			printf("[rel]\tname: %s\n\taddr: %lu\n\ttyp: %hhu\n", (int8_t*) &(rel[i].str), rel[i].addr, rel[i].typ);
+		}
+		
+		au_out(bin, bn, sym, symn, rel, reln, argv[3]);
 	}
 	
-	FILE* f = fopen(argv[3], "w");
-	fwrite(bin, bn, 1, f);
-	fclose(f);
-	
+	free(bin);
+	free(sym);
+	free(rel);
 	return 0;
 }
