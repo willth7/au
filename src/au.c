@@ -177,6 +177,15 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 					rt[i] = 4;
 					rv[i] = (uint64_t) &(rel[*reln].typ);
 					rel[*reln].addr = *bn;
+					rel[*reln].typ = 0;
+					memcpy(&(rel[*reln].str), rg[i] + 1, 8);
+					(*reln)++;
+				}
+				else if (rg[i][0] == '^' && rg[i][1] >= 97 && rg[i][1] <= 122) { //relocation
+					rt[i] = 4;
+					rv[i] = (uint64_t) &(rel[*reln].typ);
+					rel[*reln].addr = *bn;
+					rel[*reln].typ = 128;
 					memcpy(&(rel[*reln].str), rg[i] + 1, 8);
 					(*reln)++;
 				}
@@ -248,8 +257,17 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_
 	memcpy(buf + 44, &reln, 8);
 	
 	memcpy(buf + binoff, bin, bn);
-	memcpy(buf + symoff, sym, symn * 17);
-	memcpy(buf + reloff, rel, reln * 17);
+	for (uint64_t i = 0; i < symn; i++) {
+		memcpy(buf + symoff + (17 * i), &(sym[i].str), 8);
+		memcpy(buf + symoff + (17 * i) + 8, &(sym[i].addr), 8);
+		memcpy(buf + symoff + (17 * i) + 16, &(sym[i].typ), 1);
+	}
+	
+	for (uint64_t i = 0; i < reln; i++) {
+		memcpy(buf + reloff + (17 * i), &(rel[i].str), 8);
+		memcpy(buf + reloff + (17 * i) + 8, &(rel[i].addr), 8);
+		memcpy(buf + reloff + (17 * i) + 16, &(rel[i].typ), 1);
+	}
 	
 	FILE* f = fopen(path, "w");
 	fwrite(buf, 52 + bn + (symn * 17) + (reln * 17), 1, f);
@@ -288,11 +306,11 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	uint8_t* bin = calloc(1000, 1);
+	uint8_t bin[1000000];
 	uint64_t bn = 0;
-	au_sym_t* sym = calloc(1000, 1);
+	au_sym_t sym[100000];
 	uint64_t symn = 0;
-	au_sym_t* rel = calloc(1000, 1);
+	au_sym_t rel[100000];
 	uint64_t reln = 0;
 	int8_t e = 0;
 	au_lex(bin, &bn, sym, &symn, rel, &reln, argv[2], &e);
@@ -308,9 +326,5 @@ int8_t main(int32_t argc, int8_t** argv) {
 		
 		au_writ(bin, bn, sym, symn, rel, reln, argv[3]);
 	}
-	
-	free(bin);
-	free(sym);
-	free(rel);
 	return 0;
 }
