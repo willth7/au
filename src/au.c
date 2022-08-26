@@ -306,25 +306,21 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	uint8_t bin[1000000];
+	uint8_t* bin = calloc(1000000, 1);
 	uint64_t bn = 0;
-	au_sym_t sym[100000];
+	au_sym_t* sym = calloc(1000000, 1);
 	uint64_t symn = 0;
-	au_sym_t rel[100000];
+	au_sym_t* rel = calloc(1000000, 1);
 	uint64_t reln = 0;
 	int8_t e = 0;
 	au_lex(bin, &bn, sym, &symn, rel, &reln, argv[2], &e);
 	
 	if (!e) {
-		for (uint16_t i = 0; i < symn; i++) {
-			printf("[sym]\tname: %s\n\taddr: %lu\n\ttyp: %hhu\n", (int8_t*) &(sym[i].str), sym[i].addr, sym[i].typ);
-		}
-		
-		for (uint16_t i = 0; i < reln; i++) {
-			printf("[rel]\tname: %s\n\taddr: %lu\n\ttyp: %hhu\n", (int8_t*) &(rel[i].str), rel[i].addr, rel[i].typ);
-		}
-		
 		au_writ(bin, bn, sym, symn, rel, reln, argv[3]);
 	}
+	
+	free(bin);
+	free(sym);
+	free(rel);
 	return 0;
 }
