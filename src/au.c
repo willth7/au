@@ -200,6 +200,12 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				au_op(bin, bn, op, rt, rv, e, path, ln);
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
+				for (uint64_t i = 0; i < *symn; i++) {
+					if (!memcmp(&(sym[i].str), op + 1, 8)) {
+						printf("[%s, %lu] error: redefinition of symbol '%s'\n", path, ln, op + 1);
+						*e = -1;
+					}
+				}
 				sym[*symn].addr = *bn;
 				memcpy(&(sym[*symn].str), op + 1, 8);
 				(*symn)++;

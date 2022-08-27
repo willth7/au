@@ -1162,6 +1162,11 @@ void avr_enc_sbrs(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b) {
 }
 
 void avr_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
+	if (*bn % 2) {
+		printf("[%s, %lu] error: instruction out of alignment\n", path, ln);
+		*e = -1;
+	}
+	
 	if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
 		if (rt[0] == 0 && rt[1] == 0 && rt[2] == 0) {
 			avr_enc_nop(bin, bn);
