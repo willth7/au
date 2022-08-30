@@ -335,7 +335,7 @@ void avr_inst_fmulsu(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 
 void avr_inst_cp(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
-	bin[*bn + 1] = 4;
+	bin[*bn + 1] = 20;
 	
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
@@ -347,7 +347,7 @@ void avr_inst_cp(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 
 void avr_inst_cpc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
-	bin[*bn + 1] = 20;
+	bin[*bn + 1] = 4;
 	
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
@@ -359,7 +359,7 @@ void avr_inst_cpc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 
 void avr_inst_sub(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
-	bin[*bn + 1] = 8;
+	bin[*bn + 1] = 24;
 	
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
@@ -371,7 +371,7 @@ void avr_inst_sub(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 
 void avr_inst_sbc(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
-	bin[*bn + 1] = 24;
+	bin[*bn + 1] = 8;
 	
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
@@ -456,6 +456,18 @@ void avr_inst_or(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 void avr_inst_mov(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 44;
+	
+	bin[*bn] |= (rs) & 15;
+	bin[*bn] |= (rd << 4) & 240;
+	bin[*bn + 1] |= (rs >> 3) & 2;
+	bin[*bn + 1] |= (rd >> 4) & 1;
+	
+	*bn += 2;
+}
+
+void avr_inst_mul(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
+	bin[*bn] = 0;
+	bin[*bn + 1] = 156;
 	
 	bin[*bn] |= (rs) & 15;
 	bin[*bn] |= (rd << 4) & 240;
@@ -588,7 +600,7 @@ void avr_inst_std(uint8_t* bin, uint64_t* bn, uint8_t rp, uint8_t k, uint8_t rs)
 	*bn += 2;
 }
 
-void avr_inst_lds(uint8_t* bin, uint64_t* bn, uint8_t rd, uint16_t k) { //todo
+void avr_inst_lds(uint8_t* bin, uint64_t* bn, uint8_t rd, uint16_t k) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 144;
 	
@@ -600,7 +612,7 @@ void avr_inst_lds(uint8_t* bin, uint64_t* bn, uint8_t rd, uint16_t k) { //todo
 	*bn += 4;
 }
 
-void avr_inst_sts(uint8_t* bin, uint64_t* bn, uint16_t k, uint8_t rs) { //todo
+void avr_inst_sts(uint8_t* bin, uint64_t* bn, uint16_t k, uint8_t rs) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 146;
 	
@@ -612,7 +624,7 @@ void avr_inst_sts(uint8_t* bin, uint64_t* bn, uint16_t k, uint8_t rs) { //todo
 	*bn += 4;
 }
 
-void avr_inst_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp, int8_t k) {
+void avr_inst_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp, int8_t k) { //todo
 	bin[*bn] = 0;
 	bin[*bn + 1] = 144;
 	
@@ -624,6 +636,10 @@ void avr_inst_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp, int8_t k) {
 	}
 	else if (rp == 30) {
 		rp = 0;
+	}
+	
+	if (rp != 12 && k == 0) {
+		bin[*bn + 1] = 128;
 	}
 	
 	if (k == -1) {
@@ -638,7 +654,7 @@ void avr_inst_ld(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rp, int8_t k) {
 	*bn += 2;
 }
 
-void avr_inst_st(uint8_t* bin, uint64_t* bn, uint8_t rp, int8_t k, uint8_t rs) {
+void avr_inst_st(uint8_t* bin, uint64_t* bn, uint8_t rp, int8_t k, uint8_t rs) { //todo
 	bin[*bn] = 0;
 	bin[*bn + 1] = 146;
 	
@@ -650,6 +666,10 @@ void avr_inst_st(uint8_t* bin, uint64_t* bn, uint8_t rp, int8_t k, uint8_t rs) {
 	}
 	else if (rp == 30) {
 		rp = 0;
+	}
+	
+	if (rp != 12 && k == 0) {
+		bin[*bn + 1] = 130;
 	}
 	
 	if (k == -1) {
@@ -1024,18 +1044,6 @@ void avr_inst_sbis(uint8_t* bin, uint64_t* bn, uint8_t p, uint8_t b) {
 	*bn += 2;
 }
 
-void avr_inst_mul(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
-	bin[*bn] = 0;
-	bin[*bn + 1] = 156;
-	
-	bin[*bn] |= (rs) & 15;
-	bin[*bn] |= (rd << 4) & 240;
-	bin[*bn + 1] |= (rs >> 3) & 2;
-	bin[*bn + 1] |= (rd >> 4) & 1;
-	
-	*bn += 2;
-}
-
 void avr_inst_in(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t p) {
 	bin[*bn] = 0;
 	bin[*bn + 1] = 176;
@@ -1403,6 +1411,17 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			avr_err_r5(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
+			avr_inst_mul(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mul");
+			*e = -1;
+		}
+	}
 	else if (op[0] == 'c' && op[1] == 'p' && op[2] == 'i' && op[3] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
 			avr_err_r4(rv[0], e, path, ln);
@@ -1556,7 +1575,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 's' && op[3] == 0) { //todo
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 's' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
 			avr_err_r5(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) = 1;
@@ -1572,7 +1591,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) { //todo
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 's' && op[3] == 0) {
 		if (rt[0] == 4 && rt[1] == 1 && rt[2] == 0) {
 			*((uint8_t*) rv[0]) = 1;
 			avr_err_r5(rv[1], e, path, ln);
@@ -1607,11 +1626,11 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_err_r5(rv[0], e, path, ln);
-			avr_err_rp(rv[1], e, path, ln);
+			avr_err_rp(rv[0], e, path, ln);
+			avr_err_r5(rv[1], e, path, ln);
 			avr_inst_st(bin, bn, rv[0], 0, rv[1]);
 		}
-		else if (rt[0] == 1 && rt[1] == 2 && (rt[2] == 1 || rt[2] == 3)) {
+		else if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 1) {
 			avr_err_rp(rv[0], e, path, ln);
 			avr_err_k2(rv[1], e, path, ln);
 			avr_err_r5(rv[2], e, path, ln);
@@ -2075,7 +2094,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) { //todo
+	else if (op[0] == 'j' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
 		if (rt[0] == 4 && rt[1] == 0 && rt[2] == 0) {
 			*((uint8_t*) rv[0]) |= 2;
 			avr_inst_jmp(bin, bn, 0);
@@ -2089,7 +2108,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) { //todo
+	else if (op[0] == 'c' && op[1] == 'a' && op[2] == 'l' && op[3] == 'l' && op[4] == 0) {
 		if (rt[0] == 4 && rt[1] == 0 && rt[2] == 0) {
 			*((uint8_t*) rv[0]) |= 2;
 			avr_inst_call(bin, bn, 0);
@@ -2176,17 +2195,6 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sbis");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 0) {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			avr_err_r5(rv[0], e, path, ln);
-			avr_err_r5(rv[1], e, path, ln);
-			avr_inst_mul(bin, bn, rv[0], rv[1]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mul");
 			*e = -1;
 		}
 	}
