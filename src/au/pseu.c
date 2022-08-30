@@ -19,41 +19,41 @@
 #include <string.h>
 #include <stdio.h>
 
-void au_enc_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_inst_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -128 || k > 255) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_enc_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_inst_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -32768 || k > ((uint16_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_enc_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_inst_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -2147483648 || k > ((uint32_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_enc_byte(uint8_t* bin, uint64_t* bn, int8_t k) {
+void au_inst_byte(uint8_t* bin, uint64_t* bn, int8_t k) {
 	bin[*bn] = k;
 	
 	*bn += 1;
 }
 
-void au_enc_byt2(uint8_t* bin, uint64_t* bn, int16_t k) {
+void au_inst_byt2(uint8_t* bin, uint64_t* bn, int16_t k) {
 	bin[*bn] = k;
 	bin[*bn + 1] = k >> 8;
 	
 	*bn += 2;
 }
 
-void au_enc_byt4(uint8_t* bin, uint64_t* bn, int32_t k) {
+void au_inst_byt4(uint8_t* bin, uint64_t* bn, int32_t k) {
 	bin[*bn] = k;
 	bin[*bn + 1] = k >> 8;
 	bin[*bn + 2] = k >> 16;
@@ -62,7 +62,7 @@ void au_enc_byt4(uint8_t* bin, uint64_t* bn, int32_t k) {
 	*bn += 4;
 }
 
-void au_enc_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
+void au_inst_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
 	bin[*bn] = k;
 	bin[*bn + 1] = k >> 8;
 	bin[*bn + 2] = k >> 16;
@@ -75,11 +75,11 @@ void au_enc_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
 	*bn += 8;
 }
 
-void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
+void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == 'e' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k8(rv[0], e, path, ln);
-			au_enc_byte(bin, bn, rv[0]);
+			au_inst_k8(rv[0], e, path, ln);
+			au_inst_byte(bin, bn, rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
@@ -88,8 +88,8 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '2' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k16(rv[0], e, path, ln);
-			au_enc_byt2(bin, bn, rv[0]);
+			au_inst_k16(rv[0], e, path, ln);
+			au_inst_byt2(bin, bn, rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt2");
@@ -98,8 +98,8 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '4' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_enc_k32(rv[0], e, path, ln);
-			au_enc_byt4(bin, bn, rv[0]);
+			au_inst_k32(rv[0], e, path, ln);
+			au_inst_byt4(bin, bn, rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt4");
@@ -108,7 +108,7 @@ void au_pseu_op(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '8' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_enc_byt8(bin, bn, rv[0]);
+			au_inst_byt8(bin, bn, rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt8");

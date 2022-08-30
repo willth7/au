@@ -24,7 +24,7 @@
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 
-void (*au_op) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
+void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 typedef struct au_sym_s {
 	int64_t str;
@@ -197,7 +197,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			
 			
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
-				au_op(bin, bn, op, rt, rv, e, path, ln);
+				au_enc(bin, bn, op, rt, rv, e, path, ln);
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
 				for (uint64_t i = 0; i < *symn; i++) {
@@ -211,7 +211,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				(*symn)++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
-				au_pseu_op(bin, bn, op + 1, rt, rv, e, path, ln);
+				au_pseu_enc(bin, bn, op + 1, rt, rv, e, path, ln);
 			}
 			else {
 				printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
@@ -290,7 +290,7 @@ int8_t main(int32_t argc, int8_t** argv) {
 	
 	if (!strcmp(argv[1], "avr")) {
 		au_reg = avr_reg;
-		au_op = avr_op;
+		au_enc = avr_enc;
 	}
 	else {
 		printf("error: unsupported architecture\n");
