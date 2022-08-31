@@ -143,6 +143,13 @@ void avr_err_r5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void avr_err_r2w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r != 24 && r != 26 && r != 28 && r != 30) {
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
 void avr_err_r4w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r % 2) {
 		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
@@ -2124,12 +2131,12 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_err_r4w(rv[0], e, path, ln);
+			avr_err_r2w(rv[0], e, path, ln);
 			avr_err_k6(rv[1], e, path, ln);
 			avr_inst_adiw(bin, bn, rv[0], rv[1]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
-			avr_err_r4w(rv[0], e, path, ln);
+			avr_err_r2w(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) = 6;
 			avr_inst_adiw(bin, bn, rv[0], 0);
 		}
@@ -2140,12 +2147,12 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'i' && op[3] == 'w' && op[4] == 0) {
 		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
-			avr_err_r4w(rv[0], e, path, ln);
+			avr_err_r2w(rv[0], e, path, ln);
 			avr_err_k6(rv[1], e, path, ln);
 			avr_inst_sbiw(bin, bn, rv[0], rv[1]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
-			avr_err_r4w(rv[0], e, path, ln);
+			avr_err_r2w(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) = 6;
 			avr_inst_sbiw(bin, bn, rv[0], 0);
 		}
