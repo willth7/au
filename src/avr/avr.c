@@ -124,49 +124,49 @@ uint8_t avr_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 
 void avr_err_r3(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 16 || r > 23) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_r4(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 16 || r > 32) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_r5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r > 23) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_r4w(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r % 2) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_rp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 26 && r != 28 && r != 30) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_ry(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 28 && r != 30) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }
 
 void avr_err_rz(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r != 30) {
-		printf("[%s, %lu] error: illegal register '%u'\n", path, ln, r);
+		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
 		*e = -1;
 	}
 }

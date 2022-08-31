@@ -19,21 +19,21 @@
 #include <string.h>
 #include <stdio.h>
 
-void au_inst_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -128 || k > 255) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_inst_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_err_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -32768 || k > ((uint16_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
 	}
 }
 
-void au_inst_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+void au_err_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -2147483648 || k > ((uint32_t) -1)) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", path, ln, k);
 		*e = -1;
@@ -78,7 +78,7 @@ void au_inst_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
 void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == 'e' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_inst_k8(rv[0], e, path, ln);
+			au_err_k8(rv[0], e, path, ln);
 			au_inst_byte(bin, bn, rv[0]);
 		}
 		else {
@@ -88,7 +88,7 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '2' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_inst_k16(rv[0], e, path, ln);
+			au_err_k16(rv[0], e, path, ln);
 			au_inst_byt2(bin, bn, rv[0]);
 		}
 		else {
@@ -98,7 +98,7 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '4' && op[4] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_inst_k32(rv[0], e, path, ln);
+			au_err_k32(rv[0], e, path, ln);
 			au_inst_byt4(bin, bn, rv[0]);
 		}
 		else {
