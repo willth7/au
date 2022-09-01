@@ -741,6 +741,41 @@ void arm_v6m_inst_bkpt(uint8_t* bin, uint64_t* bn, uint8_t k) {
 	*bn += 2;
 }
 
+void arm_v6m_inst_nop(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 0;
+	bin[*bn + 1] = 191;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_yield(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 16;
+	bin[*bn + 1] = 191;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_wfe(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 32;
+	bin[*bn + 1] = 191;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_wfi(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 48;
+	bin[*bn + 1] = 191;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_sev(uint8_t* bin, uint64_t* bn) {
+	bin[*bn] = 64;
+	bin[*bn + 1] = 191;
+	
+	*bn += 2;
+}
+
 void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (*bn % 2) {
 		printf("[%s, %lu] error: instruction out of alignment\n", path, ln);
@@ -1327,12 +1362,57 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'k' && op[2] == 'p' && op[3] == 't' && op[4] == 0) {
-		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) { //todo
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
 			arm_v6m_err_k8(rv[0], e, path, ln);
 			arm_v6m_inst_bkpt(bin, bn, rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bkpt");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
+		if (rt[0] == 0) {
+			arm_v6m_inst_nop(bin, bn);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "nop");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'y' && op[1] == 'i' && op[2] == 'e' && op[3] == 'l' && op[4] == 'd' && op[5] == 0) {
+		if (rt[0] == 0) {
+			arm_v6m_inst_yield(bin, bn);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "yield");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'w' && op[1] == 'f' && op[2] == 'e' && op[3] == 0) {
+		if (rt[0] == 0) {
+			arm_v6m_inst_wfe(bin, bn);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "wfe");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'w' && op[1] == 'f' && op[2] == 'i' && op[3] == 0) {
+		if (rt[0] == 0) {
+			arm_v6m_inst_wfi(bin, bn);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "wdi");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'e' && op[2] == 'v' && op[3] == 0) {
+		if (rt[0] == 0) {
+			arm_v6m_inst_sev(bin, bn);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sev");
 			*e = -1;
 		}
 	}
