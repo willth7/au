@@ -47,8 +47,22 @@ void arm_v6m_err_k5(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void arm_v6m_err_k7(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -64 || k > 127) {
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
+		*e = -1;
+	}
+}
+
 void arm_v6m_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -128 || k > 255) {
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
+		*e = -1;
+	}
+}
+
+void arm_v6m_err_k11(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -1024 || k > 2047) {
 		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
@@ -776,6 +790,46 @@ void arm_v6m_inst_sev(uint8_t* bin, uint64_t* bn) {
 	*bn += 2;
 }
 
+void arm_v6m_inst_stm(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t k) { //todo
+	bin[*bn] = 0;
+	bin[*bn + 1] = 192;
+	
+	bin[*bn] |= k;
+	bin[*bn + 1] |= rd;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_ldm(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t k) { //todo
+	bin[*bn] = 0;
+	bin[*bn + 1] = 200;
+	
+	bin[*bn] |= k;
+	bin[*bn + 1] |= rd;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_b_cond(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t k) {
+	bin[*bn] = 0;
+	bin[*bn + 1] = 208;
+	
+	bin[*bn] |= k;
+	bin[*bn + 1] |= c;
+	
+	*bn += 2;
+}
+
+void arm_v6m_inst_b(uint8_t* bin, uint64_t* bn, uint16_t k) {
+	bin[*bn] = 0;
+	bin[*bn + 1] = 224;
+	
+	bin[*bn] |= k;
+	bin[*bn + 1] |= k >> 8;
+	
+	*bn += 2;
+}
+
 void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (*bn % 2) {
 		printf("[%s, %lu] error: instruction out of alignment\n", path, ln);
@@ -1413,6 +1467,266 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sev");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'm' && op[3] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_stm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "stm");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'm' && op[3] == 'i' && op[4] == 'a' && op[5] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_stm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "stmia");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'm' && op[3] == 'e' && op[4] == 'a' && op[5] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_stm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "stmea");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'm' && op[3] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_ldm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldm");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'm' && op[3] == 'i' && op[4] == 'a' && op[5] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_ldm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldmia");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 't' && op[2] == 'd' && op[3] == 'f' && op[4] == 'd' && op[5] == 0) {
+		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) { //todo
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_inst_ldm(bin, bn, rv[0], rv[1]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldmfd");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'e' && op[2] == 'q' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "beq");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'n' && op[2] == 'e' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 1, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bne");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'c' && op[2] == 's' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 2, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bcs");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'h' && op[2] == 's' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 2, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bhs");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'c' && op[2] == 'c' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 3, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bcc");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'o' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 3, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "blo");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'm' && op[2] == 'i' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 4, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bmi");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'p' && op[2] == 'l' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 5, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bpl");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'v' && op[2] == 's' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 6, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bvs");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'v' && op[2] == 'c' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 7, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bvc");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'h' && op[2] == 'i' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 8, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bhi");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 's' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 9, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bls");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'g' && op[2] == 'e' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 10, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bge");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 't' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 11, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "blt");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'g' && op[2] == 't' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 12, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bgt");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 'e' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 13, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ble");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'u' && op[1] == 'd' && op[2] == 'f' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 14, rv[0]); //todo
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "udf");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'v' && op[2] == 'c' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k8(rv[0], e, path, ln);
+			arm_v6m_inst_b_cond(bin, bn, 15, rv[0]); //todo
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "svc");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 'a' && op[2] == 'l' && op[3] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k11(rv[0], e, path, ln);
+			arm_v6m_inst_b(bin, bn, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bal");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'b' && op[1] == 0) {
+		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+			arm_v6m_err_k11(rv[0], e, path, ln);
+			arm_v6m_inst_b(bin, bn, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "b");
 			*e = -1;
 		}
 	}
