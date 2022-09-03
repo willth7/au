@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 uint8_t arm_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
-	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) {
+	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) { //general purpose
 		return 0;
 	}
 	else if (r[0] == 'r' && r[1] == '1' && r[2] == 0) {
@@ -67,6 +67,39 @@ uint8_t arm_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 	else if ((r[0] == 'r' && r[1] == '1' && r[2] == '5' && r[3] == 0) || (r[0] == 'p' && r[1] == 'c')) {
 		return 15;
+	}
+	else if (r[0] == 'a' && r[1] == 'p' && r[2] == 's' && r[3] == 'r' && r[4] == 0) { //special purpose
+		return 16;
+	}
+	else if (r[0] == 'i' && r[1] == 'a' && r[2] == 'p' && r[3] == 's' && r[4] == 'r' && r[5] == 0) {
+		return 17;
+	}
+	else if (r[0] == 'e' && r[1] == 'a' && r[2] == 'p' && r[3] == 's' && r[4] == 'r' && r[5] == 0) {
+		return 18;
+	}
+	else if (r[0] == 'x' && r[1] == 'p' && r[2] == 's' && r[3] == 'r' && r[4] == 0) {
+		return 19;
+	}
+	else if (r[0] == 'i' && r[1] == 'p' && r[2] == 's' && r[3] == 'r' && r[4] == 0) {
+		return 20;
+	}
+	else if (r[0] == 'e' && r[1] == 'p' && r[2] == 's' && r[3] == 'r' && r[4] == 0) {
+		return 21;
+	}
+	else if (r[0] == 'i' && r[1] == 'e' && r[2] == 'p' && r[3] == 's' && r[4] == 'r' && r[5] == 0) {
+		return 22;
+	}
+	else if (r[0] == 'm' && r[1] == 's' && r[2] == 'p' && r[3] == 0) {
+		return 23;
+	}
+	else if (r[0] == 'p' && r[1] == 's' && r[2] == 'p' && r[3] == 0) {
+		return 24;
+	}
+	else if (r[0] == 'p' && r[1] == 'r' && r[2] == 'i' && r[3] == 'm' && r[4] == 'a' && r[4] == 's' && r[4] == 'k' && r[4] == 0) {
+		return 32;
+	}
+	else if (r[0] == 'c' && r[1] == 'o' && r[2] == 'n' && r[3] == 't' && r[4] == 'r' && r[4] == 'o' && r[4] == 'l' && r[4] == 0) {
+		return 36;
 	}
 	else {
 		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);
