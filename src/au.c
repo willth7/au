@@ -99,13 +99,25 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	int8_t op[256];
 	*((uint64_t*) op) = 0;
 	*((uint64_t*) op + 1) = 0;
-	int8_t rg[3][256];
+	int8_t rg[9][256];
 	*((uint64_t*) rg[0]) = 0;
 	*((uint64_t*) rg[0] + 1) = 0;
 	*((uint64_t*) rg[1]) = 0;
 	*((uint64_t*) rg[1] + 1) = 0;
 	*((uint64_t*) rg[2]) = 0;
 	*((uint64_t*) rg[2] + 1) = 0;
+	*((uint64_t*) rg[3]) = 0;
+	*((uint64_t*) rg[3] + 1) = 0;
+	*((uint64_t*) rg[4]) = 0;
+	*((uint64_t*) rg[4] + 1) = 0;
+	*((uint64_t*) rg[5]) = 0;
+	*((uint64_t*) rg[5] + 1) = 0;
+	*((uint64_t*) rg[6]) = 0;
+	*((uint64_t*) rg[6] + 1) = 0;
+	*((uint64_t*) rg[7]) = 0;
+	*((uint64_t*) rg[7] + 1) = 0;
+	*((uint64_t*) rg[8]) = 0;
+	*((uint64_t*) rg[8] + 1) = 0;
 	uint8_t ri = 0;
 	uint8_t rn = 0;
 	
@@ -120,7 +132,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			li++;
 		}
 		else if (fx[fi] == ',' && !c) { //addt operand signal
-			if (rn < 3) {
+			if (rn < 9) {
 				rn++;
 			}
 			else {
@@ -159,8 +171,8 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				*e = -1;
 			}
 			
-			uint8_t rt[3] = {0, 0, 0};
-			uint64_t rv[3] = {0, 0, 0};
+			uint8_t rt[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+			uint64_t rv[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 			
 			for (uint8_t i = 0; i < ri; i++) {
 				if (rg[i][0] >= 97 && rg[i][0] <= 122) { //arch-spec reg
@@ -231,6 +243,18 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			*((uint64_t*) rg[1] + 1) = 0;
 			*((uint64_t*) rg[2]) = 0;
 			*((uint64_t*) rg[2] + 1) = 0;
+			*((uint64_t*) rg[3]) = 0;
+			*((uint64_t*) rg[3] + 1) = 0;
+			*((uint64_t*) rg[4]) = 0;
+			*((uint64_t*) rg[4] + 1) = 0;
+			*((uint64_t*) rg[5]) = 0;
+			*((uint64_t*) rg[5] + 1) = 0;
+			*((uint64_t*) rg[6]) = 0;
+			*((uint64_t*) rg[6] + 1) = 0;
+			*((uint64_t*) rg[7]) = 0;
+			*((uint64_t*) rg[7] + 1) = 0;
+			*((uint64_t*) rg[8]) = 0;
+			*((uint64_t*) rg[8] + 1) = 0;
 			ri = 0;
 			rn = 0;
 			lex[0] = 0;
