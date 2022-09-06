@@ -1559,7 +1559,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 	}
 	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
 			avr_err_r5(rv[0], e, path, ln);
 			avr_err_ry(rv[1], e, path, ln);
 			avr_err_k6(rv[2], e, path, ln);
@@ -1571,7 +1571,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 	}
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 'd' && op[3] == 0) {
-		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 1) {
+		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 1 && rt[3] == 0) {
 			avr_err_ry(rv[0], e, path, ln);
 			avr_err_k6(rv[1], e, path, ln);
 			avr_err_r5(rv[2], e, path, ln);
@@ -1620,7 +1620,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			avr_err_rp(rv[1], e, path, ln);
 			avr_inst_ld(bin, bn, rv[0], rv[1], 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && (rt[2] == 2 || rt[2] == 3)) {
+		else if (rt[0] == 1 && rt[1] == 1 && (rt[2] == 2 || rt[2] == 3) && rt[3] == 0) {
 			avr_err_r5(rv[0], e, path, ln);
 			avr_err_rp(rv[1], e, path, ln);
 			avr_err_k2(rv[2], e, path, ln);
@@ -1637,7 +1637,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			avr_err_r5(rv[1], e, path, ln);
 			avr_inst_st(bin, bn, rv[0], 0, rv[1]);
 		}
-		else if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 1) {
+		else if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 1 && rt[3] == 0) {
 			avr_err_rp(rv[0], e, path, ln);
 			avr_err_k2(rv[1], e, path, ln);
 			avr_err_r5(rv[2], e, path, ln);
@@ -1657,7 +1657,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			avr_err_rz(rv[1], e, path, ln);
 			avr_inst_lpm_reg(bin, bn, rv[0], 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
 			avr_err_r5(rv[0], e, path, ln);
 			avr_err_rz(rv[1], e, path, ln);
 			avr_err_k1(rv[2], e, path, ln);
@@ -1677,7 +1677,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			avr_err_rz(rv[1], e, path, ln);
 			avr_inst_elpm_reg(bin, bn, rv[0], 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
 			avr_err_r5(rv[0], e, path, ln);
 			avr_err_rz(rv[1], e, path, ln);
 			avr_err_k1(rv[2], e, path, ln);
