@@ -1220,15 +1220,15 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_v6m_err_k8(rv[1], e, path, ln);
 			arm_v6m_inst_cmp_imm(bin, bn, rv[0], rv[1]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			arm_v6m_err_r3(rv[0], e, path, ln);
-			arm_v6m_err_r3(rv[1], e, path, ln);
-			arm_v6m_inst_cmp_reg0(bin, bn, rv[0], rv[1]);
-		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && ((rv[0] > 7) ^ (rv[1] > 7))) {
 			arm_v6m_err_r4(rv[0], e, path, ln);
 			arm_v6m_err_r4(rv[1], e, path, ln);
 			arm_v6m_inst_cmp_reg1(bin, bn, rv[0], rv[1]);
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			arm_v6m_err_r3(rv[1], e, path, ln);
+			arm_v6m_inst_cmp_reg0(bin, bn, rv[0], rv[1]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "cmp");
@@ -2381,6 +2381,10 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0) {
 			arm_v6m_err_k24(rv[0], e, path, ln);
 			arm_v6m_inst_bl(bin, bn, rv[0]);
+		}
+		else if (rt[0] == 4 && rt[1] == 0) {
+			*((uint8_t*) rv[0]) |= 4;
+			arm_v6m_inst_bl(bin, bn, 0);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bl");
