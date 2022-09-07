@@ -240,7 +240,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				}
 				else if (rg[i][0] >= 48 && rg[i][0] <= 57) { //imm
 					rt[i] = 2;
-					if (rg[i][0] == '0' && rg[1] == 'x') {
+					if (rg[i][0] == '0' && rg[i][1] == 'x') {
 						rv[i] = au_str_int_hex(rg[i] + 2, e, path, ln);
 					}
 					else {
@@ -249,7 +249,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				}
 				else if (rg[i][0] == '-' && rg[i][1] >= 48 && rg[i][1] <= 57) { //neg imm
 					rt[i] = 3;
-					if (rg[i][0] == '0' && rg[1] == 'x') {
+					if (rg[i][0] == '0' && rg[i][1] == 'x') {
 						rv[i] = -1 * au_str_int_hex(rg[i] + 2, e, path, ln);
 					}
 					else {
