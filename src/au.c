@@ -36,7 +36,7 @@ typedef struct au_sym_s {
 
 void (*au_writ) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
 
-uint64_t au_str_int(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
+uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
 	for(uint8_t i = 0; i < 20; i++) {
 		if (a[i] == 0) {
@@ -69,6 +69,65 @@ uint64_t au_str_int(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 		}
 		else if (a[i] == '9') {
 			b += 9;
+		}
+		else if (a[i] != '0') {
+			printf("[%s, %lu] error: illegal character '%c'\n", path, ln, a[i]);
+			*e = -1;
+		}
+	}
+}
+
+uint64_t au_str_int_hex(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
+	uint64_t b = 0;
+	for(uint8_t i = 0; i < 20; i++) {
+		if (a[i] == 0) {
+			return b;
+		}
+		b *= 16;
+		if (a[i] == '1') {
+			b += 1;
+		}
+		else if (a[i] == '2') {
+			b += 2;
+		}
+		else if (a[i] == '3') {
+			b += 3;
+		}
+		else if (a[i] == '4') {
+			b += 4;
+		}
+		else if (a[i] == '5') {
+			b += 5;
+		}
+		else if (a[i] == '6') {
+			b += 6;
+		}
+		else if (a[i] == '7') {
+			b += 7;
+		}
+		else if (a[i] == '8') {
+			b += 8;
+		}
+		else if (a[i] == '9') {
+			b += 9;
+		}
+		else if (a[i] == 'a') {
+			b += 10;
+		}
+		else if (a[i] == 'b') {
+			b += 11;
+		}
+		else if (a[i] == 'c') {
+			b += 12;
+		}
+		else if (a[i] == 'd') {
+			b += 13;
+		}
+		else if (a[i] == 'e') {
+			b += 14;
+		}
+		else if (a[i] == 'f') {
+			b += 15;
 		}
 		else if (a[i] != '0') {
 			printf("[%s, %lu] error: illegal character '%c'\n", path, ln, a[i]);
@@ -181,11 +240,21 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				}
 				else if (rg[i][0] >= 48 && rg[i][0] <= 57) { //imm
 					rt[i] = 2;
-					rv[i] = au_str_int(rg[i], e, path, ln);
+					if (rg[i][0] == '0' && rg[1] == 'x') {
+						rv[i] = au_str_int_hex(rg[i] + 2, e, path, ln);
+					}
+					else {
+						rv[i] = au_str_int_dec(rg[i], e, path, ln);
+					}
 				}
 				else if (rg[i][0] == '-' && rg[i][1] >= 48 && rg[i][1] <= 57) { //neg imm
 					rt[i] = 3;
-					rv[i] = -1 * au_str_int(rg[i] + 1, e, path, ln);
+					if (rg[i][0] == '0' && rg[1] == 'x') {
+						rv[i] = -1 * au_str_int_hex(rg[i] + 2, e, path, ln);
+					}
+					else {
+						rv[i] = -1 * au_str_int_dec(rg[i], e, path, ln);
+					}
 				}
 				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122) { //relocation
 					rt[i] = 4;

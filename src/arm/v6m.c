@@ -1193,11 +1193,6 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_v6m_err_r4(rv[1], e, path, ln);
 			arm_v6m_inst_mov_reg0(bin, bn, rv[0], rv[1]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			arm_v6m_err_r3(rv[0], e, path, ln);
-			arm_v6m_err_r3(rv[1], e, path, ln);
-			arm_v6m_inst_mov_reg1(bin, bn, rv[0], rv[1]);
-		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mov");
 			*e = -1;
@@ -1387,10 +1382,10 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) { //todo: syntax
-		if (rt[0] == 1 && (rt[1] == 2 || rt[1] == 3) && rt[2] == 0) {
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) {
+		if (rt[0] == 1 && (rt[1] == 1 && rv[1] == 15) && (rt[2] == 2 || rt[2] == 3) && rt[3] == 0) {
 			arm_v6m_err_r3(rv[0], e, path, ln);
-			arm_v6m_err_k8(rv[1], e, path, ln);
+			arm_v6m_err_k8(rv[2], e, path, ln);
 			arm_v6m_inst_ldr_pc(bin, bn, rv[0], rv[1]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
@@ -1540,11 +1535,15 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'r' && op[3] == 0) {
-		if (rt[0] == 1 && rt[1] == 1 && (rt[2] == 2 || rt[2] == 3) && rt[3] == 0) {
+		if (rt[0] == 1 && (rt[1] == 1 && rv[1] == 15) && (rt[2] == 2 || rt[2] == 3) && rt[3] == 0) {
 			arm_v6m_err_r3(rv[0], e, path, ln);
-			//arm_v6m_err_pc(rv[1], e, path, ln);
 			arm_v6m_err_k8(rv[2], e, path, ln);
 			arm_v6m_inst_adr(bin, bn, rv[0], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) {
+			arm_v6m_err_r3(rv[0], e, path, ln);
+			*((uint8_t*) rv[1]) |= 2;
+			arm_v6m_inst_adr(bin, bn, rv[0], 0);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adr");
@@ -2377,7 +2376,7 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 0) { //todo
+	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 0) {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0) {
 			arm_v6m_err_k24(rv[0], e, path, ln);
 			arm_v6m_inst_bl(bin, bn, rv[0]);
