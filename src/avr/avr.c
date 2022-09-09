@@ -2594,7 +2594,7 @@ void avr_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 	}
 	else {
-		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, "sbrs");
-			*e = -1;
+		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
+		*e = -1;
 	}
 }
