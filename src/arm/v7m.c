@@ -1062,6 +1062,344 @@ void arm_v7m_inst_b(uint8_t* bin, uint64_t* bn, uint16_t k) {
 	*bn += 2;
 }
 
+void arm_v7m_inst_stm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
+	bin[*bn] = 128;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn] |= rd;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ldm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
+	bin[*bn] = 144;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn] |= rd;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_pop_32(uint8_t* bin, uint64_t* bn) { //todo
+	bin[*bn] = 189;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+		else if (rl[i] == 15) {
+			bin[*bn + 3] |= 128;
+		}
+	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_stmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, stmfd
+	bin[*bn] = 0;
+	bin[*bn + 1] = 233;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn] |= rd;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_push_32(uint8_t* bin, uint64_t* bn) { //todo
+	bin[*bn] = 77;
+	bin[*bn + 1] = 233;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ldmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, ldmea
+	bin[*bn] = 16;
+	bin[*bn + 1] = 233;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn] |= rd;
+	
+	for (uint8_t i = 0; i < rn; i++) {
+		if (rl[i] == 0) {
+			bin[*bn + 2] |= 1;
+		}
+		else if (rl[i] == 1) {
+			bin[*bn + 2] |= 2;
+		}
+		else if (rl[i] == 2) {
+			bin[*bn + 2] |= 4;
+		}
+		else if (rl[i] == 3) {
+			bin[*bn + 2] |= 8;
+		}
+		else if (rl[i] == 4) {
+			bin[*bn + 2] |= 16;
+		}
+		else if (rl[i] == 5) {
+			bin[*bn + 2] |= 32;
+		}
+		else if (rl[i] == 6) {
+			bin[*bn + 2] |= 64;
+		}
+		else if (rl[i] == 7) {
+			bin[*bn + 2] |= 128;
+		}
+		else if (rl[i] == 8) {
+			bin[*bn + 3] |= 1;
+		}
+		else if (rl[i] == 9) {
+			bin[*bn + 3] |= 2;
+		}
+		else if (rl[i] == 10) {
+			bin[*bn + 3] |= 4;
+		}
+		else if (rl[i] == 11) {
+			bin[*bn + 3] |= 8;
+		}
+		else if (rl[i] == 12) {
+			bin[*bn + 3] |= 16;
+		}
+		else if (rl[i] == 14) {
+			bin[*bn + 3] |= 64;
+		}
+		else if (rl[i] == 15) {
+			bin[*bn + 3] |= 128;
+		}
+	}
+	
+	*bn += 4;
+}
+
 void arm_v7m_inst_msr(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 128;
 	bin[*bn + 1] = 243;
