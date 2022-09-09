@@ -1062,7 +1062,7 @@ void arm_v7m_inst_b(uint8_t* bin, uint64_t* bn, uint16_t k) {
 	*bn += 2;
 }
 
-void arm_v7m_inst_stm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
+void arm_v7m_inst_stm_32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint64_t* rl, uint8_t rn) { //todo
 	bin[*bn] = 128;
 	bin[*bn + 1] = 232;
 	bin[*bn + 2] = 0;
@@ -1118,7 +1118,7 @@ void arm_v7m_inst_stm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
 	*bn += 4;
 }
 
-void arm_v7m_inst_ldm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
+void arm_v7m_inst_ldm_32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint64_t* rl, uint8_t rn) { //todo
 	bin[*bn] = 144;
 	bin[*bn + 1] = 232;
 	bin[*bn + 2] = 0;
@@ -1174,7 +1174,7 @@ void arm_v7m_inst_ldm_32(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo
 	*bn += 4;
 }
 
-void arm_v7m_inst_pop_32(uint8_t* bin, uint64_t* bn) { //todo
+void arm_v7m_inst_pop_32(uint8_t* bin, uint64_t* bn, uint64_t* rl, uint8_t rn) { //todo
 	bin[*bn] = 189;
 	bin[*bn + 1] = 232;
 	bin[*bn + 2] = 0;
@@ -1231,7 +1231,7 @@ void arm_v7m_inst_pop_32(uint8_t* bin, uint64_t* bn) { //todo
 	*bn += 4;
 }
 
-void arm_v7m_inst_stmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, stmfd
+void arm_v7m_inst_stmdb(uint8_t* bin, uint64_t* bn, uint8_t rd, uint64_t* rl, uint8_t rn) { //todo, stmfd
 	bin[*bn] = 0;
 	bin[*bn + 1] = 233;
 	bin[*bn + 2] = 0;
@@ -1287,7 +1287,7 @@ void arm_v7m_inst_stmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, stmfd
 	*bn += 4;
 }
 
-void arm_v7m_inst_push_32(uint8_t* bin, uint64_t* bn) { //todo
+void arm_v7m_inst_push_32(uint8_t* bin, uint64_t* bn, uint64_t* rl, uint8_t rn) { //todo
 	bin[*bn] = 77;
 	bin[*bn + 1] = 233;
 	bin[*bn + 2] = 0;
@@ -1341,7 +1341,7 @@ void arm_v7m_inst_push_32(uint8_t* bin, uint64_t* bn) { //todo
 	*bn += 4;
 }
 
-void arm_v7m_inst_ldmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, ldmea
+void arm_v7m_inst_ldmdb(uint8_t* bin, uint64_t* bn, uint8_t rd, uint64_t* rl, uint8_t rn) { //todo, ldmea
 	bin[*bn] = 16;
 	bin[*bn + 1] = 233;
 	bin[*bn + 2] = 0;
@@ -1396,6 +1396,121 @@ void arm_v7m_inst_ldmdb(uint8_t* bin, uint64_t* bn, uint8_t rd) { //todo, ldmea
 			bin[*bn + 3] |= 128;
 		}
 	}
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_strex(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t k) {
+	bin[*bn] = 64;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn + 3] |= r0 << 4;
+	bin[*bn] |= r1;
+	bin[*bn + 2] |= k;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ldrex(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs, uint8_t k) {
+	bin[*bn] = 80;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 15;
+	
+	bin[*bn + 3] |= rd << 4;
+	bin[*bn] |= rs;
+	bin[*bn + 2] |= k;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_strd(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t k) { //todo
+	bin[*bn] = 64;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn + 3] |= r0 << 4;
+	bin[*bn] |= r1;
+	bin[*bn + 2] |= k;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_strexb(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1) {
+	bin[*bn] = 192;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 64;
+	bin[*bn + 3] = 15;
+	
+	bin[*bn + 2] |= rd;
+	bin[*bn + 3] |= r0 << 4;
+	bin[*bn] |= r1;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_strexh(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1) {
+	bin[*bn] = 192;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 80;
+	bin[*bn + 3] = 15;
+	
+	bin[*bn + 2] |= rd;
+	bin[*bn + 3] |= r0 << 4;
+	bin[*bn] |= r1;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_tbb(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
+	bin[*bn] = 208;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 240;
+	
+	bin[*bn + 2] |= rs;
+	bin[*bn] |= rd;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_tbh(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
+	bin[*bn] = 208;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 16;
+	bin[*bn + 3] = 240;
+	
+	bin[*bn + 2] |= rs;
+	bin[*bn] |= rd;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ldrexb(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
+	bin[*bn] = 208;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 79;
+	bin[*bn + 3] = 15;
+	
+	bin[*bn + 3] |= rd << 4;
+	bin[*bn] |= rs;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ldrexh(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
+	bin[*bn] = 208;
+	bin[*bn + 1] = 232;
+	bin[*bn + 2] = 95;
+	bin[*bn + 3] = 15;
+	
+	bin[*bn + 3] |= rd << 4;
+	bin[*bn] |= rs;
 	
 	*bn += 4;
 }
