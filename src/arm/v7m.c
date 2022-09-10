@@ -1515,6 +1515,70 @@ void arm_v7m_inst_ldrexh(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	*bn += 4;
 }
 
+void arm_v7m_inst_and_reg32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t t, uint8_t k) { //todo
+	bin[*bn] = 0;
+	bin[*bn + 1] = 234;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn] |= r0;
+	bin[*bn + 2] |= r1;
+	bin[*bn + 2] |= t << 4;
+	bin[*bn + 2] |= k << 6;
+	bin[*bn + 3] |= (k << 2) & 112;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_ands_reg32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t t, uint8_t k) { //todo
+	bin[*bn] = 16;
+	bin[*bn + 1] = 234;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn] |= r0;
+	bin[*bn + 2] |= r1;
+	bin[*bn + 2] |= t << 4;
+	bin[*bn + 2] |= k << 6;
+	bin[*bn + 3] |= (k << 2) & 112;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_bic_reg32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t t, uint8_t k) { //todo
+	bin[*bn] = 32;
+	bin[*bn + 1] = 234;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn] |= r0;
+	bin[*bn + 2] |= r1;
+	bin[*bn + 2] |= t << 4;
+	bin[*bn + 2] |= k << 6;
+	bin[*bn + 3] |= (k << 2) & 112;
+	
+	*bn += 4;
+}
+
+void arm_v7m_inst_bics_reg32(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t t, uint8_t k) { //todo
+	bin[*bn] = 48;
+	bin[*bn + 1] = 234;
+	bin[*bn + 2] = 0;
+	bin[*bn + 3] = 0;
+	
+	bin[*bn + 3] |= rd;
+	bin[*bn] |= r0;
+	bin[*bn + 2] |= r1;
+	bin[*bn + 2] |= t << 4;
+	bin[*bn + 2] |= k << 6;
+	bin[*bn + 3] |= (k << 2) & 112;
+	
+	*bn += 4;
+}
+
 void arm_v7m_inst_msr(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs) {
 	bin[*bn] = 128;
 	bin[*bn + 1] = 243;
