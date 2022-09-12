@@ -80,9 +80,6 @@ uint8_t arm_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	else if (r[0] == 'r' && r[1] == 'o' && r[2] == 'r' && r[3] == 0) { //shifts
 		return 19;
 	}
-	else if (r[0] == 'r' && r[1] == 'r' && r[2] == 'x' && r[3] == 0) { //shifts
-		return 20;
-	}
 	else {
 		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);
 		*e = -1;

@@ -828,11 +828,6 @@ void arm_v7m_inst_bl(uint8_t* bin, uint64_t* bn, int32_t k) { //todo
 }
 
 void arm_v7m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
-	if (*bn % 2) {
-		printf("[%s, %lu] error: instruction out of alignment\n", path, ln);
-		*e = -1;
-	}
-	
 	if (op[0] == 'l' && op[1] == 's' && op[2] == 'l' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
 			arm_v7m_err_r3(rv[0], e, path, ln);
