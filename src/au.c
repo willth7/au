@@ -23,6 +23,7 @@
 #include "avr/avr.h"
 #include "arm/arm.h"
 #include "arm/v6m.h"
+#include "arm/v7a.h"
 #include "arm/v7m.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
@@ -395,6 +396,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 	else if (!strcmp(argv[1], "arm-v7m")) {
 		au_reg = arm_reg;
 		au_enc = arm_v7m_enc;
+	}
+	else if (!strcmp(argv[1], "arm-v7a")) {
+		au_reg = arm_reg;
+		au_enc = arm_v7a_enc;
 	}
 	else {
 		printf("error: unsupported architecture\n");

@@ -102,13 +102,6 @@ void arm_v6m_err_rl(uint64_t* r, uint8_t rn, uint8_t ex, int8_t* e, int8_t* path
 	}
 }
 
-void arm_v6m_err_rs(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
-	if (r < 15 || (r > 24 && r != 32 && r != 36)) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
-		*e = -1;
-	}
-}
-
 void arm_v6m_err_k3(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -4 || k > 7) {
 		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
