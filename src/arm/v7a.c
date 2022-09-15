@@ -2346,6 +2346,167 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
+	//sync prim
+	else if (op[0] == 's' && op[1] == 'w' && op[2] == 'p' && op[3] == 'b') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 4, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "swpb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'w' && op[2] == 'p') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 3, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "swp");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'd') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 160;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "strexd");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'b') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 192;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "strexb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'h') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 224;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "strexh");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 5, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "strex");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'd') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 176;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldrexd");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'b') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 208;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldrexb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 'h') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 6, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 240;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldrexh");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x') {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
+			arm_v7a_err_r4_r4_r4(rv[0], rv[1], rv[2], e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 5, e, path, ln);
+			
+			bin[*bn] = 144;
+			bin[*bn + 1] = 15;
+			bin[*bn + 2] = 144;
+			bin[*bn + 3] = 1;
+			arm_v7a_inst_c4_s1_r4_r4_r4_r4(bin, bn, c, 0, rv[2], rv[1], 0, rv[0]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldrex");
+			*e = -1;
+		}
+	}
 	//str
 	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'b' && op[4] == 'p' && op[5] == 's') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
