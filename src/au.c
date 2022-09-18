@@ -139,8 +139,8 @@ uint64_t au_str_int_hex(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 
 void au_clr_rg(int8_t rg[20][64]) {
 	for (uint8_t i = 0; i < 20; i++) {
-		*((uint64_t*) rg[0]) = 0;
-		*((uint64_t*) rg[0] + 1) = 0;
+		*((uint64_t*) rg[i]) = 0;
+		*((uint64_t*) rg[i] + 1) = 0;
 	}
 }
 

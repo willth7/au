@@ -224,7 +224,7 @@ void arm_v7a_inst_c4_s1_r4_r4_r4_r4(uint8_t* bin, uint64_t* bn, uint8_t c, uint8
 
 void arm_v7a_inst_c4_r4_r4_k12(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, uint8_t rs, uint16_t k) {
 	bin[*bn] |= k;
-	bin[*bn + 1] |= (k >> 4) & 15;
+	bin[*bn + 1] |= (k >> 8) & 15;
 	bin[*bn + 1] |= rd << 4;
 	bin[*bn + 2] |= rs;
 	bin[*bn + 3] |= c << 4;
@@ -2771,7 +2771,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -2781,7 +2781,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -2792,7 +2792,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -2872,7 +2872,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -2882,7 +2882,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -2893,7 +2893,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -2909,7 +2909,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -2919,7 +2919,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -2930,7 +2930,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3010,7 +3010,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -3031,7 +3031,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -3042,7 +3042,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3058,7 +3058,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3068,7 +3068,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3136,7 +3136,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3146,7 +3146,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3162,7 +3162,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3172,7 +3172,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3240,7 +3240,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -3261,7 +3261,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3277,7 +3277,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3287,7 +3287,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3355,7 +3355,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3365,7 +3365,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3381,7 +3381,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3391,7 +3391,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3459,7 +3459,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -3480,7 +3480,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3496,7 +3496,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3506,7 +3506,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -3517,7 +3517,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3597,7 +3597,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3607,7 +3607,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -3618,7 +3618,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3634,7 +3634,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3644,7 +3644,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -3655,7 +3655,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3735,7 +3735,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -3756,7 +3756,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -3767,7 +3767,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -3784,7 +3784,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3794,7 +3794,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3862,7 +3862,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3872,7 +3872,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3888,7 +3888,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -3898,7 +3898,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -3966,7 +3966,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -3987,7 +3987,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4003,7 +4003,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4013,7 +4013,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4081,7 +4081,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4091,7 +4091,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4107,7 +4107,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4117,7 +4117,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4185,7 +4185,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -4206,7 +4206,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 255;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4222,7 +4222,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4232,7 +4232,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -4243,7 +4243,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -4323,7 +4323,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4333,7 +4333,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -4344,7 +4344,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -4360,7 +4360,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4370,7 +4370,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -4381,7 +4381,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -4461,7 +4461,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -4482,7 +4482,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -4493,7 +4493,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -4509,7 +4509,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4519,7 +4519,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4587,7 +4587,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4597,7 +4597,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4613,7 +4613,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4623,7 +4623,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4691,7 +4691,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -4712,7 +4712,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4728,7 +4728,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4738,7 +4738,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 1;
+			bin[*bn + 3] = 0;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4806,7 +4806,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 192;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4816,7 +4816,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4910,7 +4910,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -4931,7 +4931,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
+			bin[*bn + 3] = 1;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else {
@@ -4947,7 +4947,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -4957,7 +4957,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -4968,7 +4968,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -5048,7 +5048,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -5058,7 +5058,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -5069,7 +5069,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -5085,7 +5085,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 5;
+			bin[*bn + 3] = 4;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
@@ -5095,7 +5095,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -5106,7 +5106,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 7;
+			bin[*bn + 3] = 6;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -5186,7 +5186,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 4;
+			bin[*bn + 3] = 5;
 			arm_v7a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
@@ -5207,7 +5207,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
@@ -5218,7 +5218,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 6;
+			bin[*bn + 3] = 7;
 			arm_v7a_inst_c4_r4_r4_r4_t2_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
 		else {
@@ -6514,7 +6514,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else if (rt[0] == 4 && rt[1] == 0) { //rel
 			*((uint8_t*) rv[0]) |= 5;
-			uint8_t c = arm_v7a_cond(op + 5, e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 2, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
@@ -6530,7 +6530,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 	else if (op[0] == 'b') {
 		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0) {
 			arm_v7a_err_k24(rv[0], e, path, ln);
-			uint8_t c = arm_v7a_cond(op + 2, e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 1, e, path, ln);
 			
 			bin[*bn] = rv[0];
 			bin[*bn + 1] = rv[0] >> 8;
@@ -6540,7 +6540,7 @@ void arm_v7a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else if (rt[0] == 4 && rt[1] == 0) { //rel
 			*((uint8_t*) rv[0]) |= 5;
-			uint8_t c = arm_v7a_cond(op + 5, e, path, ln);
+			uint8_t c = arm_v7a_cond(op + 1, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
