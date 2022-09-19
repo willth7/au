@@ -40,46 +40,13 @@ void au_err_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
-void au_inst_byte(uint8_t* bin, uint64_t* bn, int8_t k) {
-	bin[*bn] = k;
-	
-	*bn += 1;
-}
-
-void au_inst_byt2(uint8_t* bin, uint64_t* bn, int16_t k) {
-	bin[*bn] = k;
-	bin[*bn + 1] = k >> 8;
-	
-	*bn += 2;
-}
-
-void au_inst_byt4(uint8_t* bin, uint64_t* bn, int32_t k) {
-	bin[*bn] = k;
-	bin[*bn + 1] = k >> 8;
-	bin[*bn + 2] = k >> 16;
-	bin[*bn + 3] = k >> 24;
-	
-	*bn += 4;
-}
-
-void au_inst_byt8(uint8_t* bin, uint64_t* bn, int64_t k) {
-	bin[*bn] = k;
-	bin[*bn + 1] = k >> 8;
-	bin[*bn + 2] = k >> 16;
-	bin[*bn + 3] = k >> 24;
-	bin[*bn + 4] = k >> 32;
-	bin[*bn + 5] = k >> 40;
-	bin[*bn + 6] = k >> 48;
-	bin[*bn + 7] = k >> 56;
-	
-	*bn += 8;
-}
-
 void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == 'e' && op[4] == 0) {
-		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
 			au_err_k8(rv[0], e, path, ln);
-			au_inst_byte(bin, bn, rv[0]);
+			
+			bin[*bn] = k;
+			*bn += 1;
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
@@ -87,9 +54,12 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '2' && op[4] == 0) {
-		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
 			au_err_k16(rv[0], e, path, ln);
-			au_inst_byt2(bin, bn, rv[0]);
+			
+			bin[*bn] = k;
+			bin[*bn + 1] = k >> 8;
+			*bn += 2;
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt2");
@@ -97,9 +67,14 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '4' && op[4] == 0) {
-		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
+		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
 			au_err_k32(rv[0], e, path, ln);
-			au_inst_byt4(bin, bn, rv[0]);
+			
+			bin[*bn] = k;
+			bin[*bn + 1] = k >> 8;
+			bin[*bn + 2] = k >> 16;
+			bin[*bn + 3] = k >> 24;
+			*bn += 4;
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt4");
@@ -107,11 +82,78 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 	}
 	else if (op[0] == 'b' && op[1] == 'y' && op[2] == 't' && op[3] == '8' && op[4] == 0) {
-		if ((rt[0] == 2 || rt[0] == 3) && rt[1] == 0 && rt[2] == 0) {
-			au_inst_byt8(bin, bn, rv[0]);
+		if (rt[0] == 2 && rt[1] == 0 && rt[2] == 0) {
+			bin[*bn] = k;
+			bin[*bn + 1] = k >> 8;
+			bin[*bn + 2] = k >> 16;
+			bin[*bn + 3] = k >> 24;
+			bin[*bn + 4] = k >> 32;
+			bin[*bn + 5] = k >> 40;
+			bin[*bn + 6] = k >> 48;
+			bin[*bn + 7] = k >> 56;
+			*bn += 8;
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byt8");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 'r' && op[4] == 0) {
+		if (rt[0] == 4 && rt[1] == 0) {
+			*((uint8_t*) rv[0]) |= 255;
+			
+			bin[*bn] = 0;
+			*bn += 1;
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '2' && op[4] == 0) {
+		if (rt[0] == 4 && rt[1] == 0) {
+			*((uint8_t*) rv[0]) |= 254;
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			*bn += 2;
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '4' && op[4] == 0) {
+		if (rt[0] == 4 && rt[1] == 0) {
+			*((uint8_t*) rv[0]) |= 253;
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 0;
+			*bn += 4;
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '8' && op[4] == 0) {
+		if (rt[0] == 4 && rt[1] == 0) {
+			*((uint8_t*) rv[0]) |= 252;
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 0;
+			bin[*bn + 4] = 0;
+			bin[*bn + 5] = 0;
+			bin[*bn + 6] = 0;
+			bin[*bn + 7] = 0;
+			*bn += 8;
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
 			*e = -1;
 		}
 	}
