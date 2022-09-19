@@ -92,7 +92,7 @@ void arm_v7a_err_k5(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 }
 
 void arm_v7a_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
-	if (k < -128 || k > 256) {
+	if (k < -128 || k > 255) {
 		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
 		*e = -1;
 	}
