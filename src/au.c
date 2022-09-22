@@ -22,8 +22,8 @@
 #include "au/pseu.h"
 #include "avr/avr.h"
 #include "arm/arm.h"
-#include "arm/v6m.h"
-#include "arm/v7a.h"
+#include "arm/32m.h"
+#include "arm/32a.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 
@@ -361,13 +361,13 @@ int8_t main(int32_t argc, int8_t** argv) {
 		au_reg = avr_reg;
 		au_enc = avr_enc;
 	}
-	else if (!strcmp(argv[1], "arm-v6m")) {
+	else if (!strcmp(argv[1], "arm-32m")) {
 		au_reg = arm_reg;
-		au_enc = arm_v6m_enc;
+		au_enc = arm_32m_enc;
 	}
-	else if (!strcmp(argv[1], "arm-v7a")) {
+	else if (!strcmp(argv[1], "arm-32a")) {
 		au_reg = arm_reg;
-		au_enc = arm_v7a_enc;
+		au_enc = arm_32a_enc;
 	}
 	else {
 		printf("error: unsupported architecture\n");
