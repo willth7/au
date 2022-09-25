@@ -7314,6 +7314,22 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 's' && op[1] == 'v' && op[2] == 'c') {
+		if (rt[0] == 2 && rt[1] == 0) {
+			arm_32a_err_k24(rv[0], e, path, ln);
+			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			
+			bin[*bn] = rv[0];
+			bin[*bn + 1] = rv[0] >> 8;
+			bin[*bn + 2] = rv[0] >> 16;
+			bin[*bn + 3] = (c << 4) + 15;
+			*bn += 4;
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "svc");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
