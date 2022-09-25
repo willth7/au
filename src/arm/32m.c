@@ -148,7 +148,7 @@ void arm_32m_err_k24(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 }
 
 void arm_32m_err_sh(int64_t r, int8_t* e, int8_t* path, uint64_t ln) {
-	if (r < 16 || r > 19) {
+	if (r < 32 || r > 35) {
 		printf("[%s, %lu] error: illegal shift\n", path, ln);
 		*e = -1;
 	}
@@ -179,7 +179,7 @@ void arm_32m_inst_r4_r4_r4_sh_k5(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t
 	bin[*bn + 3] |= rd;
 	bin[*bn] |= r0;
 	bin[*bn + 2] |= r1;
-	bin[*bn + 2] |= (sh - 16) << 4;
+	bin[*bn + 2] |= (sh - 32) << 4;
 	bin[*bn + 2] |= k << 6;
 	bin[*bn + 3] |= (k << 2) & 112;
 	*bn += 4;
@@ -224,6 +224,14 @@ void arm_32m_inst_r4_r4_r4_k2(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0
 	bin[*bn] |= r0;
 	bin[*bn + 2] |= r1;
 	bin[*bn + 2] |= k << 4;
+	*bn += 4;
+}
+
+void arm_32m_inst_r4_r4_r4_k8(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t k) {
+	bin[*bn + 3] |= rd;
+	bin[*bn + 3] |= r0 << 4;
+	bin[*bn] |= r1;
+	bin[*bn + 2] |= k;
 	*bn += 4;
 }
 
@@ -2636,6 +2644,41 @@ void arm_32m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "smultt");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 2 && rt[4] == 0) { //32
+			arm_32m_err_r4(rv[0], e, path, ln);
+			arm_32m_err_r4(rv[1], e, path, ln);
+			arm_32m_err_r4(rv[2], e, path, ln);
+			arm_32m_err_k8(rv[3], e, path, ln);
+			
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 0;
+			bin[*bn] = 64;
+			bin[*bn + 1] = 232;
+			arm_32m_inst_r4_r4_r4_k8(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "strex");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'r' && op[3] == 'e' && op[4] == 'x' && op[5] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) { //32
+			arm_32m_err_r4(rv[0], e, path, ln);
+			arm_32m_err_r4(rv[1], e, path, ln);
+			arm_32m_err_k8(rv[2], e, path, ln);
+			
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 15;
+			bin[*bn] = 80;
+			bin[*bn + 1] = 232;
+			arm_32m_inst_r4_r4_r4_k8(bin, bn, 0, rv[0], rv[1], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ldrex");
 			*e = -1;
 		}
 	}

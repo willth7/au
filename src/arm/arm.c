@@ -68,17 +68,65 @@ uint8_t arm_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	else if ((r[0] == 'r' && r[1] == '1' && r[2] == '5' && r[3] == 0) || (r[0] == 'p' && r[1] == 'c')) {
 		return 15;
 	}
-	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'l' && r[3] == 0) { //shifts
+	else if (r[0] == 'p' && r[1] == '0' && r[2] == 0) { //coprocessor
 		return 16;
 	}
-	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'r' && r[3] == 0) { //shifts
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == 0) {
 		return 17;
 	}
-	else if (r[0] == 'a' && r[1] == 's' && r[2] == 'r' && r[3] == 0) { //shifts
+	else if (r[0] == 'p' && r[1] == '2' && r[2] == 0) {
 		return 18;
 	}
-	else if (r[0] == 'r' && r[1] == 'o' && r[2] == 'r' && r[3] == 0) { //shifts
+	else if (r[0] == 'p' && r[1] == '3' && r[2] == 0) {
 		return 19;
+	}
+	else if (r[0] == 'p' && r[1] == '4' && r[2] == 0) {
+		return 20;
+	}
+	else if (r[0] == 'p' && r[1] == '5' && r[2] == 0) {
+		return 21;
+	}
+	else if (r[0] == 'p' && r[1] == '6' && r[2] == 0) {
+		return 22;
+	}
+	else if (r[0] == 'p' && r[1] == '7' && r[2] == 0) {
+		return 23;
+	}
+	else if (r[0] == 'p' && r[1] == '8' && r[2] == 0) {
+		return 24;
+	}
+	else if (r[0] == 'p' && r[1] == '9' && r[2] == 0) {
+		return 25;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '0' && r[3] == 0) {
+		return 26;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '1' && r[3] == 0) {
+		return 27;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '2' && r[3] == 0) {
+		return 28;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '3' && r[3] == 0) {
+		return 29;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '4' && r[3] == 0) {
+		return 30;
+	}
+	else if (r[0] == 'p' && r[1] == '1' && r[2] == '5' && r[3] == 0) {
+		return 31;
+	}
+	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'l' && r[3] == 0) { //shifts
+		return 32;
+	}
+	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'r' && r[3] == 0) {
+		return 33;
+	}
+	else if (r[0] == 'a' && r[1] == 's' && r[2] == 'r' && r[3] == 0) {
+		return 34;
+	}
+	else if (r[0] == 'r' && r[1] == 'o' && r[2] == 'r' && r[3] == 0) {
+		return 35;
 	}
 	else {
 		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);

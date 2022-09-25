@@ -937,68 +937,6 @@ void arm_v6m_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'b' && op[1] != 0 && op[2] != 0 && op[3] == 0) {
-		if (rt[0] == 2 && rt[1] == 0) {
-			arm_v6m_err_k8(rv[0], e, path, ln);
-			arm_v6m_inst_b_cond(bin, bn, arm_v6m_cond(op + 1, e, path, ln), rv[0]);
-		}
-		else if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 1;
-			arm_v6m_inst_b_cond(bin, bn, arm_v6m_cond(op + 1, e, path, ln), 0);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, op);
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'u' && op[1] == 'd' && op[2] == 'f' && op[3] == 0) {
-		if (rt[0] == 2 && rt[1] == 0) {
-			arm_v6m_err_k8(rv[0], e, path, ln);
-			arm_v6m_inst_b_cond(bin, bn, 14, rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "udf");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 's' && op[1] == 'v' && op[2] == 'c' && op[3] == 0) {
-		if (rt[0] == 2 && rt[1] == 0) {
-			arm_v6m_err_k8(rv[0], e, path, ln);
-			arm_v6m_inst_b_cond(bin, bn, 15, rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "svc");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'b' && op[1] == 0) {
-		if (rt[0] == 2 && rt[1] == 0) {
-			arm_v6m_err_k11(rv[0], e, path, ln);
-			arm_v6m_inst_b(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 3;
-			arm_v6m_inst_b(bin, bn, 0);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "b");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'b' && op[1] == 'l' && op[2] == 0) {
-		if (rt[0] == 2 && rt[1] == 0) {
-			arm_v6m_err_k24(rv[0], e, path, ln);
-			arm_v6m_inst_bl(bin, bn, rv[0]);
-		}
-		else if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 4;
-			arm_v6m_inst_bl(bin, bn, 0);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bl");
-			*e = -1;
-		}
-	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
