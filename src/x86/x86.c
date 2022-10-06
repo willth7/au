@@ -227,3 +227,7 @@ uint8_t x86_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 		*e = -1;
 	}
 }
+
+void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
+	
+}

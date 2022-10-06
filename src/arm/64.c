@@ -113,7 +113,7 @@ uint8_t arm_64_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	else if ((r[0] == 'x' && r[1] == '3' && r[2] == '0' && r[3] == 0) || (r[0] == 'x' && r[1] == 'l' && r[2] == 'r' && r[3] == '0')) {
 		return 30;
 	}
-	else if ((r[0] == 'x' && r[1] == '3' && r[2] == '1' && r[3] == 0) || (r[0] == 'x' && r[1] == 's' && r[2] == 'p' && r[3] == '0') || (r[0] == 'x' && r[1] == 'z' && r[2] == 'r' && r[3] == '0'))) {
+	else if ((r[0] == 'x' && r[1] == '3' && r[2] == '1' && r[3] == 0) || (r[0] == 'x' && r[1] == 's' && r[2] == 'p' && r[3] == '0') || (r[0] == 'x' && r[1] == 'z' && r[2] == 'r' && r[3] == '0')) {
 		return 31;
 	}
 	else if (r[0] == 'w' && r[1] == '0' && r[2] == 0) { //general purpose 32-bit
@@ -209,7 +209,7 @@ uint8_t arm_64_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	else if ((r[0] == 'w' && r[1] == '3' && r[2] == '0' && r[3] == 0) || (r[0] == 'w' && r[1] == 'l' && r[2] == 'r' && r[3] == '0')) {
 		return 62;
 	}
-	else if ((r[0] == 'w' && r[1] == '3' && r[2] == '1' && r[3] == 0) || (r[0] == 'w' && r[1] == 's' && r[2] == 'p' && r[3] == '0') || (r[0] == 'w' && r[1] == 'z' && r[2] == 'r' && r[3] == '0'))) {
+	else if ((r[0] == 'w' && r[1] == '3' && r[2] == '1' && r[3] == 0) || (r[0] == 'w' && r[1] == 's' && r[2] == 'p' && r[3] == '0') || (r[0] == 'w' && r[1] == 'z' && r[2] == 'r' && r[3] == '0')) {
 		return 63;
 	}
 
@@ -229,7 +229,7 @@ void arm_64_err_w5(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
-void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
+void arm_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'a' &&  op[1] == 'd' && op[2] == 'r' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel todo
 			arm_64_err_x5(rv[0], e, path, ln);
