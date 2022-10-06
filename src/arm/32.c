@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 
-uint8_t arm_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
+uint8_t arm_32_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) { //general purpose
 		return 0;
 	}

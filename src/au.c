@@ -21,7 +21,7 @@
 
 #include "au/pseu.h"
 #include "avr/avr.h"
-#include "arm/arm.h"
+#include "arm/32.h"
 #include "arm/32m.h"
 #include "arm/32a.h"
 
@@ -362,11 +362,11 @@ int8_t main(int32_t argc, int8_t** argv) {
 		au_enc = avr_enc;
 	}
 	else if (!strcmp(argv[1], "arm-32m")) {
-		au_reg = arm_reg;
+		au_reg = arm_32_reg;
 		au_enc = arm_32m_enc;
 	}
 	else if (!strcmp(argv[1], "arm-32a")) {
-		au_reg = arm_reg;
+		au_reg = arm_32_reg;
 		au_enc = arm_32a_enc;
 	}
 	else {
