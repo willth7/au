@@ -24,7 +24,7 @@
 //#include "arm/32m.h"
 //#include "arm/32a.h"
 //#include "arm/64.h"
-#include "x86/x86.h"
+#include "x86/x64.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 
@@ -42,7 +42,7 @@ void (*au_writ) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, i
 uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
 	for(uint8_t i = 0; i < 20; i++) {
-		if (a[i] == 0) {
+		if (a[i] == 0 || a[i] == ')') {
 			return b;
 		}
 		b *= 10;
@@ -83,7 +83,7 @@ uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 uint64_t au_str_int_hex(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
 	for(uint8_t i = 0; i < 20; i++) {
-		if (a[i] == 0) {
+		if (a[i] == 0 || a[i] == ')') {
 			return b;
 		}
 		b *= 16;
@@ -183,7 +183,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			lex[li] = fx[fi];
 			li++;
 		}
-		else if (fx[fi] == ',' && !c) { //addt operand signal
+		else if (fx[fi] == ',' && op[0] && !c) { //addt operand signal
 			if (rn < 20) {
 				rn++;
 			}
@@ -192,7 +192,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				*e = -1;
 			}
 		}
-		else if (fx[fi] == ')' && (fx[fi + 1] == ' ' || fx[fi + 1] == ',' || fx[fi + 1] == '\t' || fx[fi + 1] == '\n') && li && !c) {
+		else if (fx[fi] == ')' && (fx[fi + 1] == ' ' || fx[fi + 1] == ',' || fx[fi + 1] == '\t' || fx[fi + 1] == '\n') && op[0] && li && !c) { //nested operand
 			lex[li] = ')';
 			lex[li + 1] = 0;
 			li++;
@@ -400,9 +400,17 @@ int8_t main(int32_t argc, int8_t** argv) {
 		//au_reg = arm_64_reg;
 		//au_enc = arm_64_enc;
 	}
+	else if (!strcmp(argv[1], "x86")) {
+		//au_reg = x86_reg;
+		//au_enc = x86_enc;
+	}
+	else if (!strcmp(argv[1], "i386")) {
+		//au_reg = i386_reg;
+		//au_enc = i386_enc;
+	}
 	else if (!strcmp(argv[1], "x86-64")) {
-		au_reg = x86_reg;
-		au_enc = x86_enc;
+		au_reg = x86_64_reg;
+		au_enc = x86_64_enc;
 	}
 	else {
 		printf("error: unsupported architecture\n");
