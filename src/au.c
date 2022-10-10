@@ -20,11 +20,10 @@
 #include <stdio.h>
 
 #include "au/pseu.h"
-#include "avr/avr.h"
-#include "arm/32.h"
-#include "arm/32m.h"
-#include "arm/32a.h"
-#include "arm/64.h"
+//#include "arm/32.h"
+//#include "arm/32m.h"
+//#include "arm/32a.h"
+//#include "arm/64.h"
 #include "x86/x86.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
@@ -38,6 +37,7 @@ typedef struct au_sym_s {
 } au_sym_t;
 
 void (*au_writ) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
+
 
 uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	uint64_t b = 0;
@@ -73,7 +73,7 @@ uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 		else if (a[i] == '9') {
 			b += 9;
 		}
-		else if (a[i] != '0') {
+		else if (a[i] != '0' && a[i] != ')') {
 			printf("[%s, %lu] error: illegal character '%c'\n", path, ln, a[i]);
 			*e = -1;
 		}
@@ -132,7 +132,7 @@ uint64_t au_str_int_hex(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 		else if (a[i] == 'f') {
 			b += 15;
 		}
-		else if (a[i] != '0') {
+		else if (a[i] != '0' && a[i] != ')') {
 			printf("[%s, %lu] error: illegal character '%c'\n", path, ln, a[i]);
 			*e = -1;
 		}
@@ -179,7 +179,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			lex[li + 1] = 0;
 			li++;
 		}
-		else if ((fx[fi] == '*' || fx[fi] == '^' || fx[fi] == '-' || fx[fi] == '~') && !li && !c) { //special init char
+		else if ((fx[fi] == '*' || fx[fi] == '^' || fx[fi] == '-' || fx[fi] == '~' || fx[fi] == '(') && !li && !c) { //special init char
 			lex[li] = fx[fi];
 			li++;
 		}
@@ -191,6 +191,11 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 				printf("[%s, %lu] error: too many operands\n", path, ln);
 				*e = -1;
 			}
+		}
+		else if (fx[fi] == ')' && (fx[fi + 1] == ' ' || fx[fi + 1] == ',' || fx[fi + 1] == '\t' || fx[fi + 1] == '\n') && li && !c) {
+			lex[li] = ')';
+			lex[li + 1] = 0;
+			li++;
 		}
 		else if ((fx[fi] == ' ' || fx[fi] == '\t' || fx[fi] == '\n') && li && !c) { //next string
 			if (!(op[0])) {
@@ -226,51 +231,75 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			uint8_t rt[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			uint64_t rv[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			
+			uint8_t p = 0;
+			
 			for (uint8_t i = 0; i < ri; i++) {
-				if (rg[i][0] >= 97 && rg[i][0] <= 122) { //arch-spec reg
-					rt[i] = 1;
-					rv[i] = au_reg(rg[i], e, path, ln);
+				uint8_t q = 0;
+				if (rg[i][0] == '(' && !p) { //nested operands
+					p = 1;
+					q = 1;
 				}
-				else if (rg[i][0] >= 48 && rg[i][0] <= 57) { //imm
-					rt[i] = 2;
-					if (rg[i][0] == '0' && rg[i][1] == 'x') {
-						rv[i] = au_str_int_hex(rg[i] + 2, e, path, ln);
+				else if (rg[i][0] == '(' && p) { //error
+					printf("[%s, %lu] error: expected ')'\n", path, ln);
+					*e = -1;
+				}
+				
+				if (rg[i][q] >= 97 && rg[i][q] <= 122) { //arch-spec reg
+					rt[i] = 1 | (p << 2);
+					rv[i] = au_reg(rg[i] + q, e, path, ln);
+				}
+				else if (rg[i][q] >= 48 && rg[i][q] <= 57) { //imm
+					rt[i] = 2 | (p << 2);
+					if (rg[i][q] == '0' && rg[i][q + 1] == 'x') {
+						rv[i] = au_str_int_hex(rg[i] + 2 + q, e, path, ln);
 					}
 					else {
-						rv[i] = au_str_int_dec(rg[i], e, path, ln);
+						rv[i] = au_str_int_dec(rg[i] + q, e, path, ln);
 					}
 				}
-				else if (rg[i][0] == '-' && rg[i][1] >= 48 && rg[i][1] <= 57) { //neg imm
-					rt[i] = 2;
-					if (rg[i][0] == '0' && rg[i][1] == 'x') {
-						rv[i] = -1 * au_str_int_hex(rg[i] + 3, e, path, ln);
+				else if (rg[i][q] == '-' && rg[i][q + 1] >= 48 && rg[i][q + 1] <= 57) { //neg imm
+					rt[i] = 2 | (p << 2);
+					if (rg[i][q + 1] == '0' && rg[i][q + 2] == 'x') {
+						rv[i] = -1 * au_str_int_hex(rg[i] + 3 + q, e, path, ln);
 					}
 					else {
-						rv[i] = -1 * au_str_int_dec(rg[i] + 1, e, path, ln);
+						rv[i] = -1 * au_str_int_dec(rg[i] + 1 + q, e, path, ln);
 					}
 				}
-				else if (rg[i][0] == '*' && rg[i][1] >= 97 && rg[i][1] <= 122) { //relocation
-					rt[i] = 4;
+				else if (rg[i][q] == '*' && rg[i][q + 1] >= 97 && rg[i][q + 1] <= 122) { //relocation
+					rt[i] = 3 | (p << 2);
 					rv[i] = (uint64_t) &(rel[*reln].typ);
 					rel[*reln].addr = *bn;
 					rel[*reln].typ = 0;
-					memcpy(&(rel[*reln].str), rg[i] + 1, 8);
+					memcpy(&(rel[*reln].str), rg[i] + 1 + q, 8);
 					(*reln)++;
 				}
-				else if (rg[i][0] == '^' && rg[i][1] >= 97 && rg[i][1] <= 122) { //relocation
-					rt[i] = 4;
+				else if (rg[i][q] == '^' && rg[i][q + 1] >= 97 && rg[i][q + 1] <= 122) { //relocation
+					rt[i] = 3 | (p << 2);
 					rv[i] = (uint64_t) &(rel[*reln].typ);
 					rel[*reln].addr = *bn;
 					rel[*reln].typ = 128;
-					memcpy(&(rel[*reln].str), rg[i] + 1, 8);
+					memcpy(&(rel[*reln].str), rg[i] + 1 + q, 8);
 					(*reln)++;
 				}
 				else {
 					printf("[%s, %lu] error: unknown operand '%s'\n", path, ln, rg[i]);
 					*e = -1;
 				}
+
+				if (rg[i][strlen(rg[i]) - 1] == ')' && p) {
+					p = 0;
+				}
+				else if (rg[i][strlen(rg[i]) - 1] == ')' && !p) { //error
+					printf("[%s, %lu] error: expected '('\n", path, ln);
+					*e = -1;
+				}
 			}
 			
+			if (p) {
+				printf("[%s, %lu] error: expected ')'\n", path, ln);
+				*e = -1;
+			}
 			
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
 				au_enc(bin, bn, op, rt, rv, e, path, ln);
@@ -359,21 +388,17 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	if (!strcmp(argv[1], "avr")) {
-		au_reg = avr_reg;
-		au_enc = avr_enc;
-	}
-	else if (!strcmp(argv[1], "aarch32-m")) {
-		au_reg = arm_32_reg;
-		au_enc = arm_32m_enc;
+	if (!strcmp(argv[1], "aarch32-m")) {
+		//au_reg = arm_32_reg;
+		//au_enc = arm_32m_enc;
 	}
 	else if (!strcmp(argv[1], "aarch32-a")) {
-		au_reg = arm_32_reg;
-		au_enc = arm_32a_enc;
+		//au_reg = arm_32_reg;
+		//au_enc = arm_32a_enc;
 	}
 	else if (!strcmp(argv[1], "aarch64")) {
-		au_reg = arm_64_reg;
-		au_enc = arm_64_enc;
+		//au_reg = arm_64_reg;
+		//au_enc = arm_64_enc;
 	}
 	else if (!strcmp(argv[1], "x86-64")) {
 		au_reg = x86_reg;
