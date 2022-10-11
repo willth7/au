@@ -20,10 +20,11 @@
 #include <stdio.h>
 
 #include "au/pseu.h"
-//#include "arm/32.h"
 //#include "arm/32m.h"
 //#include "arm/32a.h"
 //#include "arm/64.h"
+#include "x86/x86.h"
+#include "x86/i386.h"
 #include "x86/x64.h"
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
@@ -401,12 +402,12 @@ int8_t main(int32_t argc, int8_t** argv) {
 		//au_enc = arm_64_enc;
 	}
 	else if (!strcmp(argv[1], "x86")) {
-		//au_reg = x86_reg;
-		//au_enc = x86_enc;
+		au_reg = x86_reg;
+		au_enc = x86_enc;
 	}
 	else if (!strcmp(argv[1], "i386")) {
-		//au_reg = i386_reg;
-		//au_enc = i386_enc;
+		au_reg = i386_reg;
+		au_enc = i386_enc;
 	}
 	else if (!strcmp(argv[1], "x86-64")) {
 		au_reg = x86_64_reg;

@@ -244,46 +244,247 @@ int8_t* x86_64_dec_reg(uint8_t r) {
 	else if (r == 2) {
 		return "dl";
 	}
+	else if (r == 3) {
+		return "bl";
+	}
+	else if (r == 4) {
+		return "ah";
+	}
+	else if (r == 5) {
+		return "ch";
+	}
+	else if (r == 6) {
+		return "dh";
+	}
+	else if (r == 7) {
+		return "bh";
+	}
+	else if (r == 8) {
+		return "r8b";
+	}
+	else if (r == 9) {
+		return "r9b";
+	}
+	else if (r == 10) {
+		return "r10b";
+	}
+	else if (r == 11) {
+		return "r11b";
+	}
+	else if (r == 12) {
+		return "r12b";
+	}
+	else if (r == 13) {
+		return "r13b";
+	}
+	else if (r == 14) {
+		return "r14b";
+	}
+	else if (r == 15) {
+		return "r15b";
+	}
+	else if (r == 16) {
+		return "ax";
+	}
+	else if (r == 17) {
+		return "cx";
+	}
+	else if (r == 18) {
+		return "dx";
+	}
+	else if (r == 19) {
+		return "bx";
+	}
+	else if (r == 20) {
+		return "sp";
+	}
+	else if (r == 21) {
+		return "bp";
+	}
+	else if (r == 22) {
+		return "si";
+	}
+	else if (r == 23) {
+		return "di";
+	}
+	else if (r == 24) {
+		return "r8w";
+	}
+	else if (r == 25) {
+		return "r9w";
+	}
+	else if (r == 26) {
+		return "r10w";
+	}
+	else if (r == 27) {
+		return "r11w";
+	}
+	else if (r == 28) {
+		return "r12w";
+	}
+	else if (r == 29) {
+		return "r13w";
+	}
+	else if (r == 30) {
+		return "r14w";
+	}
+	else if (r == 31) {
+		return "r15w";
+	}
+	else if (r == 32) {
+		return "eax";
+	}
+	else if (r == 33) {
+		return "ecx";
+	}
+	else if (r == 34) {
+		return "edx";
+	}
+	else if (r == 35) {
+		return "ebx";
+	}
+	else if (r == 36) {
+		return "esp";
+	}
+	else if (r == 37) {
+		return "ebp";
+	}
+	else if (r == 38) {
+		return "esi";
+	}
+	else if (r == 39) {
+		return "edi";
+	}
+	else if (r == 40) {
+		return "r8d";
+	}
+	else if (r == 41) {
+		return "r9d";
+	}
+	else if (r == 42) {
+		return "r10d";
+	}
+	else if (r == 43) {
+		return "r11d";
+	}
+	else if (r == 44) {
+		return "r12d";
+	}
+	else if (r == 45) {
+		return "r13d";
+	}
+	else if (r == 46) {
+		return "r14d";
+	}
+	else if (r == 47) {
+		return "r15d";
+	}
+	else if (r == 48) {
+		return "rax";
+	}
+	else if (r == 49) {
+		return "rcx";
+	}
+	else if (r == 50) {
+		return "rdx";
+	}
+	else if (r == 51) {
+		return "rbx";
+	}
+	else if (r == 52) {
+		return "rsp";
+	}
+	else if (r == 53) {
+		return "rbp";
+	}
+	else if (r == 54) {
+		return "rsi";
+	}
+	else if (r == 55) {
+		return "rdi";
+	}
+	else if (r == 56) {
+		return "r8";
+	}
+	else if (r == 57) {
+		return "r9";
+	}
+	else if (r == 58) {
+		return "r10";
+	}
+	else if (r == 59) {
+		return "r11";
+	}
+	else if (r == 60) {
+		return "r12";
+	}
+	else if (r == 61) {
+		return "r13";
+	}
+	else if (r == 62) {
+		return "r14";
+	}
+	else if (r == 63) {
+		return "r15";
+	}
+	else if (r == 68) {
+		return "spl";
+	}
+	else if (r == 69) {
+		return "bpl";
+	}
+	else if (r == 70) {
+		return "sil";
+	}
+	else if (r == 71) {
+		return "dil";
+	}
+	else if (r == 101) {
+		return "eip";
+	}
+	else if (r == 117) {
+		return "rip";
+	}
 }
 
 void x86_64_err_r8h(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r > 15) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
 
 void x86_64_err_r8l(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r == 4 || r == 5 || r == 6 || r == 7 || (r > 15 && r != 68 && r != 69 && r != 70 && r != 71)) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
 
 void x86_64_err_r16(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 16 || r > 31) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
 
 void x86_64_err_r32(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 32 || r > 47) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
 
 void x86_64_err_r64(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r < 48 || r > 63) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
 
 void x86_64_err_rsp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if ((r & 15) == 4) {
-		printf("[%s, %lu] error: illegal register\n", path, ln);
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, x86_64_dec_reg(r));
 		*e = -1;
 	}
 }
@@ -679,6 +880,12 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_inst_mod(bin, bn, 2, 4, rv[4]); //modrm
 			x86_64_inst_mod(bin, bn, s, rv[0], rv[2]); //sib
 			x86_64_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 32) { //32 bit axk
+			x86_64_err_k32(rv[1], e, path, ln);
+			
+			x86_64_inst_byt(bin, bn, 5); //op
+			x86_64_inst_k32(bin, bn, rv[1]); //imm
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "add");
