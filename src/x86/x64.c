@@ -612,6 +612,13 @@ uint8_t x86_64_enc_8r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint6
 		x86_64_inst_k32(bin, bn, rv[1]); //disp
 		return 0;
 	}
+	else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 0) {
+		x86_64_err_k8(rv[1], e, path, ln);
+		
+		x86_64_inst_byt(bin, bn, op + 4); //op
+		x86_64_inst_k8(bin, bn, rv[1]); //imm
+		return 0;
+	}
 	return 1;
 }
 
@@ -645,6 +652,14 @@ uint8_t x86_64_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint
 		x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 		x86_64_inst_mod(bin, bn, 0, 5, 4); //sib
 		x86_64_inst_k32(bin, bn, rv[1]);
+		return 0;
+	}
+	else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 16) {
+		i386_err_k16(rv[1], e, path, ln);
+		
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 5); //op
+		i386_inst_k16(bin, bn, rv[1]); //imm
 		return 0;
 	}
 	return 1;
