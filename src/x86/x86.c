@@ -241,6 +241,15 @@ uint8_t x86_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_
 		x86_inst_mod(bin, bn, 0, a, rv[2]); //modrm
 		return 0;
 	}
+	else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 48) == 16) {
+		x86_err_k16(rv[0], e, path, ln);
+		
+		x86_inst_byt(bin, bn, 102); //leg op
+		x86_inst_byt(bin, bn, op + 1); //op
+		x86_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+		x86_inst_k16(bin, bn, rv[0]); //disp
+		return 0;
+	}
 	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[1] < 256) {
 		uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
 		x86_err_r16(rv[2], e, path, ln);
@@ -303,6 +312,15 @@ uint8_t x86_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_
 		
 		x86_inst_byt(bin, bn, op + 3); //op
 		x86_inst_mod(bin, bn, 0, a, rv[0]); //modrm
+		return 0;
+	}
+	else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0 && (rv[0] & 48) == 16) {
+		x86_err_k16(rv[1], e, path, ln);
+		
+		x86_inst_byt(bin, bn, 102); //leg op
+		x86_inst_byt(bin, bn, op + 3); //op
+		x86_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+		x86_inst_k16(bin, bn, rv[1]); //disp
 		return 0;
 	}
 	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[2] < 256) {

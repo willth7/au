@@ -90,9 +90,6 @@ uint8_t i386_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
 	else if (r[0] == 'e' && r[1] == 'd' && r[2] == 'i' && (r[3] == 0 || r[3] == ')')) {
 		return 39;
 	}	
-	else if (r[0] == 'e' && r[1] == 'i' && r[2] == 'p' && (r[3] == 0 || r[3] == ')')) { //32 bit ip
-		return 101;
-	}
 	else {
 		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);
 		*e = -1;
@@ -555,31 +552,6 @@ uint8_t i386_enc_32r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
 		return 0;
 	}
-	else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 101) {
-		i386_err_r32(rv[1], e, path, ln);
-		
-		i386_inst_byt(bin, bn, op + 1); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[1]); //modrm
-		i386_inst_k32(bin, bn, 0); //disp
-		return 0;
-	}
-	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 101) {
-		i386_err_k32(rv[1], e, path, ln);
-		i386_err_r32(rv[2], e, path, ln);
-		
-		i386_inst_byt(bin, bn, op + 1); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[2]); //modrm
-		i386_inst_k32(bin, bn, rv[1]); //disp
-		return 0;
-	}
-	else if (rt[0] == 4 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 48) == 32) {
-		i386_err_k32(0, e, path, ln); //rel todo
-		
-		i386_inst_byt(bin, bn, op + 1); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[1]); //modrm
-		i386_inst_k32(bin, bn, 0); //disp
-		return 0;
-	}
 	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 32 && (rv[0] & 7) != 4 && rv[1] < 256) { //32 bit ar m1
 		i386_err_r32(rv[2], e, path, ln);
 		
@@ -705,31 +677,6 @@ uint8_t i386_enc_32r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_byt(bin, bn, op + 3); //op
 		i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 		i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		return 0;
-	}
-	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 101) {
-		i386_err_r32(rv[0], e, path, ln);
-		
-		i386_inst_byt(bin, bn, op + 3); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
-		i386_inst_k32(bin, bn, 0); //disp
-		return 0;
-	}
-	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 101) {
-		i386_err_k32(rv[2], e, path, ln);
-		i386_err_r32(rv[0], e, path, ln);
-		
-		i386_inst_byt(bin, bn, op + 3); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
-		i386_inst_k32(bin, bn, rv[2]); //disp
-		return 0;
-	}
-	else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0 && (rv[0] & 48) == 32) {
-		i386_err_k32(rv[2], e, path, ln); //rel todo
-		
-		i386_inst_byt(bin, bn, op + 3); //op
-		i386_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
-		i386_inst_k32(bin, bn, 0); //disp
 		return 0;
 	}
 	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 32 && (rv[1] & 7) != 4 && rv[2] < 256) { //32 bit ra m1
