@@ -170,9 +170,6 @@ int8_t* i386_dec_reg(uint8_t r) {
 	else if (r == 39) {
 		return "edi";
 	}
-	else if (r == 101) {
-		return "eip";
-	}
 }
 
 void i386_err_r8(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
@@ -220,25 +217,6 @@ void i386_err_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 void i386_err_k32(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -2147483648 || k > 4294967295) {
 		printf("[%s, %lu] error: immediate '%u' out of range\n", path, ln, k);
-		*e = -1;
-	}
-}
-
-uint8_t i386_err_scl(uint64_t a, int8_t* e, int8_t* path, uint64_t ln) {
-	if (a == 1) {
-		return 0;
-	}
-	else if (a == 2) {
-		return 1;
-	}
-	else if (a == 4) {
-		return 2;
-	}
-	else if (a == 8) {
-		return 3;
-	}
-	else {
-		printf("[%s, %lu] error: illegal scale '%lu'\n", path, ln, a);
 		*e = -1;
 	}
 }
@@ -314,6 +292,14 @@ uint8_t i386_enc_8r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_
 		i386_inst_k32(bin, bn, rv[0]); //disp
 		return 0;
 	}
+	else if (rt[0] == 7 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 48) == 0) {
+		i386_err_k32(rv[0], e, path, ln); //rel todo
+		
+		i386_inst_byt(bin, bn, op); //op
+		i386_inst_mod(bin, bn, 0, 5, rv[1]); //modrm
+		i386_inst_k32(bin, bn, 0); //disp
+		return 0;
+	}
 	else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 0) {
 		i386_err_r8(rv[1], e, path, ln);
 		
@@ -329,6 +315,14 @@ uint8_t i386_enc_8r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_
 		i386_inst_k32(bin, bn, rv[1]); //disp
 		return 0;
 	}
+	else if (rt[0] == 1 && rt[1] == 7 && rt[2] == 0 && (rv[0] & 48) == 0) {
+		i386_err_k32(rv[1], e, path, ln); //rel todo
+		
+		i386_inst_byt(bin, bn, op + 2); //op
+		i386_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
+		i386_inst_k32(bin, bn, 0); //disp
+		return 0;
+	}
 	else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 0) {
 		i386_err_k8(rv[1], e, path, ln);
 		
@@ -340,7 +334,7 @@ uint8_t i386_enc_8r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_
 }
 
 uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
-	if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
+	if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0
 		uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 		i386_err_r16(rv[1], e, path, ln);
 		
@@ -361,7 +355,7 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_mod(bin, bn, 0, a, rv[2]); //modrm
 		return 0;
 	}
-	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[1] < 256) {
+	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[1] < 256) { //mod 1
 		uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 		i386_err_r16(rv[2], e, path, ln);
 		
@@ -384,7 +378,7 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k8(bin, bn, rv[2]); //disp
 		return 0;
 	}
-	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16) {
+	else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16) { //mod 2
 		uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 		i386_err_k16(rv[1], e, path, ln);
 		i386_err_r16(rv[2], e, path, ln);
@@ -394,6 +388,18 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_byt(bin, bn, op + 1); //op
 		i386_inst_mod(bin, bn, 2, a, rv[2]); //modrm
 		i386_inst_k16(bin, bn, rv[1]); //disp
+		return 0;
+	}
+	else if (rt[0] == 5 && rt[1] == 7 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 48) == 16) {
+		uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
+		i386_err_k16(rv[1], e, path, ln); //rel todo
+		i386_err_r16(rv[2], e, path, ln);
+		
+		i386_inst_byt(bin, bn, 103); //leg addr
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 1); //op
+		i386_inst_mod(bin, bn, 2, a, rv[2]); //modrm
+		i386_inst_k16(bin, bn, 0); //disp
 		return 0;
 	}
 	else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 6 && rt[3] == 1 && rt[4] == 0 && (rv[0] & 48) == 16) {
@@ -409,6 +415,19 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k16(bin, bn, rv[2]); //disp
 		return 0;
 	}
+	else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 7 && rt[3] == 1 && rt[4] == 0 && (rv[0] & 48) == 16) {
+		i386_err_r16(rv[1], e, path, ln);
+		uint8_t a = i386_err_a16(rv[0], rv[1], e, path, ln);
+		i386_err_k16(rv[2], e, path, ln); //rel todo
+		i386_err_r16(rv[3], e, path, ln);
+		
+		i386_inst_byt(bin, bn, 103); //leg addr
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 1); //op
+		i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
+		i386_inst_k16(bin, bn, 0); //disp
+		return 0;
+	}
 	else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 48) == 16) {
 		i386_err_k32(rv[0], e, path, ln);
 		
@@ -418,7 +437,16 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k32(bin, bn, rv[0]); //disp
 		return 0;
 	}
-	else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
+	else if (rt[0] == 7 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 48) == 16) {
+		i386_err_k32(rv[0], e, path, ln); //rel todo
+		
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 1); //op
+		i386_inst_mod(bin, bn, 2, 5, rv[1]); //modrm
+		i386_inst_k32(bin, bn, 0); //disp
+		return 0;
+	}
+	else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 3
 		i386_err_r16(rv[1], e, path, ln);
 		
 		i386_inst_byt(bin, bn, 102); //leg op
@@ -426,7 +454,7 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		return 0;
 	}
-	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[0] & 48) == 16) {
+	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[0] & 48) == 16) { //moe 0
 		uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 		i386_err_r16(rv[1], e, path, ln);
 		
@@ -447,7 +475,7 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_mod(bin, bn, 0, a, rv[0]); //modrm
 		return 0;
 	}
-	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[2] < 256) {
+	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 16 && rv[2] < 256) { //mod 1
 		uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 		i386_err_r16(rv[1], e, path, ln);
 		
@@ -470,7 +498,7 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k8(bin, bn, rv[3]); //disp
 		return 0;
 	}
-	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 16) {
+	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[0] & 48) == 16) { //mod 2
 		uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 		i386_err_k16(rv[2], e, path, ln);
 		i386_err_r16(rv[1], e, path, ln);
@@ -480,6 +508,18 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_byt(bin, bn, op + 3); //op
 		i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 		i386_inst_k16(bin, bn, rv[2]); //disp
+		return 0;
+	}
+	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 7 && rt[3] == 0 && (rv[0] & 48) == 16) {
+		uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
+		i386_err_k16(rv[2], e, path, ln); //rel todo
+		i386_err_r16(rv[1], e, path, ln);
+		
+		i386_inst_byt(bin, bn, 103); //leg addr
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 3); //op
+		i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
+		i386_inst_k16(bin, bn, 0); //disp
 		return 0;
 	}
 	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0 && (rv[0] & 48) == 16) {
@@ -495,6 +535,19 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k16(bin, bn, rv[3]); //disp
 		return 0;
 	}
+	else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 7 && rt[4] == 0 && (rv[0] & 48) == 16) {
+		i386_err_r16(rv[1], e, path, ln);
+		uint8_t a = i386_err_a16(rv[1], rv[2], e, path, ln);
+		i386_err_k16(rv[3], e, path, ln); //rel todo
+		i386_err_r16(rv[2], e, path, ln);
+		
+		i386_inst_byt(bin, bn, 103); //leg addr
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 3); //op
+		i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
+		i386_inst_k16(bin, bn, 0); //disp
+		return 0;
+	}
 	else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0 && (rv[0] & 48) == 16) {
 		i386_err_k32(rv[1], e, path, ln);
 		
@@ -504,7 +557,16 @@ uint8_t i386_enc_16r(uint8_t* bin, uint64_t* bn, uint8_t op, uint8_t* rt, uint64
 		i386_inst_k32(bin, bn, rv[1]); //disp
 		return 0;
 	}
-	else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 16) {
+	else if (rt[0] == 1 && rt[1] == 7 && rt[2] == 0 && (rv[0] & 48) == 16) {
+		i386_err_k32(rv[1], e, path, ln); //rel todo
+		
+		i386_inst_byt(bin, bn, 102); //leg op
+		i386_inst_byt(bin, bn, op + 3); //op
+		i386_inst_mod(bin, bn, 2, 5, rv[0]); //modrm
+		i386_inst_k32(bin, bn, 0); //disp
+		return 0;
+	}
+	else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && rv[0] == 16) { //axk
 		i386_err_k16(rv[1], e, path, ln);
 		
 		i386_inst_byt(bin, bn, 102); //leg op
@@ -851,6 +913,118 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 		if (eo) {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "add");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 8, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 8, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 8, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "or");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 16, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 16, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 16, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adc");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'b' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 24, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 24, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 24, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sbb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 32, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 32, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 32, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "and");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 40, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 40, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 40, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sub");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'x' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 48, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 48, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 48, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "xor");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'c' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = i386_enc_8r(bin, bn, 56, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_16r(bin, bn, 56, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = i386_enc_32r(bin, bn, 56, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "cmp");
 			*e = -1;
 		}
 	}

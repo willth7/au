@@ -448,6 +448,97 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 8, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 8, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "or");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 16, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 16, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adc");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'b' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 24, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 24, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sbb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 32, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 32, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "and");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 40, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 40, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sub");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'x' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 48, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 48, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "xor");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'c' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
+		uint8_t eo = 1;
+		if (eo) {
+			eo = x86_enc_8r(bin, bn, 56, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			eo = x86_enc_16r(bin, bn, 56, rt, rv, e, path, ln);
+		}
+		if (eo) {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "cmp");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
