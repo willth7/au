@@ -19,6 +19,73 @@
 #include <string.h>
 #include <stdio.h>
 
+uint8_t arm_32a_reg(int8_t* r, int8_t* e, int8_t* path, uint64_t ln) {
+	if (r[0] == 'r' && r[1] == '0' && r[2] == 0) { //general purpose
+		return 0;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == 0) {
+		return 1;
+	}
+	else if (r[0] == 'r' && r[1] == '2' && r[2] == 0) {
+		return 2;
+	}
+	else if (r[0] == 'r' && r[1] == '3' && r[2] == 0) {
+		return 3;
+	}
+	else if (r[0] == 'r' && r[1] == '4' && r[2] == 0) {
+		return 4;
+	}
+	else if (r[0] == 'r' && r[1] == '5' && r[2] == 0) {
+		return 5;
+	}
+	else if (r[0] == 'r' && r[1] == '6' && r[2] == 0) {
+		return 6;
+	}
+	else if (r[0] == 'r' && r[1] == '7' && r[2] == 0) {
+		return 7;
+	}
+	else if (r[0] == 'r' && r[1] == '8' && r[2] == 0) {
+		return 8;
+	}
+	else if (r[0] == 'r' && r[1] == '9' && r[2] == 0) {
+		return 9;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '0' && r[3] == 0) {
+		return 10;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '1' && r[3] == 0) {
+		return 11;
+	}
+	else if (r[0] == 'r' && r[1] == '1' && r[2] == '2' && r[3] == 0) {
+		return 12;
+	}
+	else if ((r[0] == 'r' && r[1] == '1' && r[2] == '3' && r[3] == 0) || (r[0] == 's' && r[1] == 'p')) {
+		return 13;
+	}
+	else if ((r[0] == 'r' && r[1] == '1' && r[2] == '4' && r[3] == 0) || (r[0] == 'l' && r[1] == 'r')) {
+		return 14;
+	}
+	else if ((r[0] == 'r' && r[1] == '1' && r[2] == '5' && r[3] == 0) || (r[0] == 'p' && r[1] == 'c')) {
+		return 15;
+	}
+	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'l' && r[3] == 0) { //shifts
+		return 16;
+	}
+	else if (r[0] == 'l' && r[1] == 's' && r[2] == 'r' && r[3] == 0) {
+		return 17;
+	}
+	else if (r[0] == 'a' && r[1] == 's' && r[2] == 'r' && r[3] == 0) {
+		return 18;
+	}
+	else if (r[0] == 'r' && r[1] == 'o' && r[2] == 'r' && r[3] == 0) {
+		return 19;
+	}
+	else {
+		printf("[%s, %lu] error: unknown register '%s'\n", path, ln, r);
+		*e = -1;
+	}
+}
+
 uint8_t arm_32a_cond(int8_t* c, int8_t* e, int8_t* path, uint64_t ln) {
 	if (c[0] == 0) {
 		return 14;
@@ -77,6 +144,13 @@ uint8_t arm_32a_cond(int8_t* c, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+uint8_t arm_32a_str(int8_t* s) {
+	if (*s == 's') {
+		return 1;
+	}
+	return 0;
+}
+
 void arm_32a_err_r4(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	if (r > 15) {
 		printf("[%s, %lu] error: illegal register 'r%u'\n", path, ln, r);
@@ -127,7 +201,7 @@ void arm_32a_err_k24(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 }
 
 void arm_32a_err_sh(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
-	if (r < 32 || r > 35) {
+	if (r < 16 || r > 19) {
 		printf("[%s, %lu] error: illegal shift\n", path, ln);
 		*e = -1;
 	}
@@ -161,7 +235,7 @@ uint8_t arm_32a_err_rl(uint64_t* v, uint8_t* t, int8_t* e, int8_t* path, uint64_
 
 void arm_32a_inst_c4_r4_r4_r4_sh_k5(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t sh, uint8_t k) {
 	bin[*bn] |= r1;
-	bin[*bn] |= (sh - 32) << 5;
+	bin[*bn] |= (sh - 16) << 5;
 	bin[*bn] |= k << 7;
 	bin[*bn + 1] |= k >> 1;
 	bin[*bn + 1] |= rd << 4;
@@ -172,7 +246,7 @@ void arm_32a_inst_c4_r4_r4_r4_sh_k5(uint8_t* bin, uint64_t* bn, uint8_t c, uint8
 
 void arm_32a_inst_c4_r4_r4_r4_sh_r4(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, uint8_t r0, uint8_t r1, uint8_t sh, uint8_t r2) {
 	bin[*bn] |= r1;
-	bin[*bn] |= (sh - 32) << 5;
+	bin[*bn] |= (sh - 16) << 5;
 	bin[*bn + 1] |= r2;
 	bin[*bn + 1] |= rd << 4;
 	bin[*bn + 2] |= r0;
@@ -238,44 +312,47 @@ void arm_32a_inst_c4_r4_rl(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, ui
 }
 
 void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
-	if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 's') {
+	if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16;
+			bin[*bn + 2] = 0 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16;
+			bin[*bn + 2] = 0 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16;
+			bin[*bn + 2] = 0 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -283,69 +360,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "ands");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
+			bin[*bn + 2] = 0 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -354,102 +374,47 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "eors");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'e' && op[1] == 'o' && op[2] == 'r') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32;
+			bin[*bn + 2] = 32 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32;
+			bin[*bn + 2] = 32 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32;
+			bin[*bn + 2] = 32 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -457,11 +422,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32;
+			bin[*bn + 2] = 32 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -470,102 +436,47 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "subs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64;
+			bin[*bn + 2] = 64 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64;
+			bin[*bn + 2] = 64 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64;
+			bin[*bn + 2] = 64 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -573,11 +484,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64;
+			bin[*bn + 2] = 64 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -586,102 +498,47 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'r' && op[1] == 's' && op[2] == 'b' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "rsbs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'r' && op[1] == 's' && op[2] == 'b') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96;
+			bin[*bn + 2] = 96 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96;
+			bin[*bn + 2] = 96 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96;
+			bin[*bn + 2] = 96 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -689,11 +546,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96;
+			bin[*bn + 2] = 96 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -702,102 +560,47 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adds");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -805,11 +608,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -818,74 +622,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adcs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
@@ -895,11 +642,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -909,11 +657,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -921,11 +670,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -934,74 +684,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sbcs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'c') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
@@ -1011,11 +704,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1025,11 +719,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1037,11 +732,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 2;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -1050,74 +746,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'r' && op[1] == 's' && op[2] == 'c' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 2;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "rscs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'r' && op[1] == 's' && op[2] == 'c') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
@@ -1127,11 +766,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1141,11 +781,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1153,7 +794,8 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
@@ -1178,7 +820,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 2 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_sh(rv[2], e, path, ln);
@@ -1191,7 +833,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], rv[2], rv[3]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 5 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
@@ -1233,7 +875,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 2 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_sh(rv[2], e, path, ln);
@@ -1246,7 +888,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], rv[2], rv[3]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 5 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
@@ -1288,7 +930,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 2 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_sh(rv[2], e, path, ln);
@@ -1301,7 +943,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], rv[2], rv[3]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 5 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
@@ -1343,7 +985,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 2 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_sh(rv[2], e, path, ln);
@@ -1356,7 +998,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, 0, rv[0], rv[1], rv[2], rv[3]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 5 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
@@ -1386,102 +1028,47 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'r' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 3;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "orrs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 'r') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 5 && rt[5] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1489,11 +1076,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 3;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -1502,54 +1090,28 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_k12(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 3;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], 0, rv[1]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "movs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_k12(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 3;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], 0, rv[1]);
 		}
@@ -1558,46 +1120,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'l' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 0, rv[2]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 0, rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lsls");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'l') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 0, rv[2]);
 		}
@@ -1605,11 +1138,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 0, rv[2]);
 		}
@@ -1618,46 +1152,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'r' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 1, rv[2]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 1, rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lsrs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'l' && op[1] == 's' && op[2] == 'r') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 1, rv[2]);
 		}
@@ -1665,11 +1170,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 1, rv[2]);
 		}
@@ -1678,46 +1184,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'a' && op[1] == 's' && op[2] == 'r' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 2, rv[2]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 2, rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "asrs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'a' && op[1] == 's' && op[2] == 'r') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 2, rv[2]);
 		}
@@ -1725,11 +1202,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 2, rv[2]);
 		}
@@ -1738,46 +1216,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'r' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 3, rv[2]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 3, rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "rors");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'r' && op[1] == 'o' && op[2] == 'r') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], 0, rv[1], 3, rv[2]);
 		}
@@ -1785,11 +1234,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k5(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 3, rv[2]);
 		}
@@ -1798,32 +1248,16 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'r' && op[1] == 'r' && op[2] == 'x' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 3, 0);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "rrxs");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'r' && op[1] == 'r' && op[2] == 'x') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], 0, rv[1], 3, 0);
 		}
@@ -1832,74 +1266,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'b' && op[1] == 'i' && op[2] == 'c' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 3;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "bics");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'b' && op[1] == 'i' && op[2] == 'c') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
@@ -1909,11 +1286,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1923,11 +1301,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -1935,11 +1314,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 3;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -1948,74 +1328,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'm' && op[1] == 'v' && op[2] == 'n' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 2 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 1 && rt[5] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_sh(rv[3], e, path, ln);
-			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 16;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 1;
-			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
-		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 3;
-			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mvns");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'm' && op[1] == 'v' && op[2] == 'n') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], 0, 0);
 		}
@@ -2025,11 +1348,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_k5(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_k5(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -2039,11 +1363,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_sh(rv[3], e, path, ln);
 			arm_32a_err_r4(rv[4], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 16;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_r4_sh_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3], rv[4]);
 		}
@@ -2051,11 +1376,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 3;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
@@ -2064,58 +1390,22 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[0], rv[1], rv[2], 0);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "muls");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
+			bin[*bn + 2] = 0 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[0], rv[1], rv[2], 0);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mul");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'm' && op[1] == 'l' && op[2] == 'a' && op[3] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "mlas");
 			*e = -1;
 		}
 	}
@@ -2125,11 +1415,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			uint8_t s = arm_32a_str(op + 3);
+			uint8_t c = arm_32a_cond(op + 3 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32;
+			bin[*bn + 2] = 32 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[0], rv[1], rv[2], rv[3]);
 		}
@@ -2176,60 +1467,23 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'u' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 'l' && op[5] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 144;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "umulls");
-			*e = -1;
-		}
-	}
 	else if (op[0] == 'u' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 'l') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
+			uint8_t s = arm_32a_str(op + 5);
+			uint8_t c = arm_32a_cond(op + 5 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 128;
+			bin[*bn + 2] = 128 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "umull");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'u' && op[1] == 'm' && op[2] == 'l' && op[3] == 'a' && op[4] == 'l' && op[5] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 176;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "umlals");
 			*e = -1;
 		}
 	}
@@ -2239,35 +1493,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
+			uint8_t s = arm_32a_str(op + 5);
+			uint8_t c = arm_32a_cond(op + 5 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 160;
+			bin[*bn + 2] = 160 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "umlal");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 's' && op[1] == 'm' && op[2] == 'u' && op[3] == 'l' && op[4] == 'l' && op[5] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 208;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "smulls");
 			*e = -1;
 		}
 	}
@@ -2277,35 +1513,17 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
+			uint8_t s = arm_32a_str(op + 5);
+			uint8_t c = arm_32a_cond(op + 5 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 192;
+			bin[*bn + 2] = 192 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "smull");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 's' && op[1] == 'm' && op[2] == 'l' && op[3] == 'a' && op[4] == 'l' && op[5] == 's') {
-		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 1 && rt[4] == 0) {
-			arm_32a_err_r4(rv[0], e, path, ln);
-			arm_32a_err_r4(rv[1], e, path, ln);
-			arm_32a_err_r4(rv[2], e, path, ln);
-			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
-			
-			bin[*bn] = 144;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 240;
-			bin[*bn + 3] = 0;
-			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "smlals");
 			*e = -1;
 		}
 	}
@@ -2315,11 +1533,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_r4(rv[2], e, path, ln);
 			arm_32a_err_r4(rv[3], e, path, ln);
-			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
+			uint8_t s = arm_32a_str(op + 5);
+			uint8_t c = arm_32a_cond(op + 5 + s, e, path, ln);
 			
 			bin[*bn] = 144;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 224;
+			bin[*bn + 2] = 224 | (s << 4);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_r4_r4(bin, bn, c, rv[1], rv[2], rv[3], rv[0]);
 		}
@@ -3365,7 +2584,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 6;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -3630,7 +2849,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -3881,7 +3100,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -4206,7 +3425,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 6;
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
@@ -4472,7 +3691,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
@@ -4723,7 +3942,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
@@ -5048,7 +4267,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 6;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -5313,7 +4532,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -5564,7 +4783,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 7;
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
@@ -5889,7 +5108,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], rv[2]);
 		}
-		else if (rt[0] == 1 && rt[1] == 4 && rt[2] == 0) { //rel
+		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
 			arm_32a_err_r4(rv[0], e, path, ln);
 			*((uint8_t*) rv[1]) |= 6;
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
@@ -7265,7 +6484,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 250;
 			*bn += 4;
 		}
-		else if (rt[0] == 4 && rt[1] == 0) { //rel
+		else if (rt[0] == 3 && rt[1] == 0) { //rel
 			*((uint8_t*) rv[0]) |= 5;
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
@@ -7289,7 +6508,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = (c << 4) + 11;
 			*bn += 4;
 		}
-		else if (rt[0] == 4 && rt[1] == 0) { //rel
+		else if (rt[0] == 3 && rt[1] == 0) { //rel
 			*((uint8_t*) rv[0]) |= 5;
 			uint8_t c = arm_32a_cond(op + 2, e, path, ln);
 			
@@ -7315,7 +6534,7 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = (c << 4) + 10;
 			*bn += 4;
 		}
-		else if (rt[0] == 4 && rt[1] == 0) { //rel
+		else if (rt[0] == 3 && rt[1] == 0) { //rel
 			*((uint8_t*) rv[0]) |= 5;
 			uint8_t c = arm_32a_cond(op + 1, e, path, ln);
 			

@@ -14,4 +14,6 @@
 
 //   gloria in excelsis deo
 
+uint8_t arm_32a_reg(int8_t*, int8_t*, int8_t*, uint64_t);
+
 void arm_32a_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);

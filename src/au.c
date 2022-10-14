@@ -21,7 +21,7 @@
 
 #include "au/pseu.h"
 //#include "arm/32m.h"
-//#include "arm/32a.h"
+#include "arm/32a.h"
 //#include "arm/64.h"
 #include "x86/x86.h"
 #include "x86/i386.h"
@@ -394,8 +394,8 @@ int8_t main(int32_t argc, int8_t** argv) {
 		//au_enc = arm_32m_enc;
 	}
 	else if (!strcmp(argv[1], "aarch32-a")) {
-		//au_reg = arm_32_reg;
-		//au_enc = arm_32a_enc;
+		au_reg = arm_32a_reg;
+		au_enc = arm_32a_enc;
 	}
 	else if (!strcmp(argv[1], "aarch64")) {
 		//au_reg = arm_64_reg;
