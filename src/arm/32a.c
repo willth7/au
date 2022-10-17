@@ -2312,12 +2312,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2357,12 +2357,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2402,12 +2402,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2415,12 +2415,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2497,12 +2497,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2528,12 +2528,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2559,12 +2559,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2572,12 +2572,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2626,12 +2626,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2657,12 +2657,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2688,12 +2688,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2701,12 +2701,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2755,12 +2755,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32 | (s << 7);
+			bin[*bn + 2] = 32 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2800,12 +2800,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 32 | (s << 7);
+			bin[*bn + 2] = 32 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2845,12 +2845,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0 | (s << 7);
+			bin[*bn + 2] = 0 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2858,12 +2858,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0 | (s << 7);
+			bin[*bn + 2] = 0 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2941,12 +2941,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -2972,12 +2972,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3003,12 +3003,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3016,12 +3016,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3070,12 +3070,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3101,12 +3101,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 6, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3132,12 +3132,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3145,12 +3145,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 240;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3199,12 +3199,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3244,12 +3244,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3289,12 +3289,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3302,12 +3302,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3384,12 +3384,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3415,12 +3415,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 112 | (s << 7);
+			bin[*bn + 2] = 112 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3446,12 +3446,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3459,12 +3459,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 176;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 80 | (s << 7);
+			bin[*bn + 2] = 80 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3513,12 +3513,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3544,12 +3544,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 5, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 96 | (s << 7);
+			bin[*bn + 2] = 96 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3575,12 +3575,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 0;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3588,12 +3588,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k8(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 208;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 64 | (s << 7);
+			bin[*bn + 2] = 64 | (u << 7);
 			bin[*bn + 3] = 1;
 			arm_32a_inst_c4_r4_r4_k8(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3642,12 +3642,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48 | (s << 7);
+			bin[*bn + 2] = 48 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3687,12 +3687,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 4, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 48 | (s << 7);
+			bin[*bn + 2] = 48 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3732,12 +3732,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16 | (s << 7);
+			bin[*bn + 2] = 16 | (u << 7);
 			bin[*bn + 3] = 4;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}
@@ -3745,12 +3745,12 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_32a_err_r4(rv[0], e, path, ln);
 			arm_32a_err_r4(rv[1], e, path, ln);
 			arm_32a_err_k12(rv[2], e, path, ln);
-			uint8_t s = arm_32a_uk(rv[2]);
+			uint8_t u = arm_32a_uk(rv[2]);
 			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
 			
 			bin[*bn] = 0;
 			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 16 | (s << 7);
+			bin[*bn + 2] = 16 | (u << 7);
 			bin[*bn + 3] = 5;
 			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], rv[1], arm_32a_abs(rv[2]));
 		}

@@ -20,9 +20,9 @@
 #include <stdio.h>
 
 #include "au/pseu.h"
-//#include "arm/32m.h"
+#include "arm/32m.h"
 #include "arm/32a.h"
-//#include "arm/64.h"
+#include "arm/64.h"
 #include "x86/x86.h"
 #include "x86/i386.h"
 #include "x86/x64.h"
@@ -390,16 +390,16 @@ int8_t main(int32_t argc, int8_t** argv) {
 	}
 	
 	if (!strcmp(argv[1], "aarch32-m")) {
-		//au_reg = arm_32_reg;
-		//au_enc = arm_32m_enc;
+		au_reg = arm_32m_reg;
+		au_enc = arm_32m_enc;
 	}
 	else if (!strcmp(argv[1], "aarch32-a")) {
 		au_reg = arm_32a_reg;
 		au_enc = arm_32a_enc;
 	}
 	else if (!strcmp(argv[1], "aarch64")) {
-		//au_reg = arm_64_reg;
-		//au_enc = arm_64_enc;
+		au_reg = arm_64_reg;
+		au_enc = arm_64_enc;
 	}
 	else if (!strcmp(argv[1], "x86")) {
 		au_reg = x86_reg;
