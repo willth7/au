@@ -1649,6 +1649,36 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 0 && (rv[0] & 48) == 16) {
+			i386_inst_byt(bin, bn, 102); //leg op
+			i386_inst_byt(bin, bn, 80 | (rv[0] & 7)); //op
+		}
+		else if (rt[0] == 1 && rt[1] == 0) {
+			i386_err_r32(rv[0], e, path, ln);
+			
+			i386_inst_byt(bin, bn, 80 | (rv[0] & 7)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "push");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 0 && (rv[0] & 48) == 16) {
+			i386_inst_byt(bin, bn, 102); //leg op
+			i386_inst_byt(bin, bn, 88 | (rv[0] & 7)); //op
+		}
+		else if (rt[0] == 1 && rt[1] == 0) {
+			i386_err_r32(rv[0], e, path, ln);
+			
+			i386_inst_byt(bin, bn, 88 | (rv[0] & 7)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "pop");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
