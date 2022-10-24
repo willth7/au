@@ -18,6 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 #include "au/pseu.h"
 #include "arm/32m.h"
@@ -148,18 +153,17 @@ void au_clr_rg(int8_t rg[20][64]) {
 }
 
 void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t* rel, uint64_t* reln, int8_t* path, int8_t* e) {
-	FILE* f = fopen(path, "r");
-	if (!f) {
-		printf("[%s] error: file doesn't exist\n", path);
-		*e = -1;
-		return;
-	}
-	fseek(f, 0, SEEK_END);
-	uint64_t fn = ftell(f);
-	int8_t* fx = malloc(fn);
-	fseek(f, 0, SEEK_SET);
-	fread(fx, fn, 1, f);
-	fclose(f);
+	int32_t fd = open(path, O_RDONLY);
+    if (fd == -1) {
+        printf("failed to open file '%s'\n", path);
+        return -1;
+    }
+	
+    struct stat fs;
+    fstat(fd, &fs);
+	
+    uint8_t* fx = mmap(0, fs.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
 	
 	int8_t lex[64];
 	uint8_t li = 0;
@@ -174,7 +178,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	uint8_t ri = 0;
 	uint8_t rn = 0;
 	
-	for (uint64_t fi = 0; fi < fn; fi++) {
+	for (uint64_t fi = 0; fi < fs.st_size; fi++) {
 		if (((fx[fi] >= 97 && fx[fi] <= 122) || (fx[fi] >= 48 && fx[fi] <= 57) || fx[fi] == '_') && !c) { //string
 			lex[li] = fx[fi];
 			lex[li + 1] = 0;
@@ -339,48 +343,60 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 		}
 	}
 	
-	free(fx);
+	munmap(fx, fs.st_size);
 }
 
 void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
-	FILE* f = fopen(path, "w");
-	fwrite(bin, bn, 1, f);
-	fclose(f);
+	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
+    if (fd == -1) {
+        printf("failed to create file '%s'\n", path);
+        return -1;
+    }
+    ftruncate(fd, bn);
+    uint8_t* mem = mmap(0, bn, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	memcpy(mem, bin, bn);
+	munmap(mem, bn);
+	close(fd);
 }
 
 void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
-	uint8_t* buf = malloc(52 + bn + (symn * 17) + (reln * 17));
+	uint64_t memsz = 52 + bn + (symn * 17) + (reln * 17);
+	
+	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
+    if (fd == -1) {
+        printf("failed to create file '%s'\n", path);
+        return -1;
+    }
+    ftruncate(fd, memsz);
+    uint8_t* mem = mmap(0, memsz, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 	
 	uint64_t binoff = 52;
 	uint64_t symoff = 52 + bn;
 	uint64_t reloff = 52 + bn + (symn * 17);
 	
-	memcpy(buf, "zinc", 4);
-	memcpy(buf + 4, &binoff, 8);
-	memcpy(buf + 12, &bn, 8);
-	memcpy(buf + 20, &symoff, 8);
-	memcpy(buf + 28, &symn, 8);
-	memcpy(buf + 36, &reloff, 8);
-	memcpy(buf + 44, &reln, 8);
+	memcpy(mem, "zinc", 4);
+	memcpy(mem + 4, &binoff, 8);
+	memcpy(mem + 12, &bn, 8);
+	memcpy(mem + 20, &symoff, 8);
+	memcpy(mem + 28, &symn, 8);
+	memcpy(mem + 36, &reloff, 8);
+	memcpy(mem + 44, &reln, 8);
 	
-	memcpy(buf + binoff, bin, bn);
+	memcpy(mem + binoff, bin, bn);
 	for (uint64_t i = 0; i < symn; i++) {
-		memcpy(buf + symoff + (17 * i), &(sym[i].str), 8);
-		memcpy(buf + symoff + (17 * i) + 8, &(sym[i].addr), 8);
-		memcpy(buf + symoff + (17 * i) + 16, &(sym[i].typ), 1);
+		memcpy(mem + symoff + (17 * i), &(sym[i].str), 8);
+		memcpy(mem + symoff + (17 * i) + 8, &(sym[i].addr), 8);
+		memcpy(mem + symoff + (17 * i) + 16, &(sym[i].typ), 1);
 	}
 	
 	for (uint64_t i = 0; i < reln; i++) {
-		memcpy(buf + reloff + (17 * i), &(rel[i].str), 8);
-		memcpy(buf + reloff + (17 * i) + 8, &(rel[i].addr), 8);
-		memcpy(buf + reloff + (17 * i) + 16, &(rel[i].typ), 1);
+		memcpy(mem + reloff + (17 * i), &(rel[i].str), 8);
+		memcpy(mem + reloff + (17 * i) + 8, &(rel[i].addr), 8);
+		memcpy(mem + reloff + (17 * i) + 16, &(rel[i].typ), 1);
 	}
 	
-	FILE* f = fopen(path, "w");
-	fwrite(buf, 52 + bn + (symn * 17) + (reln * 17), 1, f);
-	fclose(f);
-	
-	free(buf);
+	munmap(mem, memsz);
+	close(fd);
 }
 
 int8_t main(int32_t argc, int8_t** argv) {
@@ -389,15 +405,15 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	if (!strcmp(argv[1], "aarch32-m")) {
+	if (!strcmp(argv[1], "arm32-m")) {
 		au_reg = arm_32m_reg;
 		au_enc = arm_32m_enc;
 	}
-	else if (!strcmp(argv[1], "aarch32-a")) {
+	else if (!strcmp(argv[1], "arm32-a")) {
 		au_reg = arm_32a_reg;
 		au_enc = arm_32a_enc;
 	}
-	else if (!strcmp(argv[1], "aarch64")) {
+	else if (!strcmp(argv[1], "arm64")) {
 		au_reg = arm_64_reg;
 		au_enc = arm_64_enc;
 	}

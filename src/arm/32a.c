@@ -295,6 +295,15 @@ void arm_32a_inst_c4_r4_r4_k12(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd
 	*bn += 4;
 }
 
+void arm_32a_inst_c4_r4_k16(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, uint16_t k) {
+    bin[*bn] |= k;
+    bin[*bn + 1] |= (k >> 8) & 15;
+    bin[*bn + 1] |= rd << 4;
+    bin[*bn + 2] |= k >> 12;
+    bin[*bn + 3] |= c << 4;
+    *bn += 4;
+}
+
 void arm_32a_inst_c4_r4_r4_k8(uint8_t* bin, uint64_t* bn, uint8_t c, uint8_t rd, uint8_t rs, uint8_t k) {
 	bin[*bn] |= k & 15;
 	bin[*bn + 1] |= k >> 4;
@@ -1113,6 +1122,23 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'w') {
+        if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) {
+            arm_32a_err_r4(rv[0], e, path, ln);
+            arm_32a_err_k16(rv[1], e, path, ln);
+            uint8_t c = arm_32a_cond(op + 4, e, path, ln);
+             
+            bin[*bn] = 0;
+            bin[*bn + 1] = 0;
+            bin[*bn + 2] = 0;
+            bin[*bn + 3] = 3;
+            arm_32a_inst_c4_r4_k16(bin, bn, c, rv[0], rv[1]);
+        }
+        else {
+            printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "movw");
+            *e = -1;
+        }
+    }
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);

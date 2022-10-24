@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
 rm /usr/bin/au
