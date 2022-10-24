@@ -156,7 +156,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	int32_t fd = open(path, O_RDONLY);
     if (fd == -1) {
         printf("failed to open file '%s'\n", path);
-        return -1;
+        return;
     }
 	
     struct stat fs;
@@ -350,7 +350,7 @@ void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
         printf("failed to create file '%s'\n", path);
-        return -1;
+        return;
     }
     ftruncate(fd, bn);
     uint8_t* mem = mmap(0, bn, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -365,7 +365,7 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
         printf("failed to create file '%s'\n", path);
-        return -1;
+        return;
     }
     ftruncate(fd, memsz);
     uint8_t* mem = mmap(0, memsz, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);

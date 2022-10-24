@@ -207,6 +207,13 @@ void i386_err_rbp(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void i386_err_132(uint8_t r, int8_t* e, int8_t* path, uint64_t ln) {
+	if ((r & 48) == 0) {
+		printf("[%s, %lu] error: illegal register '%s'\n", path, ln, i386_dec_reg(r));
+		*e = -1;
+	}
+}
+
 void i386_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -128 || k > 255) {
 		printf("[%s, %lu] error: immediate '%u' out of range\n", path, ln, k);
@@ -478,7 +485,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			i386_err_k16(rv[1], e, path, ln);
 			
-			i386_prfx_leg(bin, bn, rv[2]);
 			i386_inst_byt(bin, bn, 103); //leg addr
 			i386_inst_byt(bin, bn, 131); //op
 			i386_inst_mod(bin, bn, 2, a, 0); //modrm
@@ -489,7 +495,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			uint8_t a = i386_err_a16(rv[0], rv[1], e, path, ln);
 			i386_err_k16(rv[2], e, path, ln);
 			
-			i386_prfx_leg(bin, bn, rv[3]);
 			i386_inst_byt(bin, bn, 103); //leg addr
 			i386_inst_byt(bin, bn, 131); //op
 			i386_inst_mod(bin, bn, 2, a, 0); //modrm
@@ -510,7 +515,7 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k32(rv[1], e, path, ln);
 			
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 0, a, 0); //modrm
 			i386_inst_k32(bin, bn, rv[1]); //imm
 		}
@@ -519,7 +524,7 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k32(rv[2], e, path, ln);
 			
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 0, a, 0); //modrm
 			i386_inst_k32(bin, bn, rv[2]); //imm
 		}
@@ -528,7 +533,7 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k32(rv[2], e, path, ln);
 			
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 1, a, 0); //modrm
 			i386_inst_byt(bin, bn, rv[1]); //disp
 			i386_inst_k32(bin, bn, rv[2]); //imm
@@ -538,7 +543,7 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k32(rv[3], e, path, ln);
 			
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 1, a, 0); //modrm
 			i386_inst_byt(bin, bn, rv[2]); //imm
 			i386_inst_k32(bin, bn, rv[3]); //imm
@@ -548,9 +553,8 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k16(rv[1], e, path, ln);
 			i386_err_k32(rv[2], e, path, ln);
 			
-			i386_prfx_leg(bin, bn, rv[2]);
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 2, a, 0); //modrm
 			i386_inst_k16(bin, bn, rv[1]); //disp
 			i386_inst_k32(bin, bn, rv[2]); //imm
@@ -560,9 +564,8 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			i386_err_k16(rv[2], e, path, ln);
 			i386_err_k32(rv[3], e, path, ln);
 			
-			i386_prfx_leg(bin, bn, rv[3]);
 			i386_inst_byt(bin, bn, 103); //leg addr
-			i386_inst_byt(bin, bn, 131); //op
+			i386_inst_byt(bin, bn, 129); //op
 			i386_inst_mod(bin, bn, 2, a, 0); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 			i386_inst_k32(bin, bn, rv[2]); //imm
@@ -577,6 +580,40 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "add");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 0) {
+			i386_err_132(rv[0], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 80 | (rv[0] & 7)); //op
+		}
+		else if (rt[0] == 2 && rt[1] == 0 && rv[0] < 256) {
+			i386_inst_byt(bin, bn, 106); //op
+			i386_inst_byt(bin, bn, rv[0]); //imm
+		}
+		else if (rt[0] == 2 && rt[1] == 0) {
+			i386_err_k16(rv[0], e, path, ln);
+			
+			i386_inst_byt(bin, bn, 104); //op
+			i386_inst_k16(bin, bn, rv[0]); //imm
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "push");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 0) {
+			i386_err_132(rv[0], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 88 | (rv[0] & 7)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "pop");
 			*e = -1;
 		}
 	}
