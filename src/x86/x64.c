@@ -6545,6 +6545,16 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			*e = -1;
 		}
 	}
+	else if (op[0] == 's' && op[1] == 'y' && op[2] == 's' && op[3] == 'c' && op[4] == 'a' && op[5] == 'l' && op[6] == 'l' && op[7] == 0) {
+		if (rt[0] == 0) { //mod 0
+			x86_64_inst_byt(bin, bn, 15); //op
+			x86_64_inst_byt(bin, bn, 5); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "syscall");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
