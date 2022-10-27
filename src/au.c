@@ -17,8 +17,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -155,7 +155,8 @@ void au_clr_rg(int8_t rg[20][64]) {
 void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t* rel, uint64_t* reln, int8_t* path, int8_t* e) {
 	int32_t fd = open(path, O_RDONLY);
     if (fd == -1) {
-        printf("failed to open file '%s'\n", path);
+        printf("error: failed to open file '%s'\n", path);
+		*e = -1;
         return;
     }
 	
@@ -276,14 +277,14 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 					rv[i] = (uint64_t) &(rel[*reln].typ);
 					rel[*reln].addr = *bn;
 					rel[*reln].typ = 0;
-					memcpy(&(rel[*reln].str), rg[i] + 1 + q, 8);
-					(*reln)++;
-				}
-				else if (rg[i][q] == '^' && rg[i][q + 1] >= 97 && rg[i][q + 1] <= 122) { //relocation
-					rt[i] = 3 | (p << 2);
-					rv[i] = (uint64_t) &(rel[*reln].typ);
-					rel[*reln].addr = *bn;
-					rel[*reln].typ = 128;
+					if (rg[i][strlen(rg[i]) - 1] == ')' && p) {
+						rg[i][strlen(rg[i]) - 1] = 0;
+						p = 0;
+					}
+					else if (rg[i][strlen(rg[i]) - 1] == ')' && !p) { //error
+						printf("[%s, %lu] error: expected '('\n", path, ln);
+						*e = -1;
+					}
 					memcpy(&(rel[*reln].str), rg[i] + 1 + q, 8);
 					(*reln)++;
 				}
@@ -349,7 +350,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
-        printf("failed to create file '%s'\n", path);
+        printf("error: failed to create file '%s'\n", path);
         return;
     }
     ftruncate(fd, bn);
@@ -364,11 +365,11 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_
 	
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
-        printf("failed to create file '%s'\n", path);
+        printf("error: failed to create file '%s'\n", path);
         return;
     }
     ftruncate(fd, memsz);
-    uint8_t* mem = mmap(0, memsz, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    uint8_t* mem = mmap(0, memsz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	
 	uint64_t binoff = 52;
 	uint64_t symoff = 52 + bn;

@@ -98,65 +98,6 @@ void au_pseu_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 'r' && op[4] == 0) {
-		if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 255;
-			
-			bin[*bn] = 0;
-			*bn += 1;
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '2' && op[4] == 0) {
-		if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 254;
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			*bn += 2;
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '4' && op[4] == 0) {
-		if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 253;
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
-			*bn += 4;
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
-			*e = -1;
-		}
-	}
-	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == '8' && op[4] == 0) {
-		if (rt[0] == 4 && rt[1] == 0) {
-			*((uint8_t*) rv[0]) |= 252;
-			
-			bin[*bn] = 0;
-			bin[*bn + 1] = 0;
-			bin[*bn + 2] = 0;
-			bin[*bn + 3] = 0;
-			bin[*bn + 4] = 0;
-			bin[*bn + 5] = 0;
-			bin[*bn + 6] = 0;
-			bin[*bn + 7] = 0;
-			*bn += 8;
-		}
-		else {
-			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "byte");
-			*e = -1;
-		}
-	}
 	else {
 		printf("[%s, %lu] error: unknown pseudo-op '%s'\n", path, ln, op);
 		*e = -1;
