@@ -6389,6 +6389,160 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'x' && op[1] == 'c' && op[2] == 'h' && op[3] == 'g' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 15) == 0) { //ax
+			x86_64_err_264(rv[0], e, path, ln);
+			x86_64_err_reg(rv[0], rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, 0, rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[0], 0, rv[0] & 48);
+			x86_64_inst_byt(bin, bn, 144 + (rv[0] & 7)); //op
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0) { //mod 3
+			x86_64_err_reg(rv[0], rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, 0, rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[0], 0, rv[1]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_rbp(rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, 4, 4); //sib
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] == 101 || rv[1] == 117)) {
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, 0, 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
+			x86_64_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] == 101 || rv[1] == 117)) {
+			x86_64_err_k32(rv[2], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, 0, 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
+			x86_64_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 7 && rt[3] == 0 && (rv[1] == 101 || rv[1] == 117)) {
+			*((uint8_t*) rv[2]) |= 4; //rel
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, 0, 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 5, rv[0]); //modrm
+			x86_64_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0) {
+			x86_64_err_364(rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, rv[1], rv[0]); //modrm
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) {
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_364(rv[2], e, path, ln);
+			x86_64_err_reg(rv[1], rv[2], e, path, ln);
+			x86_64_err_rsp(rv[2], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], rv[2], rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
+		}
+		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
+			x86_64_err_k32(rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, 0, rv[0]);
+			x86_64_prfx_rex(bin, bn, 0, 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, 5, 4); //sib
+			x86_64_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256 && rv[2] > -128) { //mod 1
+			x86_64_err_364(rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 1, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, 4, 4); //sib
+			x86_64_inst_byt(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] < 256 && rv[2] > -128) {
+			x86_64_err_364(rv[1], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 1, rv[1], rv[0]); //modrm
+			x86_64_inst_byt(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0 && rv[3] < 256 && rv[3] > -128) {
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_364(rv[2], e, path, ln);
+			x86_64_err_reg(rv[1], rv[2], e, path, ln);
+			x86_64_err_rsp(rv[2], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], rv[2], rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 1, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
+			x86_64_inst_byt(bin, bn, rv[3]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4) { //mod 2
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_k32(rv[2], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 2, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, 4, 4); //sib
+			x86_64_inst_k32(bin, bn, rv[6]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_k32(rv[2], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], 0, rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 2, rv[1], rv[0]); //modrm
+			x86_64_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
+			x86_64_err_364(rv[1], e, path, ln);
+			x86_64_err_364(rv[2], e, path, ln);
+			x86_64_err_reg(rv[1], rv[2], e, path, ln);
+			x86_64_err_rsp(rv[2], e, path, ln);
+			x86_64_err_k32(rv[3], e, path, ln);
+			
+			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
+			x86_64_prfx_rex(bin, bn, rv[1], rv[2], rv[0]);
+			x86_64_inst_byt(bin, bn, 134 + !!(rv[0] & 48)); //op
+			x86_64_inst_mod(bin, bn, 2, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
+			x86_64_inst_k32(bin, bn, rv[3]); //disp
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "xchg");
+			*e = -1;
+		}
+	}
 	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 0) {
 		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0
 			x86_64_err_364(rv[0], e, path, ln);
