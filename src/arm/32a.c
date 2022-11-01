@@ -1439,6 +1439,23 @@ void arm_32a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'r') {
+		if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) { //rel
+			arm_32a_err_r4(rv[0], e, path, ln);
+			*((uint8_t*) rv[1]) |= 8;
+			uint8_t c = arm_32a_cond(op + 3, e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 15;
+			bin[*bn + 3] = 2;
+			arm_32a_inst_c4_r4_r4_k12(bin, bn, c, rv[0], 0, 0);
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "adr");
+			*e = -1;
+		}
+	}
 	else if (op[0] == 'm' && op[1] == 'u' && op[2] == 'l') {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) {
 			arm_32a_err_r4(rv[0], e, path, ln);
