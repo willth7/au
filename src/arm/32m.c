@@ -259,6 +259,13 @@ void arm_32m_err_k8(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void arm_32m_err_k12(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k < -2048 || k > 4095) {
+		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);
+		*e = -1;
+	}
+}
+
 void arm_32m_err_k24(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k < -8388608 || k > 16777215) {
 		printf("[%s, %lu] error: immediate '%li' out of range\n", path, ln, k);

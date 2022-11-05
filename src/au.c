@@ -37,7 +37,9 @@ uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 typedef struct au_sym_s {
-	int64_t str;
+	int64_t strl;
+	int64_t strh;
+	int64_t str2;
 	uint64_t addr;
 	uint8_t typ;
 } au_sym_t;
@@ -149,6 +151,7 @@ void au_clr_rg(int8_t rg[20][64]) {
 	for (uint8_t i = 0; i < 20; i++) {
 		*((uint64_t*) rg[i]) = 0;
 		*((uint64_t*) rg[i] + 1) = 0;
+		*((uint64_t*) rg[i] + 2) = 0;
 	}
 }
 
@@ -174,6 +177,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	int8_t op[64];
 	*((uint64_t*) op) = 0;
 	*((uint64_t*) op + 1) = 0;
+	*((uint64_t*) op + 2) = 0;
 	int8_t rg[20][64];
 	au_clr_rg(rg);
 	uint8_t ri = 0;
@@ -285,7 +289,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 						printf("[%s, %lu] error: expected '('\n", path, ln);
 						*e = -1;
 					}
-					memcpy(&(rel[*reln].str), rg[i] + 1 + q, 8);
+					memcpy(&(rel[*reln].strl), rg[i] + 1 + q, 16);
 					(*reln)++;
 				}
 				else {
@@ -312,13 +316,13 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
 				for (uint64_t i = 0; i < *symn; i++) {
-					if (!memcmp(&(sym[i].str), op + 1, 8)) {
+					if (!memcmp(&(sym[i].strl), op + 1, 16)) {
 						printf("[%s, %lu] error: redefinition of symbol '%s'\n", path, ln, op + 1);
 						*e = -1;
 					}
 				}
 				sym[*symn].addr = *bn;
-				memcpy(&(sym[*symn].str), op + 1, 8);
+				memcpy(&(sym[*symn].strl), op + 1, 16);
 				(*symn)++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
@@ -361,7 +365,7 @@ void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym
 }
 
 void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
-	uint64_t memsz = 52 + bn + (symn * 17) + (reln * 17);
+	uint64_t memsz = 52 + bn + (symn * 25) + (reln * 25);
 	
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
@@ -373,7 +377,7 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_
 	
 	uint64_t binoff = 52;
 	uint64_t symoff = 52 + bn;
-	uint64_t reloff = 52 + bn + (symn * 17);
+	uint64_t reloff = 52 + bn + (symn * 25);
 	
 	memcpy(mem, "zinc", 4);
 	memcpy(mem + 4, &binoff, 8);
@@ -385,15 +389,17 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_
 	
 	memcpy(mem + binoff, bin, bn);
 	for (uint64_t i = 0; i < symn; i++) {
-		memcpy(mem + symoff + (17 * i), &(sym[i].str), 8);
-		memcpy(mem + symoff + (17 * i) + 8, &(sym[i].addr), 8);
-		memcpy(mem + symoff + (17 * i) + 16, &(sym[i].typ), 1);
+		memcpy(mem + symoff + (25 * i), &(sym[i].strl), 8);
+		memcpy(mem + symoff + (25 * i) + 8, &(sym[i].strh), 8);
+		memcpy(mem + symoff + (25 * i) + 16, &(sym[i].addr), 8);
+		memcpy(mem + symoff + (25 * i) + 24, &(sym[i].typ), 1);
 	}
 	
 	for (uint64_t i = 0; i < reln; i++) {
-		memcpy(mem + reloff + (17 * i), &(rel[i].str), 8);
-		memcpy(mem + reloff + (17 * i) + 8, &(rel[i].addr), 8);
-		memcpy(mem + reloff + (17 * i) + 16, &(rel[i].typ), 1);
+		memcpy(mem + reloff + (25 * i), &(rel[i].strl), 8);
+		memcpy(mem + reloff + (25 * i) + 8, &(rel[i].strh), 8);
+		memcpy(mem + reloff + (25 * i) + 16, &(rel[i].addr), 8);
+		memcpy(mem + reloff + (25 * i) + 24, &(rel[i].typ), 1);
 	}
 	
 	munmap(mem, memsz);
