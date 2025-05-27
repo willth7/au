@@ -36,15 +36,15 @@ uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 
 void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
-typedef struct au_sym_s {
+struct au_sym_s {
 	int64_t strl;
 	int64_t strh;
 	int64_t str2;
 	uint64_t addr;
 	uint8_t typ;
-} au_sym_t;
+};
 
-void (*au_writ) (uint8_t*, uint64_t, au_sym_t*, uint64_t, au_sym_t*, uint64_t, int8_t*);
+void (*au_writ) (uint8_t*, uint64_t, struct au_sym_s*, uint64_t, struct au_sym_s*, uint64_t, int8_t*);
 
 
 uint64_t au_str_int_dec(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
@@ -155,7 +155,7 @@ void au_clr_rg(int8_t rg[20][64]) {
 	}
 }
 
-void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t* rel, uint64_t* reln, int8_t* path, int8_t* e) {
+void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, struct au_sym_s* rel, uint64_t* reln, int8_t* path, int8_t* e) {
 	int32_t fd = open(path, O_RDONLY);
     if (fd == -1) {
         printf("error: failed to open file '%s'\n", path);
@@ -351,7 +351,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, au_sym_t* sym, uint64_t* symn, au_sym_t*
 	munmap(fx, fs.st_size);
 }
 
-void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
+void au_writ_bin(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, struct au_sym_s* rel, uint64_t reln, int8_t* path) {
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
         printf("error: failed to create file '%s'\n", path);
@@ -364,7 +364,7 @@ void au_writ_bin(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym
 	close(fd);
 }
 
-void au_writ_zn(uint8_t* bin, uint64_t bn, au_sym_t* sym, uint64_t symn, au_sym_t* rel, uint64_t reln, int8_t* path) {
+void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, struct au_sym_s* rel, uint64_t reln, int8_t* path) {
 	uint64_t memsz = 52 + bn + (symn * 25) + (reln * 25);
 	
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
@@ -459,9 +459,9 @@ int8_t main(int32_t argc, int8_t** argv) {
 	
 	uint8_t* bin = calloc(1000000, 1);
 	uint64_t bn = 0;
-	au_sym_t* sym = calloc(1000000, 1);
+	struct au_sym_s* sym = calloc(1000000, 1);
 	uint64_t symn = 0;
-	au_sym_t* rel = calloc(1000000, 1);
+	struct au_sym_s* rel = calloc(1000000, 1);
 	uint64_t reln = 0;
 	int8_t e = 0;
 	au_lex(bin, &bn, sym, &symn, rel, &reln, argv[2], &e);
