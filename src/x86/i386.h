@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-//   gloria in excelsis deo
+//   agnus dei, qui tollis peccata mundi
 
 uint8_t i386_reg(int8_t*, int8_t*, int8_t*, uint64_t);
 

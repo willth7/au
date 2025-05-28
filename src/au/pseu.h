@@ -12,6 +12,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-//   gloria in excelsis deo
+//   agnus dei, qui tollis peccata mundi
 
 void au_pseu_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);

@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-//   gloria in excelsis deo
+//   agnus dei, qui tollis peccata mundi
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,9 +37,8 @@ uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
 
 struct au_sym_s {
-	int64_t strl;
-	int64_t strh;
-	int64_t str2;
+	uint8_t* str;
+	uint8_t len;
 	uint64_t addr;
 	uint8_t typ;
 };
@@ -147,7 +146,7 @@ uint64_t au_str_int_hex(int8_t* a, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
-void au_clr_rg(int8_t rg[20][64]) {
+void au_clr_rg(int8_t rg[20][255]) {
 	for (uint8_t i = 0; i < 20; i++) {
 		*((uint64_t*) rg[i]) = 0;
 		*((uint64_t*) rg[i] + 1) = 0;
@@ -178,7 +177,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 	*((uint64_t*) op) = 0;
 	*((uint64_t*) op + 1) = 0;
 	*((uint64_t*) op + 2) = 0;
-	int8_t rg[20][64];
+	int8_t rg[20][255];
 	au_clr_rg(rg);
 	uint8_t ri = 0;
 	uint8_t rn = 0;
@@ -289,7 +288,9 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 						printf("[%s, %lu] error: expected '('\n", path, ln);
 						*e = -1;
 					}
-					memcpy(&(rel[*reln].strl), rg[i] + 1 + q, 16);
+					rel[*reln].len = strlen(rg[i] + 1 + q);
+					rel[*reln].str = malloc(rel[*reln].len);
+					memcpy(rel[*reln].str, rg[i] + 1 + q, rel[*reln].len);
 					(*reln)++;
 				}
 				else {
@@ -316,13 +317,15 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			}
 			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
 				for (uint64_t i = 0; i < *symn; i++) {
-					if (!memcmp(&(sym[i].strl), op + 1, 16)) {
+					if (!strcmp(sym[i].str, op + 1)) {
 						printf("[%s, %lu] error: redefinition of symbol '%s'\n", path, ln, op + 1);
 						*e = -1;
 					}
 				}
 				sym[*symn].addr = *bn;
-				memcpy(&(sym[*symn].strl), op + 1, 16);
+				sym[*symn].len = strlen(op + 1);
+				sym[*symn].str = malloc(sym[*symn].len);
+				memcpy(sym[*symn].str, op + 1, sym[*symn].len);
 				(*symn)++;
 			}
 			else if (op[0] == '~' && op[1] >= 97 && op[1] <= 122) { //pseudo-op
@@ -365,7 +368,15 @@ void au_writ_bin(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn,
 }
 
 void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, struct au_sym_s* rel, uint64_t reln, int8_t* path) {
-	uint64_t memsz = 52 + bn + (symn * 25) + (reln * 25);
+	uint64_t strsz = 0;
+	for (uint8_t i = 0; i < symn; i++) {
+		strsz = strsz + sym[i].len;
+	}
+	for (uint8_t i = 0; i < reln; i++) {
+		strsz = strsz + rel[i].len;
+	}
+	
+	uint64_t memsz = 52 + bn + (symn * 18) + (reln * 18) + strsz;
 	
 	int32_t fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
     if (fd == -1) {
@@ -377,7 +388,8 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, 
 	
 	uint64_t binoff = 52;
 	uint64_t symoff = 52 + bn;
-	uint64_t reloff = 52 + bn + (symn * 25);
+	uint64_t reloff = 52 + bn + (symn * 18);
+	uint64_t stroff = 52 + bn + (symn * 18) + (reln * 18);
 	
 	memcpy(mem, "zinc", 4);
 	memcpy(mem + 4, &binoff, 8);
@@ -387,19 +399,26 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, 
 	memcpy(mem + 36, &reloff, 8);
 	memcpy(mem + 44, &reln, 8);
 	
+	
 	memcpy(mem + binoff, bin, bn);
 	for (uint64_t i = 0; i < symn; i++) {
-		memcpy(mem + symoff + (25 * i), &(sym[i].strl), 8);
-		memcpy(mem + symoff + (25 * i) + 8, &(sym[i].strh), 8);
-		memcpy(mem + symoff + (25 * i) + 16, &(sym[i].addr), 8);
-		memcpy(mem + symoff + (25 * i) + 24, &(sym[i].typ), 1);
+		memcpy(mem + symoff + (18 * i), &stroff, 8);
+		memcpy(mem + symoff + (18 * i) + 8, &(sym[i].len), 1);
+		memcpy(mem + symoff + (18 * i) + 9, &(sym[i].addr), 8);
+		memcpy(mem + symoff + (18 * i) + 17, &(sym[i].typ), 1);
+		
+		memcpy(mem + stroff, sym[i].str, sym[i].len);
+		stroff = stroff + sym[i].len;
 	}
 	
 	for (uint64_t i = 0; i < reln; i++) {
-		memcpy(mem + reloff + (25 * i), &(rel[i].strl), 8);
-		memcpy(mem + reloff + (25 * i) + 8, &(rel[i].strh), 8);
-		memcpy(mem + reloff + (25 * i) + 16, &(rel[i].addr), 8);
-		memcpy(mem + reloff + (25 * i) + 24, &(rel[i].typ), 1);
+		memcpy(mem + reloff + (18 * i), &stroff, 8);
+		memcpy(mem + reloff + (18 * i) + 8, &(rel[i].len), 1);
+		memcpy(mem + reloff + (18 * i) + 9, &(rel[i].addr), 8);
+		memcpy(mem + reloff + (18 * i) + 17, &(rel[i].typ), 1);
+		
+		memcpy(mem + stroff, rel[i].str, rel[i].len);
+		stroff = stroff + rel[i].len;
 	}
 	
 	munmap(mem, memsz);

@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-//   gloria in excelsis deo
+//   agnus dei, qui tollis peccata mundi
 
 #include <stdint.h>
 #include <stdio.h>
