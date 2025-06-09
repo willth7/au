@@ -275,7 +275,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 						rv[i] = -1 * au_str_int_dec(rg[i] + 1 + q, e, path, ln);
 					}
 				}
-				else if (rg[i][q] == '*' && rg[i][q + 1] >= 97 && rg[i][q + 1] <= 122) { //relocation
+				else if (rg[i][q] == '*' && ((rg[i][q + 1] >= 97 && rg[i][q + 1] <= 122) || rg[i][q + 1] == 95)) { //relocation
 					rt[i] = 3 | (p << 2);
 					rv[i] = (uint64_t) &(rel[*reln].typ);
 					rel[*reln].addr = *bn;
@@ -315,7 +315,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			if (op[0] >= 97 && op[0] <= 122) { //arch-spec op
 				au_enc(bin, bn, op, rt, rv, e, path, ln);
 			}
-			else if (op[0] == '*' && op[1] >= 97 && op[1] <= 122) { //symbol
+			else if (op[0] == '*' && ((op[1] >= 97 && op[1] <= 122) || op[1] == 95)) { //symbol
 				for (uint64_t i = 0; i < *symn; i++) {
 					if (!strcmp(sym[i].str, op + 1)) {
 						printf("[%s, %lu] error: redefinition of symbol '%s'\n", path, ln, op + 1);
