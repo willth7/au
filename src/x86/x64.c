@@ -1,4 +1,4 @@
-//   Copyright 2022 Will Thomas
+//   Copyright 2025 Will Thomas
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -627,7 +627,7 @@ void x86_64_inst_lcp(uint8_t* bin, uint64_t* bn, uint8_t r, uint32_t k) {
 	}
 }
 
-void x86_64_inst_mvp(uint8_t* bin, uint64_t* bn, uint8_t r, uint32_t k) {
+void x86_64_inst_mvp(uint8_t* bin, uint64_t* bn, uint8_t r, uint64_t k) {
 	if ((r & 48) == 0) {
 		x86_64_inst_byt(bin, bn, k);
 	}
