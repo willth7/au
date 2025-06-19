@@ -1,4 +1,4 @@
-//   Copyright 2022 Will Thomas
+//   Copyright 2025 Will Thomas
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -4374,7 +4374,56 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 	}
 	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 't' && op[3] == 0) {
-		if (rt[0] == 1 && rt[1] == 0) { //mod 3
+		if (rt[0] == 5 && rt[1] == 0) { //mod 0
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, a, 2); //modrm
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, a, 2); //modrm
+		}
+		else if (rt[0] == 6 && rt[1] == 0) {
+			x86_err_k16(rv[0], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, 6, 2); //modrm
+			x86_inst_k16(bin, bn, rv[0]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 0 && rv[1] < 256 && rv[1] > -128) { //mod 1
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 1, a, 2); //modrm
+			x86_inst_byt(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] < 256 && rv[2] > -128) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 1, a, 2); //modrm
+			x86_inst_byt(bin, bn, rv[2]); //imm
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 0) { //mod 2
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			x86_err_k16(rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 2, a, 2); //modrm
+			x86_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			x86_err_k16(rv[2], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 2, a, 2); //modrm
+			x86_inst_k16(bin, bn, rv[2]); //imm
+		}
+		else if (rt[0] == 1 && rt[1] == 0) { //mod 3
 			x86_inst_byt(bin, bn, 246 + !!(rv[0] & 48)); //op
 			x86_inst_mod(bin, bn, 3, rv[0], 2); //modrm
 		}
