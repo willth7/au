@@ -4432,6 +4432,65 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'n' && op[1] == 'e' && op[2] == 'g' && op[3] == 0) {
+		if (rt[0] == 5 && rt[1] == 0) { //mod 0
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, a, 3); //modrm
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, a, 3); //modrm
+		}
+		else if (rt[0] == 6 && rt[1] == 0) {
+			x86_err_k16(rv[0], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 0, 6, 3); //modrm
+			x86_inst_k16(bin, bn, rv[0]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 0 && rv[1] < 256 && rv[1] > -128) { //mod 1
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 1, a, 3); //modrm
+			x86_inst_byt(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] < 256 && rv[2] > -128) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 1, a, 3); //modrm
+			x86_inst_byt(bin, bn, rv[2]); //imm
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 0) { //mod 2
+			uint8_t a = x86_err_a16(rv[0], 8, e, path, ln);
+			x86_err_k16(rv[1], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 2, a, 3); //modrm
+			x86_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			uint8_t a = x86_err_a16(rv[0], rv[1], e, path, ln);
+			x86_err_k16(rv[2], e, path, ln);
+			
+			x86_inst_byt(bin, bn, 247); //op
+			x86_inst_mod(bin, bn, 2, a, 3); //modrm
+			x86_inst_k16(bin, bn, rv[2]); //imm
+		}
+		else if (rt[0] == 1 && rt[1] == 0) { //mod 3
+			x86_inst_byt(bin, bn, 246 + !!(rv[0] & 48)); //op
+			x86_inst_mod(bin, bn, 3, rv[0], 3); //modrm
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "neg");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
