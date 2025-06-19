@@ -6816,6 +6816,12 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
 			x86_64_inst_k32(bin, bn, rv[3]); //disp
 		}
+		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0 && (rv[0] & 48) && rv[1] < 4294967296) {
+			x86_64_prfx_rex(bin, bn, rv[0], 0, 48);
+			x86_64_inst_byt(bin, bn, 199); //op
+			x86_64_inst_mod(bin, bn, 3, rv[0], 0); //modrm
+			x86_64_inst_k32(bin, bn, rv[1]); //imm
+		}
 		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) {
 			x86_64_prfx_leg(bin, bn, 0, rv[0]);
 			x86_64_prfx_rex(bin, bn, rv[0], 0, rv[0] & 48);
