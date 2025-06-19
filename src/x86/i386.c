@@ -11909,6 +11909,17 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv, 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'n' && op[1] == 'o' && op[2] == 't' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 0) { //mod 3
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 246 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 3, rv[0], 2); //modrm
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "not");
+			*e = -1;
+		}
+	}
 	else {
 		printf("[%s, %lu] error: unknown opcode '%s'\n", path, ln, op);
 		*e = -1;
