@@ -695,7 +695,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 0 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 0 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -1287,7 +1287,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 8 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 8 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -1879,7 +1879,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 16 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 16 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -2471,7 +2471,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 24 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 24 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -3063,7 +3063,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 32 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 32 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -3655,7 +3655,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 40 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 40 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -4247,7 +4247,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 48 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 48 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -4839,7 +4839,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 56 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 56 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
@@ -6595,7 +6595,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, int64_t* rv
 			
 			x86_64_prfx_leg(bin, bn, rv[0], rv[2]);
 			x86_64_prfx_rex(bin, bn, rv[0], rv[1], rv[2]);
-			x86_64_inst_byt(bin, bn, 136 + !!(rv[1] & 48)); //op
+			x86_64_inst_byt(bin, bn, 136 + !!(rv[2] & 48)); //op
 			x86_64_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[0], rv[1]); //sib
 		}
