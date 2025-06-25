@@ -191,6 +191,10 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			lex[li] = fx[fi];
 			li++;
 		}
+		else if (fx[fi] == ',' && fx[fi + 1] == ')' && op[0] && !c) { //parenthesis error
+			printf("[%s, %lu] error: a parenthesis does not go on that side of a comma\n", path, ln);
+			*e = -1;
+		}
 		else if (fx[fi] == ',' && op[0] && !c) { //addt operand signal
 			if (rn < 20) {
 				rn++;
@@ -204,6 +208,12 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			lex[li] = ')';
 			lex[li + 1] = 0;
 			li++;
+		}
+		else if (fx[fi] == ')' && fx[fi + 1] == ')' && (fx[fi + 2] == ' ' || fx[fi + 2] == ',' || fx[fi + 2] == '\t' || fx[fi + 2] == '\n') && op[0] && li && !c) { //nested operand
+			lex[li] = ')';
+			lex[li + 1] = ')';
+			lex[li + 2] = 0;
+			li = li + 2;
 		}
 		else if ((fx[fi] == ' ' || fx[fi] == '\t' || fx[fi] == '\n') && li && !c) { //next string
 			if (!(op[0])) {
@@ -239,17 +249,19 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			uint8_t rt[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			uint64_t rv[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			
-			uint8_t p = 0;
+			uint8_t p = 0; //parentheses
+			uint8_t r = 0; //parentheses flag
 			
 			for (uint8_t i = 0; i < ri; i++) {
 				uint8_t q = 0;
-				if (rg[i][0] == '(' && !p) { //nested operands
-					p = 1;
-					q = 1;
-				}
-				else if (rg[i][0] == '(' && p) { //error
-					printf("[%s, %lu] error: expected ')'\n", path, ln);
+				if (rg[i][0] == '(' && r == 2) { //error
+					printf("[%s, %lu] error: parentheses are already closed\n", path, ln);
 					*e = -1;
+				}
+				else if (rg[i][0] == '(') { //single nested operands
+					p = p + 1;
+					q = 1;
+					r = 1;
 				}
 				
 				if (rg[i][q] >= 97 && rg[i][q] <= 122) { //arch-spec reg
@@ -281,7 +293,8 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 					rel[*reln].typ = 0;
 					if (rg[i][strlen(rg[i]) - 1] == ')' && p) {
 						rg[i][strlen(rg[i]) - 1] = 0;
-						p = 0;
+						p = p - 1;
+						r = 2;
 					}
 					else if (rg[i][strlen(rg[i]) - 1] == ')' && !p) { //error
 						printf("[%s, %lu] error: expected '('\n", path, ln);
@@ -296,9 +309,14 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 					printf("[%s, %lu] error: unknown operand '%s'\n", path, ln, rg[i]);
 					*e = -1;
 				}
-
+				
+				if (rg[i][strlen(rg[i]) - 2] == ')' && p) {
+					p = p - 1;
+					r = 2;
+				}
 				if (rg[i][strlen(rg[i]) - 1] == ')' && p) {
-					p = 0;
+					p = p - 1;
+					r = 2;
 				}
 				else if (rg[i][strlen(rg[i]) - 1] == ')' && !p) { //error
 					printf("[%s, %lu] error: expected '('\n", path, ln);
