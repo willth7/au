@@ -4150,7 +4150,7 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*((uint8_t*) rv[0]) |= 1; //rel
 			
 			x86_inst_byt(bin, bn, 225); //op
-			x86_inst_byt(bin, bn, 0; //imm
+			x86_inst_byt(bin, bn, 0); //imm
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "loopz");
