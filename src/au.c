@@ -169,7 +169,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 	
 	int8_t lex[64];
 	uint8_t li = 0;
-	uint64_t ln = 0;
+	uint64_t ln = 1;
 	int8_t c = 0;
 	
 	int8_t op[64];
