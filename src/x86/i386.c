@@ -270,8 +270,8 @@ uint8_t i386_err_s8(uint64_t k, uint8_t* e, int8_t* path, uint64_t ln) {
 }
 
 uint8_t i386_err_a16(uint8_t b, uint8_t i, int8_t* e, int8_t* path, uint64_t ln) {
-	if (i < 16 || i > 23) {
-		printf("[%s, %lu] error: illegal index '%s'\n", path, ln, i386_dec_reg(i));
+	if ((i & 48) != 16 && i != 8) {
+		printf("[%s, %lu] error: illegal index '%u'\n", path, ln, i386_dec_reg(i));
 		*e = -1;
 	}
 	b &= 15;
