@@ -361,7 +361,23 @@ void i386_inst_lcp(uint8_t* bin, uint64_t* bn, uint8_t r, uint32_t k) {
 
 void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
 	if (op[0] == 'a' && op[1] == 'd' && op[2] == 'd' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 0 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 0 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -415,7 +431,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -469,7 +501,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 0 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 0 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -507,15 +555,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 0 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 0 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -612,7 +651,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 0 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -650,15 +705,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 2 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -1876,7 +1922,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 'o' && op[1] == 'r' && op[2] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 8 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 8 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -1930,7 +1992,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -1984,7 +2062,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 8 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 8 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -2022,15 +2116,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 8 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 8 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -2127,7 +2212,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 8 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -2165,15 +2266,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 10 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -3391,7 +3483,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 'a' && op[1] == 'd' && op[2] == 'c' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 16 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 16 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -3445,7 +3553,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -3499,7 +3623,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 16 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 16 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -3537,15 +3677,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 16 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 16 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -3642,7 +3773,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 16 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -3680,15 +3827,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 18 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -4906,7 +5044,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 's' && op[1] == 'b' && op[2] == 'b' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 24 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 24 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -4960,7 +5114,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -5014,7 +5184,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 24 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 24 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -5052,15 +5238,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 24 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 24 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -5157,7 +5334,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 24 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -5195,15 +5388,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 26 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -6421,7 +6605,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 32 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 32 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -6475,7 +6675,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -6529,7 +6745,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 32 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 32 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -6567,15 +6799,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 32 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 32 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -6672,7 +6895,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 32 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -6710,15 +6949,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 34 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -7936,7 +8166,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 's' && op[1] == 'u' && op[2] == 'b' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 40 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 40 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -7990,7 +8236,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -8044,7 +8306,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 40 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 40 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -8082,15 +8360,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 40 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 40 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -8187,7 +8456,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 40 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -8225,15 +8510,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 42 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -9451,7 +9727,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 'x' && op[1] == 'o' && op[2] == 'r' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 48 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 48 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -9505,7 +9797,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -9559,7 +9867,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 48 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 48 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -9597,15 +9921,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 48 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 48 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -9702,7 +10017,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 48 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -9740,15 +10071,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 50 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
@@ -10966,7 +11288,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 	}
 	else if (op[0] == 'c' && op[1] == 'm' && op[2] == 'p' && op[3] == 0) {
-		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) { //mod 0 16 bit
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 21) { //mod 0 16 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 56 + !!(rv[1] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[1]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 21) {
+			i386_err_k16(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 56 + !!(rv[2] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[2]); //modrm
+			i386_inst_k16(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[0], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -11020,7 +11358,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[3]); //modrm
 			i386_inst_k16(bin, bn, rv[2]); //imm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 21) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 21) {
+			i386_err_k16(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 103); //leg addr
+			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 16)); //op
+			i386_inst_mod(bin, bn, 0, 6, rv[0]); //modrm
+			i386_inst_k16(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 48) == 16) {
 			uint8_t a = i386_err_a16(rv[1], 8, e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[0]);
@@ -11074,7 +11428,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_mod(bin, bn, 2, a, rv[0]); //modrm
 			i386_inst_k16(bin, bn, rv[3]); //imm
 		}
-		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) { //mod 0 32 bit
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 37) { //mod 0 32 bit
+			i386_prfx_leg(bin, bn, rv[1]);
+			i386_inst_byt(bin, bn, 56 + !!(rv[1] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && rv[0] == 37) {
+			i386_err_k32(rv[1], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[2]);
+			i386_inst_byt(bin, bn, 56 + !!(rv[2] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[2]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[1]); //disp
+		}
+		else if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && (rv[0] & 7) == 4) {
 			i386_err_r32(rv[0], e, path, ln);
 			
 			i386_prfx_leg(bin, bn, rv[1]);
@@ -11112,15 +11482,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 56 + !!(rv[3] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[3]); //modrm
 			i386_inst_mod(bin, bn, s, rv[0], rv[1]); //sib
-		}
-		else if (rt[0] == 6 && rt[1] == 1 && rt[2] == 0) {
-			i386_err_k32(rv[0], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[2]);
-			i386_inst_byt(bin, bn, 56 + !!(rv[1] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[1]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[0]); //disp
 		}
 		else if (rt[0] == 5 && rt[1] == 6 && rt[2] == 1 && rt[3] == 0 && (rv[0] & 7) == 4 && rv[1] < 256) { //mod 1
 			i386_err_r32(rv[0], e, path, ln);
@@ -11217,7 +11578,23 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 56 + !!(rv[1] & 48)); //op
 			i386_inst_mod(bin, bn, 3, rv[0], rv[1]); //modrm
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) { //mod 0
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && rv[1] == 37) { //mod 0
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, 0); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[1] == 37) {
+			i386_err_k32(rv[2], e, path, ln);
+			
+			i386_prfx_leg(bin, bn, rv[0]);
+			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 48)); //op
+			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			i386_inst_mod(bin, bn, 0, 5, 4); //sib
+			i386_inst_k32(bin, bn, rv[2]); //disp
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[1] & 7) == 4) {
 			i386_err_r32(rv[1], e, path, ln);
 			i386_err_rbp(rv[1], e, path, ln);
 			
@@ -11255,15 +11632,6 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 48)); //op
 			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			i386_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
-		}
-		else if (rt[0] == 1 && rt[1] == 6 && rt[2] == 0) {
-			i386_err_k32(rv[1], e, path, ln);
-			
-			i386_prfx_leg(bin, bn, rv[0]);
-			i386_inst_byt(bin, bn, 58 + !!(rv[0] & 48)); //op
-			i386_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
-			i386_inst_mod(bin, bn, 0, 5, 4); //sib
-			i386_inst_k32(bin, bn, rv[1]); //disp
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			i386_err_r32(rv[1], e, path, ln);
