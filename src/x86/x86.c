@@ -3871,6 +3871,24 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 			*e = -1;
 		}
 	}
+	else if (op[0] == 's' && op[1] == 'a' && op[2] == 'h' && op[3] == 'f' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 0 && rv[0] == 4) {
+			x86_inst_byt(bin, bn, 158); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "sahf");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'a' && op[2] == 'h' && op[3] == 'f' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 0 && rv[0] == 4) {
+			x86_inst_byt(bin, bn, 159); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lahf");
+			*e = -1;
+		}
+	}
 	else if (op[0] == 'x' && op[1] == 'c' && op[2] == 'h' && op[3] == 'g' && op[4] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 0 && (rv[1] & 15) == 0) { //ax
 			x86_err_r16(rv[0], e, path, ln);
@@ -4230,6 +4248,69 @@ void x86_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, 
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lea");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 's' && op[4] == 'b' && op[5] == 0) {
+		if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0 && rv[0] == 23 && rv[1] == 22) {
+			x86_inst_byt(bin, bn, 164); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "movsb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 's' && op[4] == 'w' && op[5] == 0) {
+		if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0 && rv[0] == 23 && rv[1] == 22) {
+			x86_inst_byt(bin, bn, 165); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "movsw");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'c' && op[1] == 'm' && op[2] == 'p' && op[3] == 's' && op[4] == 'b' && op[5] == 0) {
+		if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0 && rv[0] == 23 && rv[1] == 22) {
+			x86_inst_byt(bin, bn, 166); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "cmpsb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'c' && op[1] == 'm' && op[2] == 'p' && op[3] == 's' && op[4] == 'w' && op[5] == 0) {
+		if (rt[0] == 5 && rt[1] == 5 && rt[2] == 0 && rv[0] == 23 && rv[1] == 22) {
+			x86_inst_byt(bin, bn, 167); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "cmpsw");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'o' && op[3] == 's' && op[4] == 0) {
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 23 && (rv[1] & 7) == 0) {
+			x86_inst_byt(bin, bn, 170 + !!(rv[0] & 16)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "stos");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'o' && op[2] == 'd' && op[3] == 's' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0 && (rv[0] & 7) == 0 && rv[1] == 23) {
+			x86_inst_byt(bin, bn, 172 + !!(rv[1] & 16)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "lods");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 'c' && op[2] == 'a' && op[3] == 's' && op[4] == 0) {
+		if (rt[0] == 5 && rt[1] == 1 && rt[2] == 0 && rv[0] == 23 && (rv[1] & 7) == 0) {
+			x86_inst_byt(bin, bn, 174 + !!(rv[0] & 16)); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "scas");
 			*e = -1;
 		}
 	}
