@@ -14082,6 +14082,15 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 			*e = -1;
 		}
 	}
+	else if (op[0] == 'p' && op[1] == 'u' && op[2] == 's' && op[3] == 'h' && op[4] == 'f' && op[5] == 0) {
+		if (rt[0] == 0) {
+			i386_inst_byt(bin, bn, 156); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "pushf");
+			*e = -1;
+		}
+	}
 	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 0) {
 			i386_err_132(rv[0], e, path, ln);
@@ -14508,6 +14517,15 @@ void i386_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv,
 		}
 		else {
 			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "popw");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'p' && op[1] == 'o' && op[2] == 'p' && op[3] == 'f' && op[4] == 0) {
+		if (rt[0] == 0) {
+			i386_inst_byt(bin, bn, 157); //op
+		}
+		else {
+			printf("[%s, %lu] error: illegal usage of opcode '%s'\n", path, ln, "popf");
 			*e = -1;
 		}
 	}
