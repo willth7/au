@@ -952,8 +952,8 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
 			x86_64_prfx_rex(bin, bn, rv[1], rv[2], rv[0]);
 			x86_64_inst_byt(bin, bn, 2 + !!(rv[0] & 48)); //op
-			x86_64_inst_mod(bin, bn, s, 4, rv[0]); //modrm
-			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
+			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			x86_64_err_364(rv[1], e, path, ln);
@@ -4611,8 +4611,8 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_prfx_leg(bin, bn, rv[1], rv[0]);
 			x86_64_prfx_rex(bin, bn, rv[1], rv[2], rv[0]);
 			x86_64_inst_byt(bin, bn, 18 + !!(rv[0] & 48)); //op
-			x86_64_inst_mod(bin, bn, s, 4, rv[0]); //modrm
-			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
+			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
+			x86_64_inst_mod(bin, bn, s, rv[1], rv[2]); //sib
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && (rv[1] & 7) == 4 && rv[2] < 256) { //mod 1
 			x86_64_err_364(rv[1], e, path, ln);
@@ -6437,7 +6437,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[3] == 0) {
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[4] == 0) {
 			x86_64_err_364(rv[1], e, path, ln);
 			x86_64_err_364(rv[2], e, path, ln);
 			x86_64_err_reg(rv[1], rv[2], e, path, ln);
@@ -17390,7 +17390,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[3] == 0) {
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[4] == 0) {
 			x86_64_err_364(rv[1], e, path, ln);
 			x86_64_err_364(rv[2], e, path, ln);
 			x86_64_err_reg(rv[1], rv[2], e, path, ln);
@@ -18459,7 +18459,7 @@ void x86_64_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* r
 			x86_64_inst_mod(bin, bn, 0, 4, rv[0]); //modrm
 			x86_64_inst_mod(bin, bn, 0, rv[1], rv[2]); //sib
 		}
-		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[3] == 0) {
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 9 && rt[3] == 10 && rt[4] == 0) {
 			x86_64_err_264(rv[0], e, path, ln);
 			x86_64_err_364(rv[1], e, path, ln);
 			x86_64_err_364(rv[2], e, path, ln);
