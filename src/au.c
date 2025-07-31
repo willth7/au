@@ -489,11 +489,11 @@ int8_t main(int32_t argc, int8_t** argv) {
 		return -1;
 	}
 	
-	uint8_t* bin = calloc(1000000, 1);
+	uint8_t* bin = calloc(16777216, 1);
 	uint64_t bn = 0;
-	struct au_sym_s* sym = calloc(1000000, 1);
+	struct au_sym_s* sym = calloc(16777216, 1);
 	uint64_t symn = 0;
-	struct au_sym_s* rel = calloc(1000000, 1);
+	struct au_sym_s* rel = calloc(16777216, 1);
 	uint64_t reln = 0;
 	int8_t e = 0;
 	au_lex(bin, &bn, sym, &symn, rel, &reln, argv[2], &e);
