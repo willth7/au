@@ -16,4 +16,4 @@
 
 uint8_t i386_reg(int8_t*, int8_t*, int8_t*, uint64_t);
 
-void i386_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
+void i386_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, int64_t*, int8_t*, int8_t*, uint64_t);

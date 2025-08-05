@@ -16,4 +16,4 @@
 
 uint8_t arm_32m_reg(int8_t*, int8_t*, int8_t*, uint64_t);
 
-void arm_32m_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
+void arm_32m_enc(uint8_t*, uint64_t*, int8_t*, uint8_t*, int64_t*, int8_t*, int8_t*, uint64_t);

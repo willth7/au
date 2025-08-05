@@ -33,7 +33,7 @@
 
 uint8_t (*au_reg) (int8_t*, int8_t*, int8_t*, uint64_t);
 
-void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, uint64_t*, int8_t*, int8_t*, uint64_t);
+void (*au_enc) (uint8_t*, uint64_t*, int8_t*, uint8_t*, int64_t*, int8_t*, int8_t*, uint64_t);
 
 struct au_sym_s {
 	uint8_t* str;
@@ -247,7 +247,7 @@ void au_lex(uint8_t* bin, uint64_t* bn, struct au_sym_s* sym, uint64_t* symn, st
 			}
 			
 			uint8_t rt[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-			uint64_t rv[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+			int64_t rv[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			
 			uint8_t p = 0; //parentheses
 			uint8_t r = 0; //parentheses flag
