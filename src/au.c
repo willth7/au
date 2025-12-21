@@ -445,6 +445,7 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, 
 int8_t main(int32_t argc, int8_t** argv) {
 	if (argc != 4) {
 		printf("usage: au [architecture] [source.s] [binary.bin or link.zn]\n");
+		printf("architectures: arm32-m, arm32-a, x86, i386, x86-64\n");
 		return -1;
 	}
 	
