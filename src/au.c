@@ -27,6 +27,7 @@
 #include "au/pseu.h"
 #include "arm/32m.h"
 #include "arm/32a.h"
+#include "arm/64a.h"
 #include "x86/x86.h"
 #include "x86/i386.h"
 #include "x86/x64.h"
@@ -445,7 +446,7 @@ void au_writ_zn(uint8_t* bin, uint64_t bn, struct au_sym_s* sym, uint64_t symn, 
 int8_t main(int32_t argc, int8_t** argv) {
 	if (argc != 4) {
 		printf("usage: au [architecture] [source.s] [binary.bin or link.zn]\n");
-		printf("architectures: arm32-m, arm32-a, x86, i386, x86-64\n");
+		printf("architectures: arm32-m, arm32-a, arm64-a, x86, i386, x86-64\n");
 		return -1;
 	}
 	
@@ -454,6 +455,10 @@ int8_t main(int32_t argc, int8_t** argv) {
 		au_enc = arm_32m_enc;
 	}
 	else if (!strcmp(argv[1], "arm32-a")) {
+		au_reg = arm_32a_reg;
+		au_enc = arm_32a_enc;
+	}
+	else if (!strcmp(argv[1], "arm64-a")) {
 		au_reg = arm_32a_reg;
 		au_enc = arm_32a_enc;
 	}
