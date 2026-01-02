@@ -300,6 +300,13 @@ void arm_64a_err_k12(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void arm_64a_err_k16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k > 65535) {
+		printf("[%s, %lu] error: immediate '%lu' out of range\n", k, path, ln);
+		*e = -1;
+	}
+}
+
 void arm_64a_err_k21(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k > 2097151) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", k, path, ln);
@@ -309,7 +316,21 @@ void arm_64a_err_k21(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 
 void arm_64a_err_i12(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if ((k != 0) || (k != 12)) {
-		printf("[%s, %lu] error: immediate '%lu' out of range\n", k, path, ln);
+		printf("[%s, %lu] error: illegal immediate '%lu'\n", k, path, ln);
+		*e = -1;
+	}
+}
+
+void arm_64a_err_i16(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if ((k != 0) || (k != 16)) {
+		printf("[%s, %lu] error: illegal immediate '%lu'\n", k, path, ln);
+		*e = -1;
+	}
+}
+
+void arm_64a_err_i64(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if ((k != 0) || (k != 16) || (k != 32) || (k != 64)) {
+		printf("[%s, %lu] error: illegal immediate '%lu'\n", k, path, ln);
 		*e = -1;
 	}
 }
@@ -364,6 +385,15 @@ void arm_64a_inst_r5_r5_k6_k4(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t rs
 	bin[*bn + 1] = bin[*bn + 1] | ((rs >> 3) & 3);
 	bin[*bn + 1] = bin[*bn + 1] | (k4 << 2);
 	bin[*bn + 2] = bin[*bn + 2] | k6;
+}
+
+void arm_64a_inst_r5_k16_sh(uint8_t* bin, uint64_t* bn, uint8_t rd, uint16_t k, uint8_t sh) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (k << 5);
+	bin[*bn + 1] = bin[*bn + 1] | (k >> 3);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 11);
+	bin[*bn + 2] = bin[*bn + 2] | (sh << 5);
+	bin[*bn + 3] = bin[*bn + 3] | (rd & 128);
 }
 
 void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* rv, int8_t* e, int8_t* path, uint64_t ln) {
@@ -786,7 +816,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 3] = 10;
 			arm_64a_inst_r5_r5_r5_k6_sh_ext(bin, bn, rv[0], rv[1], rv[2], rv[3], rv[4], 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) { //immediate todo
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) { //bitmask immediate todo
 			arm_64a_err_reg(rv[0], e, path, ln);
 			arm_64a_err_reg(rv[1], e, path, ln);
 			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
@@ -794,6 +824,105 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else {
 			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "and");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'n' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) { //immediate
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 18;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) { //immediate with shift
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			arm_64a_err_lsl(rv[2], e, path, ln);
+			if (rv[0] & 128) {
+				arm_64a_err_i64(rv[3], e, path, ln);
+			}
+			else {
+				arm_64a_err_i16(rv[3], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 18;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "movn");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'z' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) { //immediate
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 82;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) { //immediate with shift
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			arm_64a_err_lsl(rv[2], e, path, ln);
+			if (rv[0] & 128) {
+				arm_64a_err_i64(rv[3], e, path, ln);
+			}
+			else {
+				arm_64a_err_i16(rv[3], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 82;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "movz");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'm' && op[1] == 'o' && op[2] == 'v' && op[3] == 'k' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 2 && rt[2] == 0) { //immediate
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 114;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 2 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) { //immediate with shift
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_k16(rv[1], e, path, ln);
+			arm_64a_err_lsl(rv[2], e, path, ln);
+			if (rv[0] & 128) {
+				arm_64a_err_i64(rv[3], e, path, ln);
+			}
+			else {
+				arm_64a_err_i16(rv[3], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 114;
+			arm_64a_inst_r5_k16_sh(bin, bn, rv[0], rv[1], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "movk");
 			*e = -1;
 		}
 	}
