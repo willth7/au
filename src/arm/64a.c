@@ -757,12 +757,39 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 	}
 	else if (op[0] == 'a' && op[1] == 'n' && op[2] == 'd' && op[3] == 0) {
 		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 0) { //register
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[2], e, path, ln);
+			arm_64a_err_r36(rv[1], rv[2], e, path, ln);
 			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 10;
+			arm_64a_inst_r5_r5_r5_k6_sh_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 1 && rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //register
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[2], e, path, ln);
+			arm_64a_err_r36(rv[1], rv[2], e, path, ln);
+			arm_64a_err_sh(rv[3], e, path, ln);
+			arm_64a_err_k6(rv[4], e, path, ln);
 			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 10;
+			arm_64a_inst_r5_r5_r5_k6_sh_ext(bin, bn, rv[0], rv[1], rv[2], rv[3], rv[4], 0);
 		}
-		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) { //immediate
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 2 && rt[3] == 0) { //immediate todo
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
 			
 		}
 		else {
