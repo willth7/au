@@ -300,6 +300,13 @@ void arm_64a_err_k6(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	}
 }
 
+void arm_64a_err_k7(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
+	if (k > 63) {
+		printf("[%s, %lu] error: immediate '%lu' out of range\n", k, path, ln);
+		*e = -1;
+	}
+}
+
 void arm_64a_err_k9(int64_t k, int8_t* e, int8_t* path, uint64_t ln) {
 	if (k > 511) {
 		printf("[%s, %lu] error: immediate '%lu' out of range\n", k, path, ln);
@@ -432,7 +439,23 @@ void arm_64a_inst_r5_b5_k9(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, ui
 	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
 	bin[*bn + 1] = bin[*bn + 1] | (k << 4);
 	bin[*bn + 2] = bin[*bn + 2] | (k >> 4);
+}
+
+void arm_64a_inst_r5_b5_k9_(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint16_t k) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	bin[*bn + 1] = bin[*bn + 1] | (k << 4);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 4);
 	bin[*bn + 2] = bin[*bn + 2] | ((rd >> 1) & 64);
+}
+
+void arm_64a_inst_r5_b5_k9__(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint16_t k) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	bin[*bn + 1] = bin[*bn + 1] | (k << 4);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 4);
 	bin[*bn + 3] = bin[*bn + 3] | ((rd >> 1) & 64);
 }
 
@@ -442,11 +465,61 @@ void arm_64a_inst_r5_b5_k12(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, u
 	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
 	bin[*bn + 1] = bin[*bn + 1] | (k << 2);
 	bin[*bn + 2] = bin[*bn + 2] | (k >> 6);
+}
+
+void arm_64a_inst_r5_b5_k12_(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint16_t k) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	bin[*bn + 1] = bin[*bn + 1] | (k << 2);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 6);
+	bin[*bn + 2] = bin[*bn + 2] | ((rd >> 1) & 64);
+}
+
+void arm_64a_inst_r5_b5_k12__(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint16_t k) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	bin[*bn + 1] = bin[*bn + 1] | (k << 2);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 6);
+	bin[*bn + 3] = bin[*bn + 3] | ((rd >> 1) & 64);
+}
+
+void arm_64a_inst_r5_r5_b5_k7(uint8_t* bin, uint64_t* bn, uint8_t r0, uint8_t r1, uint8_t b, uint8_t k) {
+	bin[*bn] = bin[*bn] | (r0 & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	bin[*bn + 1] = bin[*bn + 1] | (r1 << 2);
+	bin[*bn + 1] = bin[*bn + 1] | (k << 7);
+	bin[*bn + 2] = bin[*bn + 2] | (k >> 1);
+	bin[*bn + 3] = bin[*bn + 3] | ((r0 >> 1) & 64);
+}
+
+void arm_64a_inst_r5_b5_i5_k1_ext(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint8_t i, uint8_t k, uint8_t ext) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	if (k) {
+		bin[*bn + 1] = bin[*bn + 1] | 16;
+	}
+	bin[*bn + 1] = bin[*bn + 1] | (ext << 5);
+	bin[*bn + 2] = bin[*bn + 2] | (i & 31);
+}
+
+void arm_64a_inst_r5_b5_i5_k1_ext_(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint8_t i, uint8_t k, uint8_t ext) {
+	bin[*bn] = bin[*bn] | (rd & 31);
+	bin[*bn] = bin[*bn] | (b << 5);
+	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
+	if (k) {
+		bin[*bn + 1] = bin[*bn + 1] | 16;
+	}
+	bin[*bn + 1] = bin[*bn + 1] | (ext << 5);
+	bin[*bn + 2] = bin[*bn + 2] | (i & 31);
 	bin[*bn + 2] = bin[*bn + 2] | ((rd >> 1) & 64);
 	bin[*bn + 3] = bin[*bn + 3] | ((rd >> 1) & 64);
 }
 
-void arm_64a_inst_r5_b5_i5_k1_ext(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint8_t i, uint8_t k, uint8_t ext) {
+void arm_64a_inst_r5_b5_i5_k1_ext__(uint8_t* bin, uint64_t* bn, uint8_t rd, uint8_t b, uint8_t i, uint8_t k, uint8_t ext) {
 	bin[*bn] = bin[*bn] | (rd & 31);
 	bin[*bn] = bin[*bn] | (b << 5);
 	bin[*bn + 1] = bin[*bn + 1] | ((b >> 3) & 3);
@@ -2504,7 +2577,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 96;
 			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], 0, 0, 0);
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], 0, 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2517,7 +2590,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 96;
 			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0);
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2536,7 +2609,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 8;
 			bin[*bn + 2] = 96;
 			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2548,7 +2621,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 4;
 			bin[*bn + 2] = 64;
 			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+			arm_64a_inst_r5_b5_k9__(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2560,7 +2633,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 12;
 			bin[*bn + 2] = 64;
 			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+			arm_64a_inst_r5_b5_k9__(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2569,10 +2642,10 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 184;
-			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
+			bin[*bn + 3] = 185;
+			arm_64a_inst_r5_b5_k12__(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 3 && rt[2] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2669,9 +2742,9 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 56;
+			bin[*bn + 3] = 57;
 			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
@@ -2760,9 +2833,9 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 64;
-			bin[*bn + 3] = 120;
+			bin[*bn + 3] = 121;
 			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
@@ -2780,8 +2853,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], 0, 0, 0);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], 0, 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2794,8 +2866,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2814,8 +2885,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 8;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2827,8 +2897,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 4;
 			bin[*bn + 2] = 128;
 			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			arm_64a_inst_r5_b5_k9_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2840,8 +2909,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 12;
 			bin[*bn + 2] = 128;
 			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			arm_64a_inst_r5_b5_k9_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2850,11 +2918,10 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 56;
-			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
-			bin[*bn + 3] = bin[*bn + 3] & 63;
+			bin[*bn + 3] = 57;
+			arm_64a_inst_r5_b5_k12_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
 			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldrsb");
@@ -2871,7 +2938,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], 0, 0, 0);
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], 0, 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2884,7 +2951,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 104;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0);
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], rv[2], 0, 0);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2903,7 +2970,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 8;
 			bin[*bn + 2] = 160;
 			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
+			arm_64a_inst_r5_b5_i5_k1_ext_(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2915,7 +2982,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 4;
 			bin[*bn + 2] = 128;
 			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+			arm_64a_inst_r5_b5_k9_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2927,7 +2994,7 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			bin[*bn + 1] = 12;
 			bin[*bn + 2] = 128;
 			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+			arm_64a_inst_r5_b5_k9_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
 			arm_64a_err_reg(rv[0], e, path, ln);
@@ -2936,10 +3003,10 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 120;
-			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
+			bin[*bn + 3] = 121;
+			arm_64a_inst_r5_b5_k12_(bin, bn, rv[0], rv[1], rv[2]);
 		}
 		else {
 			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldrsh");
@@ -3032,9 +3099,9 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 			arm_64a_err_k12(rv[2], e, path, ln);
 			
 			bin[*bn] = 0;
-			bin[*bn + 1] = 12;
+			bin[*bn + 1] = 0;
 			bin[*bn + 2] = 128;
-			bin[*bn + 3] = 184;
+			bin[*bn + 3] = 185;
 			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
 			bin[*bn + 3] = bin[*bn + 3] & 191;
 		}
@@ -3050,6 +3117,404 @@ void arm_64a_enc(uint8_t* bin, uint64_t* bn, int8_t* op, uint8_t* rt, uint64_t* 
 		}
 		else {
 			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldrsw");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'p' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 2 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 192;
+			bin[*bn + 3] = 40;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldp");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'n' && op[3] == 'p' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 64;
+			bin[*bn + 3] = 40;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldnp");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 'l' && op[1] == 'd' && op[2] == 'p' && op[3] == 's' && op[4] == 'w' && op[5] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 2 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r64(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 192;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+			bin[*bn + 3] = 104;
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0 && rv[3] >= 64) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r64(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 192;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+			bin[*bn + 3] = 105;
+		}
+		else if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r64(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 64;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+			bin[*bn + 3] = 105;
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "ldpsw");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0) { //destination register, (base register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 184;
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], 0, 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 184;
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], rv[2], 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_ext(rv[2], rv[3], e, path, ln);
+			if (rv[2] & 128) {
+				arm_64a_err_i3(rv[4], e, path, ln);
+			}
+			else {
+				arm_64a_err_i2(rv[4], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 8;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 184;
+			arm_64a_inst_r5_b5_i5_k1_ext__(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 4;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 184;
+			arm_64a_inst_r5_b5_k9__(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 12;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 184;
+			arm_64a_inst_r5_b5_k9__(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k12(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 185;
+			arm_64a_inst_r5_b5_k12__(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "str");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'b' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0) { //destination register, (base register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 56;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], 0, 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 56;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_ext(rv[2], rv[3], e, path, ln);
+			if (rv[2] & 128) {
+				arm_64a_err_i3(rv[4], e, path, ln);
+			}
+			else {
+				arm_64a_err_i2(rv[4], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 8;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 56;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 4;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 56;
+			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 12;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 56;
+			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k12(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 57;
+			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "strb");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'r' && op[3] == 'h' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 5 && rt[2] == 0) { //destination register, (base register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 120;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], 0, 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == 0) { //destination register, (base register, index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 104;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 120;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], 0, 0);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 5 && rt[3] == rt[3] == 5 && rt[4] == 6 && rt[5] == 0) { //destination register, (base register, shifted index register)
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_ext(rv[2], rv[3], e, path, ln);
+			if (rv[2] & 128) {
+				arm_64a_err_i3(rv[4], e, path, ln);
+			}
+			else {
+				arm_64a_err_i2(rv[4], e, path, ln);
+			}
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 8;
+			bin[*bn + 2] = 32;
+			bin[*bn + 3] = 120;
+			arm_64a_inst_r5_b5_i5_k1_ext(bin, bn, rv[0], rv[1], rv[2], rv[4], rv[3]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 2 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 4;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 120;
+			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0 && rv[2] > -256 && rv[2] < 255) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k9(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 12;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 120;
+			arm_64a_inst_r5_b5_k9(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else if (rt[0] == 1 && rt[1] == 5 && rt[2] == 6 && rt[3] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_r32(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r64(rv[1], e, path, ln);
+			arm_64a_err_k12(rv[2], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 121;
+			arm_64a_inst_r5_b5_k12(bin, bn, rv[0], rv[1], rv[2]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "strh");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'p' && op[3] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 2 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 128;
+			bin[*bn + 3] = 40;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "stp");
+			*e = -1;
+		}
+	}
+	else if (op[0] == 's' && op[1] == 't' && op[2] == 'n' && op[3] == 'p' && op[4] == 0) {
+		if (rt[0] == 1 && rt[1] == 1 && rt[2] == 5 && rt[3] == 6 && rt[4] == 0) {
+			arm_64a_err_reg(rv[0], e, path, ln);
+			arm_64a_err_reg(rv[1], e, path, ln);
+			arm_64a_err_r36(rv[0], rv[1], e, path, ln);
+			arm_64a_err_reg(rv[2], e, path, ln);
+			arm_64a_err_r64(rv[2], e, path, ln);
+			arm_64a_err_k7(rv[3], e, path, ln);
+			
+			bin[*bn] = 0;
+			bin[*bn + 1] = 0;
+			bin[*bn + 2] = 0;
+			bin[*bn + 3] = 40;
+			arm_64a_inst_r5_r5_b5_k7(bin, bn, rv[0], rv[1], rv[2], rv[3]);
+		}
+		else {
+			printf("[%s, %lu] error illegal usage of opcode '%s'\n", path, ln, "stnp");
 			*e = -1;
 		}
 	}
